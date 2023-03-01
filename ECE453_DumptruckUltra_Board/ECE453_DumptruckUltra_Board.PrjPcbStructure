@@ -1,3 +1,6 @@
-Record=TopLevelDocument|FileName=DispenserSystem.SchDoc|SheetNumber=3
+Record=TopLevelDocument|FileName=DispenserSystem.SchDoc|SheetNumber=2
 Record=NoMainPathDocument|SourceDocument=DispenserSystem.SchDoc|FileName=MCU.SchDoc|SheetNumber=3
+Record=NoMainPathDocument|SourceDocument=DispenserSystem.SchDoc|FileName=MCUDebug.SchDoc|SheetNumber=5
 Record=NoMainPathDocument|SourceDocument=DispenserSystem.SchDoc|FileName=MotorDrivers.SchDoc|SheetNumber=1
+Record=NoMainPathDocument|SourceDocument=DispenserSystem.SchDoc|FileName=ServoDrivers.SchDoc|SheetNumber=2
+Record=NoMainPathDocument|SourceDocument=DispenserSystem.SchDoc|FileName=USB_to_UART.SchDoc|SheetNumber=4
