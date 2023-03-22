@@ -1,0 +1,21 @@
+[submodule "Software/mtb_shared/core-lib/release-v1.3.1"]
+	path = Software/mtb_shared/core-lib/release-v1.3.1
+	url = https://github.com/cypresssemiconductorco/core-lib
+[submodule "Software/mtb_shared/core-make/release-v1.9.1"]
+	path = Software/mtb_shared/core-make/release-v1.9.1
+	url = https://github.com/cypresssemiconductorco/core-make
+[submodule "Software/mtb_shared/mtb-hal-cat1/release-v2.2.0"]
+	path = Software/mtb_shared/mtb-hal-cat1/release-v2.2.0
+	url = https://github.com/cypresssemiconductorco/mtb-hal-cat1
+[submodule "Software/mtb_shared/mtb-pdl-cat1/release-v2.4.1"]
+	path = Software/mtb_shared/mtb-pdl-cat1/release-v2.4.1
+	url = https://github.com/cypresssemiconductorco/mtb-pdl-cat1
+[submodule "Software/mtb_shared/psoc6cm0p/release-v2.3.0"]
+	path = Software/mtb_shared/psoc6cm0p/release-v2.3.0
+	url = https://github.com/cypresssemiconductorco/psoc6cm0p
+[submodule "Software/mtb_shared/recipe-make-cat1a/recipe-make-cat1a"]
+	path = Software/mtb_shared/recipe-make-cat1a/recipe-make-cat1a
+	url = https://github.com/cypresssemiconductorco/recipe-make-cat1a
+[submodule "Software/mtb_shared/recipe-make-cat1a/release-v1.9.0"]
+	path = Software/mtb_shared/recipe-make-cat1a/release-v1.9.0
+	url = https://github.com/cypresssemiconductorco/recipe-make-cat1a
