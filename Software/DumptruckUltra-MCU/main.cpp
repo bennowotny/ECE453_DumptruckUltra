@@ -42,7 +42,7 @@
 #include "cy_pdl.h"
 #include "cyhal.h"
 #include "cybsp.h"
-
+#include "hw/servo/Servo.hpp"
 
 int main(void)
 {
@@ -56,6 +56,11 @@ int main(void)
     }
 
     __enable_irq();
+
+    using Hardware::Servos::Servo;
+    Servo testServo{P9_1};
+    testServo.setPosition(50);
+    testServo.enable();
 
     for (;;)
     {

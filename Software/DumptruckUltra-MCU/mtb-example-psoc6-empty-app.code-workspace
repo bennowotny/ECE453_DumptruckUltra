@@ -19,6 +19,9 @@
         //mtb//
         "modustoolbox.toolsPath": "C:/Infineon/Tools/ModusToolbox/tools_2.4/",
         "cortex-debug.armToolchainPath": "${config:modustoolbox.toolsPath}/gcc/bin",
-        "cortex-debug.openocdPath": "${config:modustoolbox.toolsPath}/openocd/bin/openocd"
+        "cortex-debug.openocdPath": "${config:modustoolbox.toolsPath}/openocd/bin/openocd",
+        "files.associations": {
+            "cstdint": "c"
+        }
     }
 }

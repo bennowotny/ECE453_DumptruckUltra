@@ -12,7 +12,8 @@
 #include "cyhal.h"
 #include "cybsp.h"
 
-namespace Hardware::Servo{
+namespace Hardware{
+namespace Servos{
 
 	using cyhal_gpio_pin=decltype(P0_0);
 
@@ -21,12 +22,14 @@ namespace Hardware::Servo{
 		explicit Servo(cyhal_gpio_pin pin);
 		void enable();
 		void disable();
-		void setPosition(uint8_t position);
+		void setPosition(float position);
 
 	private:
 		cyhal_pwm_t pwmHandle;
+		static constexpr uint32_t SERVO_PWM_FREQUENCY_HZ{1000};
 	};
 
+}
 }
 
 #endif /* HW_SERVO_SERVO_HPP_ */

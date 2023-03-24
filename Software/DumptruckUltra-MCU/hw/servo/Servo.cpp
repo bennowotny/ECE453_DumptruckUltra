@@ -7,7 +7,8 @@
 
 #include "Servo.hpp"
 
-namespace Hardware::Servo{
+namespace Hardware{
+namespace Servos{
 
 Servo::Servo(cyhal_gpio_pin pin){
 	auto result{cyhal_pwm_init(&pwmHandle, pin, nullptr)};
@@ -24,10 +25,12 @@ void Servo::disable(){
 	CY_ASSERT(CY_RSLT_SUCCESS == result);
 }
 
-void Servo::setPosition(uint8_t position){
-	// FIXME
+void Servo::setPosition(float position){
+	auto result{cyhal_pwm_set_duty_cycle(&pwmHandle, position, SERVO_PWM_FREQUENCY_HZ)};
+	CY_ASSERT(CY_RSLT_SUCCESS == result);
 }
 
+}
 }
 
 
