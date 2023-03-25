@@ -26,7 +26,11 @@ void Servo::disable(){
 }
 
 void Servo::setPosition(float position){
-	auto result{cyhal_pwm_set_duty_cycle(&pwmHandle, position, SERVO_PWM_FREQUENCY_HZ)};
+
+	const float positionScaledFromInput{(position - SERVO_POSITION_LOWER_BOUND) / (SERVO_POSITION_UPPER_BOUND - SERVO_POSITION_LOWER_BOUND)};
+	const float positionScaledToOutput{(positionScaledFromInput * (SERVO_PWM_HIGH_DUTY_CYCLE - SERVO_PWM_LOW_DUTY_CYCLE)) + SERVO_PWM_LOW_DUTY_CYCLE};
+
+	auto result{cyhal_pwm_set_duty_cycle(&pwmHandle, positionScaledToOutput, SERVO_PWM_FREQUENCY_HZ)};
 	CY_ASSERT(CY_RSLT_SUCCESS == result);
 }
 

@@ -58,12 +58,23 @@ int main(void)
     __enable_irq();
 
     using Hardware::Servos::Servo;
-    Servo testServo{P9_1};
-    testServo.setPosition(50);
+    Servo testServo{P9_3};
     testServo.enable();
+
+    float position{0.0};
+    bool goingUp{true};
+    constexpr float STEP{100.0/10.0/100.0};
 
     for (;;)
     {
+        testServo.setPosition(position);
+        cyhal_system_delay_ms(10);
+        if(goingUp && position < 99)
+            position += STEP;
+        else if(!goingUp && position > 1)
+            position -= STEP;
+        else
+            goingUp = !goingUp;
     }
 }
 
