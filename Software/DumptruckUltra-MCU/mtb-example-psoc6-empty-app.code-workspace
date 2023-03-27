@@ -25,6 +25,13 @@
         },
         "clangd.arguments": [
             "--query-driver=C:\\Infineon\\Tools\\ModusToolbox\\tools_2.4\\gcc\\bin\\arm-none-eabi-g++"
+        ],
+        "C_Cpp.intelliSenseEngine": "disabled",
+        "editor.formatOnSave": true
+    },
+    "extensions": {
+        "recommendations": [
+            "llvm-vs-code-extensions.vscode-clangd"
         ]
     }
 }
