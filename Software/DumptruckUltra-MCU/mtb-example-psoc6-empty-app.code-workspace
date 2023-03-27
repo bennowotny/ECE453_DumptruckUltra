@@ -1,12 +1,12 @@
 {
-	"folders": [
-		{
-			"path": "."
-		},
+    "folders": [
+        {
+            "path": "."
+        },
         {
             "path": "../mtb_shared"
         }
-	],
+    ],
     "settings": {
         //mtb//  If this project will be shared with multiple users, the
         //mtb//  modustoolbox.toolsPath property must be placed in user settings
@@ -17,14 +17,14 @@
         //mtb//      macOS  : $HOME/Library/Application Support/Code/User/settings.json
         //mtb//      Linux  : $HOME/.config/Code/User/settings.json
         //mtb//
-        "modustoolbox.toolsPath": "C:/Infineon/Tools/ModusToolbox/tools_2.4/",
+        "modustoolbox.toolsPath": "${env:CY_TOOLS_PATHS}",
         "cortex-debug.armToolchainPath": "${config:modustoolbox.toolsPath}/gcc/bin",
         "cortex-debug.openocdPath": "${config:modustoolbox.toolsPath}/openocd/bin/openocd",
         "files.associations": {
             "cstdint": "c"
         },
         "clangd.arguments": [
-            "--query-driver=C:\\Infineon\\Tools\\ModusToolbox\\tools_2.4\\gcc\\bin\\arm-none-eabi-g++"
+            "--query-driver=${env:CY_TOOLS_PATHS}gcc\\bin\\arm-none-eabi-g++"
         ],
         "C_Cpp.intelliSenseEngine": "disabled",
         "editor.formatOnSave": true
