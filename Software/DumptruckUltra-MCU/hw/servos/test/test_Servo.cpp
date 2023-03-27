@@ -3,7 +3,7 @@
 
 namespace Hardware {
 namespace Servos {
-namespace test {
+namespace _test_ {
 void runTest() {
     // Setup
     using Hardware::Servos::Servo;
@@ -27,6 +27,6 @@ void runTest() {
             goingUp = !goingUp;
     }
 }
-} // namespace test
+} // namespace _test_
 } // namespace Servos
 } // namespace Hardware

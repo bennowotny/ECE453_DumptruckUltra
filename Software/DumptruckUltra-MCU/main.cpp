@@ -53,7 +53,7 @@ auto main() -> int {
 
     __enable_irq();
 
-    Hardware::Servos::test::runTest(); // Contains main loop
+    Hardware::Servos::_test_::runTest(); // Contains main loop
 }
 
 /* [] END OF FILE */

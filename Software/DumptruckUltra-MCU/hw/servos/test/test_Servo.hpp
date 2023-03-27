@@ -3,7 +3,7 @@
 
 namespace Hardware {
 namespace Servos {
-namespace test {
+namespace _test_ {
 void runTest();
 }
 } // namespace Servos
