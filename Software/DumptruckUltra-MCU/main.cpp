@@ -40,7 +40,6 @@
  *******************************************************************************/
 
 #include "cybsp.h"
-#include "hw/servos/test/test_Servo.hpp"
 
 auto main() -> int {
     cy_rslt_t result{};
@@ -53,7 +52,8 @@ auto main() -> int {
 
     __enable_irq();
 
-    Hardware::Servos::_test_::runTest(); // Contains main loop
+    for (;;) {
+    }
 }
 
 /* [] END OF FILE */
