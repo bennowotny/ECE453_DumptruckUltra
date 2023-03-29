@@ -1,0 +1,5 @@
+CompileFlags:
+  Add: [-Wno-reserved-user-defined-literal] # Needed to prevent clangd from freaking out over C headers not complying to C++11
+
+Diagnostics:
+  UnusedIncludes: Strict
