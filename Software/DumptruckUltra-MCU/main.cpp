@@ -39,16 +39,11 @@
  * indemnify Cypress against all liability.
  *******************************************************************************/
 
-#include "cyhal_pwm.h"
 #include "hw/proc/proc_setup.hpp"
 
 auto main() -> int {
     Hardware::Processor::setupProcessor();
 
-    cyhal_pwm_t handle;
-    cyhal_pwm_init(&handle, P9_3, nullptr);
-    cyhal_pwm_set_duty_cycle(&handle, 50, 1000);
-    cyhal_pwm_start(&handle);
     for (;;) {
     }
 }
