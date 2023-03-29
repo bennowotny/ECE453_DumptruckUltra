@@ -39,12 +39,16 @@
 * indemnify Cypress against all liability.
 *******************************************************************************/
 
-#include "cy_pdl.h"
-#include "cyhal.h"
-#include "cybsp.h"
+#include "i2cBusManager.hpp"
 
+#define TCA9534_SUBORDINATE_ADDR                 0x20
 
-int main(void)
+#define TCA9534_INPUT_PORT_ADDR					 0x00
+#define TCA9534_OUTPUT_PORT_ADDR				 0x01
+#define TCA9534_POLARITY_ADDR					 0x02
+#define TCA9534_CONFIG_ADDR						 0x03
+
+int main()
 {
     cy_rslt_t result;
 
@@ -56,6 +60,20 @@ int main(void)
     }
 
     __enable_irq();
+
+    I2CBusManager i2cBus(PIN_MCU_SDA, PIN_MCU_SCL);
+
+    uint8_t value = 0x00;
+
+    result = i2cBus.i2cWriteReg(TCA9534_SUBORDINATE_ADDR, TCA9534_CONFIG_ADDR, &value, 1);
+    if(result != CY_RSLT_SUCCESS)
+        CY_ASSERT(0);
+    
+    value = 0x0F;
+
+    result = i2cBus.i2cWriteReg(TCA9534_SUBORDINATE_ADDR, TCA9534_OUTPUT_PORT_ADDR, &value, 1);
+    if(result != CY_RSLT_SUCCESS)
+        CY_ASSERT(0);
 
     for (;;)
     {

@@ -9,8 +9,8 @@
 #define I2CBUSMANAGER_HPP_
 
 #ifndef PIN_MCU_SDA
-#define PIN_MCU_SCL P9_0
-#define PIN_MCU_SDA P9_1
+#define PIN_MCU_SCL P5_0
+#define PIN_MCU_SDA P5_1
 #endif // !PIN_MCU_SDA
 
 #include "cy_pdl.h"
@@ -26,13 +26,13 @@
 class I2CBusManager {
 private:
     cyhal_i2c_t i2cMonarchObj;
-    cyhal_gpio_t i2cSDA;
-    cyhal_gpio_t i2cSCL;
-    cy_rslt_t i2cInit();
+    cy_rslt_t i2cInit(cyhal_gpio_t sda, cyhal_gpio_t scl);
 
 public:
+    I2CBusManager(cyhal_gpio_t sda, cyhal_gpio_t scl);
     cy_rslt_t i2cWriteReg(uint16_t devAddr, uint8_t reg, uint8_t *data, uint8_t size);
     cy_rslt_t i2cReadReg(uint16_t devAddr, uint8_t reg, uint8_t *data, uint8_t size);
+    // TODO: Add a get task handle function
 };
 
 #endif /* I2CBUSMANAGER_HPP_ */

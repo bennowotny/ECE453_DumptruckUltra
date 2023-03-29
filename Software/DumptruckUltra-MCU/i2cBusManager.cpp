@@ -6,8 +6,12 @@
  */
 #include "i2cBusManager.hpp"
 
-I2CBusManager::I2CBusManager() {
-	
+I2CBusManager::I2CBusManager(cyhal_gpio_t sda, cyhal_gpio_t scl) {
+	cy_rslt_t rslt = i2cInit(sda, scl);
+    if (rslt != CY_RSLT_SUCCESS)
+    {
+        CY_ASSERT(0);
+    }
 }
 
 // Define the I2C monarch configuration structure
@@ -59,10 +63,10 @@ cy_rslt_t I2CBusManager::i2cReadReg(uint16_t devAddr, uint8_t reg, uint8_t *data
  *
  * @param - None
  */
-cy_rslt_t I2CBusManager::i2cInit(void)
+cy_rslt_t I2CBusManager::i2cInit(cyhal_gpio_t sda, cyhal_gpio_t scl)
 {
     // Initialize I2C monarch, set the SDA and SCL pins and assign a new clock
-	 cy_rslt_t rslt = cyhal_i2c_init(&i2cMonarchObj, PIN_MCU_SDA, PIN_MCU_SCL, NULL);
+	 cy_rslt_t rslt = cyhal_i2c_init(&i2cMonarchObj, sda, scl, NULL);
 	 long int res;
 	 if(rslt != CY_RSLT_SUCCESS){
 		 res = CY_RSLT_GET_CODE(rslt);
