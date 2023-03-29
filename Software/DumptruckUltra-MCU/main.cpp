@@ -39,19 +39,16 @@
  * indemnify Cypress against all liability.
  *******************************************************************************/
 
-#include "cybsp.h"
+#include "cyhal_pwm.h"
+#include "hw/proc/proc_setup.hpp"
 
 auto main() -> int {
-    cy_rslt_t result{};
+    Hardware::Processor::setupProcessor();
 
-    /* Initialize the device and board peripherals */
-    result = cybsp_init();
-    if (result != CY_RSLT_SUCCESS) {
-        CY_ASSERT(0);
-    }
-
-    __enable_irq();
-
+    cyhal_pwm_t handle;
+    cyhal_pwm_init(&handle, P9_3, nullptr);
+    cyhal_pwm_set_duty_cycle(&handle, 50, 1000);
+    cyhal_pwm_start(&handle);
     for (;;) {
     }
 }

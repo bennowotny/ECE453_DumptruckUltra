@@ -1,18 +1,19 @@
+#include "Servo.hpp"
 #include "cyhal_system.h"
-#include "servos/Servo.hpp"
+#include "hw/proc/proc_setup.hpp"
 
-namespace Hardware {
-namespace Servos {
-namespace _test_ {
-void runTest() {
-    // Setup
+auto main() -> int {
+
+    Hardware::Processor::setupProcessor();
+
+    // Test Setup
     using Hardware::Servos::Servo;
     Servo testServo{P9_3};
     testServo.enable();
 
     float position{0.0};
     bool goingUp{true};
-    constexpr float STEP{100.0 / 10.0 / 100.0};
+    constexpr float STEP{100.0 / 20.0 / 100.0};
 
     // Climb the available duty cycles
     // FOR TESTER: Check w/ scope that the lowest high time is 600us and the highest high tim is 2400 us
@@ -27,6 +28,3 @@ void runTest() {
             goingUp = !goingUp;
     }
 }
-} // namespace _test_
-} // namespace Servos
-} // namespace Hardware

@@ -88,7 +88,9 @@ DISABLE_COMPONENTS=
 # tree for source code and builds it. The SOURCES variable can be used to
 # manually add source code to the build process from a location not searched
 # by default, or otherwise not found by the build system.
-SOURCES=
+# TEAM03: Change this line to specify which file has the main you want to run
+# DEFAULT: Use main.cpp
+SOURCES=main.cpp
 
 # Like SOURCES, but for include directories. Value should be paths to
 # directories (without a leading -I).
@@ -110,7 +112,7 @@ CFLAGS=
 #
 # NOTE: Includes and defines should use the INCLUDES and DEFINES variable
 # above.
-CXXFLAGS=
+CXXFLAGS=-fno-exceptions
 
 # Additional / custom assembler flags.
 #
