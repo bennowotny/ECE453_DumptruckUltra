@@ -5,17 +5,17 @@
  *      Author: Ben Nowotny
  */
 
-#ifndef HW_SERVO_SERVO_HPP_
-#define HW_SERVO_SERVO_HPP_
+#ifndef HW_SERVOS_SERVO_HPP_
+#define HW_SERVOS_SERVO_HPP_
 
 #include "cyhal_hw_types.h"
-#include "cyhal_psoc6_01_43_smt.h"
+#include "hw/proc/proc_setup.hpp"
 #include <cstdint>
 
 namespace Hardware {
 namespace Servos {
 
-using cyhal_gpio_pin = decltype(P0_0);
+using Hardware::Processor::cyhal_gpio_pin;
 
 class Servo {
 public:
