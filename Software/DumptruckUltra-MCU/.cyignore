@@ -6,3 +6,6 @@ images
 .settings
 .vscode
 
+# Test Files
+**test/test_*
+./main.cpp
