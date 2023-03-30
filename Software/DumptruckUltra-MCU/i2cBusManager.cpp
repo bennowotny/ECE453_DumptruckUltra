@@ -28,7 +28,7 @@ cy_rslt_t I2CBusManager::i2cWriteReg(uint16_t devAddr, uint8_t reg, uint8_t *dat
 	// Write register
 	uint8_t buf[size+1];
 	buf[0] = reg;
-	memcpy(data, &buf[1], size);
+	memcpy(&(buf[1]), data, size);
 
 	cy_rslt_t rslt = cyhal_i2c_master_write(&i2cMonarchObj, devAddr, buf, size+1, 100, true);
 	if(rslt != CY_RSLT_SUCCESS)

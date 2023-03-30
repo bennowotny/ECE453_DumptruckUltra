@@ -62,18 +62,25 @@ int main()
     __enable_irq();
 
     I2CBusManager i2cBus(PIN_MCU_SDA, PIN_MCU_SCL);
+    uint8_t value;
 
-    uint8_t value = 0x00;
+    while(1) {
+        value = 0x00;
 
-    result = i2cBus.i2cWriteReg(TCA9534_SUBORDINATE_ADDR, TCA9534_CONFIG_ADDR, &value, 1);
-    if(result != CY_RSLT_SUCCESS)
-        CY_ASSERT(0);
-    
-    value = 0x0F;
+        result = i2cBus.i2cWriteReg(TCA9534_SUBORDINATE_ADDR, TCA9534_CONFIG_ADDR, &value, 1);
+        if(result != CY_RSLT_SUCCESS)
+            CY_ASSERT(0);
+        
+        cyhal_system_delay_ms(500);
+        
+        value = 0xFF;
 
-    result = i2cBus.i2cWriteReg(TCA9534_SUBORDINATE_ADDR, TCA9534_OUTPUT_PORT_ADDR, &value, 1);
-    if(result != CY_RSLT_SUCCESS)
-        CY_ASSERT(0);
+        result = i2cBus.i2cWriteReg(TCA9534_SUBORDINATE_ADDR, TCA9534_OUTPUT_PORT_ADDR, &value, 1);
+        if(result != CY_RSLT_SUCCESS)
+            CY_ASSERT(0);
+        
+        cyhal_system_delay_ms(500);
+    }
 
     for (;;)
     {
