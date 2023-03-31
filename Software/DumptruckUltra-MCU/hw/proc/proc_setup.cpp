@@ -6,7 +6,7 @@ namespace Processor {
 void setupProcessor() {
 
     /* Initialize the device and board peripherals */
-    auto result{cybsp_init()};
+    const auto result{cybsp_init()};
     CY_ASSERT(result == CY_RSLT_SUCCESS);
 
     __enable_irq();

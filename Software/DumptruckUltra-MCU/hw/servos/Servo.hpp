@@ -5,21 +5,18 @@
  *      Author: Ben Nowotny
  */
 
-#ifndef HW_SERVO_SERVO_HPP_
-#define HW_SERVO_SERVO_HPP_
+#ifndef HW_SERVOS_SERVO_HPP_
+#define HW_SERVOS_SERVO_HPP_
 
 #include "cyhal_hw_types.h"
-#include "cyhal_psoc6_01_43_smt.h"
 #include <cstdint>
 
 namespace Hardware {
 namespace Servos {
 
-using cyhal_gpio_pin = decltype(P0_0);
-
 class Servo {
 public:
-    explicit Servo(cyhal_gpio_pin pin);
+    explicit Servo(cyhal_gpio_t pin);
     void enable();
     void disable();
     void setPosition(float position);
