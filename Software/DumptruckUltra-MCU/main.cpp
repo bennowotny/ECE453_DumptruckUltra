@@ -63,11 +63,14 @@ int main()
 
     I2CBusManager i2cBus(PIN_MCU_SDA, PIN_MCU_SCL);
     uint8_t value;
+    
+    value = 0x00;
+    result = i2cBus.i2cWriteReg(TCA9534_SUBORDINATE_ADDR, TCA9534_CONFIG_ADDR, &value, 1);
 
     while(1) {
         value = 0x00;
 
-        result = i2cBus.i2cWriteReg(TCA9534_SUBORDINATE_ADDR, TCA9534_CONFIG_ADDR, &value, 1);
+        result = i2cBus.i2cWriteReg(TCA9534_SUBORDINATE_ADDR, TCA9534_OUTPUT_PORT_ADDR, &value, 1);
         if(result != CY_RSLT_SUCCESS)
             CY_ASSERT(0);
         
