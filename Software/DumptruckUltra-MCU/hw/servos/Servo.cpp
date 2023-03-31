@@ -13,7 +13,7 @@ namespace Servos {
 
 Servo::Servo(cyhal_gpio_pin pin) : pwmHandle{} {
     // Ivert so that we can use the hardware inversion to produce a normal signal
-    auto result{cyhal_pwm_init_adv(&pwmHandle, pin, NC, CYHAL_PWM_LEFT_ALIGN, true, 0U, true, nullptr)};
+    auto result{cyhal_pwm_init_adv(&pwmHandle, pin, NC, CYHAL_PWM_RIGHT_ALIGN, true, 0U, true, nullptr)};
     CY_ASSERT(CY_RSLT_SUCCESS == result);
 }
 
