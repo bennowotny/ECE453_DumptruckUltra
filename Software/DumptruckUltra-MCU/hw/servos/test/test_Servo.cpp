@@ -16,7 +16,8 @@ auto main() -> int {
     constexpr float STEP{100.0 / 20.0 / 100.0};
 
     // Climb the available duty cycles
-    // FOR TESTER: Check w/ scope that the lowest high time is 600us and the highest high tim is 2400 us
+    // FOR TESTER: Check w/ scope that the lowest LOW time is 600us and the highest high tim is 2400 us
+    // Or high time, if we're analyzing after the hardware inversion
     while (true) {
         testServo.setPosition(position);
         cyhal_system_delay_ms(10);
