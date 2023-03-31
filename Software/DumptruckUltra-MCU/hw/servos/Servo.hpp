@@ -9,17 +9,14 @@
 #define HW_SERVOS_SERVO_HPP_
 
 #include "cyhal_hw_types.h"
-#include "hw/proc/proc_setup.hpp"
 #include <cstdint>
 
 namespace Hardware {
 namespace Servos {
 
-using Hardware::Processor::cyhal_gpio_pin;
-
 class Servo {
 public:
-    explicit Servo(cyhal_gpio_pin pin);
+    explicit Servo(cyhal_gpio_t pin);
     void enable();
     void disable();
     void setPosition(float position);

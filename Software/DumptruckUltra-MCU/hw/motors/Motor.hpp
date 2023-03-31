@@ -2,21 +2,18 @@
 #define HW_MOTORS_MOTOR_HPP_
 
 #include "cyhal_hw_types.h"
-#include "hw/proc/proc_setup.hpp"
 
 namespace Hardware {
 namespace Motors {
 
-using Hardware::Processor::cyhal_gpio_pin;
-
 struct MotorPinDefinition {
-    cyhal_gpio_pin forwardPin;
-    cyhal_gpio_pin backwardPin;
+    cyhal_gpio_t forwardPin;
+    cyhal_gpio_t backwardPin;
 };
 
 class Motor {
 public:
-    Motor(MotorPinDefinition motorPins);
+    explicit Motor(MotorPinDefinition motorPins);
     void enable();
     void disable();
     void setPower(float power);

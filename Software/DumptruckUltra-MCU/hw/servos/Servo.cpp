@@ -11,7 +11,7 @@
 namespace Hardware {
 namespace Servos {
 
-Servo::Servo(cyhal_gpio_pin pin) : pwmHandle{} {
+Servo::Servo(cyhal_gpio_t pin) : pwmHandle{} {
     auto result{cyhal_pwm_init(&pwmHandle, pin, nullptr)};
     CY_ASSERT(CY_RSLT_SUCCESS == result);
 }
