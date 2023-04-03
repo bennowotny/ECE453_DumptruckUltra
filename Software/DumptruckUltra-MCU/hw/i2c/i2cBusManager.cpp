@@ -65,11 +65,7 @@ cy_rslt_t I2CBusManager::i2cInit(cyhal_gpio_t sda, cyhal_gpio_t scl)
     // Initialize I2C monarch, set the SDA and SCL pins and assign a new clock
 	 cy_rslt_t rslt = cyhal_i2c_init(&i2cMonarchObj, sda, scl, NULL);
 	 long int res;
-	 if(rslt != CY_RSLT_SUCCESS){
-		 res = CY_RSLT_GET_CODE(rslt);
-		 printf("%lu", res);
-		 while(1);
-	 }
+	CY_ASSERT(rslt == CY_RSLT_SUCCESS);
 
     // Configure the I2C resource to be monarch
 	 rslt = cyhal_i2c_configure(&i2cMonarchObj, &i2cMonarchConfig);
