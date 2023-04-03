@@ -1,4 +1,3 @@
-#include "cyhal_psoc6_01_43_smt.h"
 #include "hw/i2c/i2cBusManager.hpp"
 #include "hw/proc/proc_setup.hpp"
 
@@ -11,6 +10,8 @@ int main() {
     uint8_t value = 0x00;
     i2cBus.i2cWriteReg(0x20, 0x03, &value, 1);
 
+    i2cBus.i2cWriteReg(0x20, 0x02, &value, 1);
+
     value = 0x01;
     i2cBus.i2cWriteReg(0x20, 0x01, &value, 1);
     cyhal_system_delay_ms(500);
@@ -22,11 +23,26 @@ int main() {
         i2cBus.i2cReadReg(0x20, 0x01, &read_val, 1);
 
         if (read_val == 0x01)
-            value = 0x80;
+            value = 0x40;
         else
             value = read_val >> 1;
 
         i2cBus.i2cWriteReg(0x20, 0x01, &value, 1);
         cyhal_system_delay_ms(500);
     }
+    // value = 0x30;
+    // i2cBus.i2cWriteReg(0x20, 0x01, &value, 1);
+    // cyhal_system_delay_ms(500);
+
+    // value = 0x40;
+    // i2cBus.i2cWriteReg(0x20, 0x01, &value, 1);
+    // cyhal_system_delay_ms(500);
+
+    // value = 0x20;
+    // i2cBus.i2cWriteReg(0x20, 0x01, &value, 1);
+    // cyhal_system_delay_ms(500);
+
+    // value = 0x10;
+    // i2cBus.i2cWriteReg(0x20, 0x01, &value, 1);
+    // cyhal_system_delay_ms(500);
 }
