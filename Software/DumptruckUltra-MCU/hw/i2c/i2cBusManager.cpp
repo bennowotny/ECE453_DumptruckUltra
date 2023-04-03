@@ -45,8 +45,7 @@ cy_rslt_t I2CBusManager::i2cReadReg(uint16_t devAddr, uint8_t reg, uint8_t *data
 
 	cy_rslt_t rslt = cyhal_i2c_master_write(&i2cMonarchObj, devAddr, &reg, 1, 100, false);
 
-	if(rslt != CY_RSLT_SUCCESS)
-				 while(1);
+	CY_ASSERT(rslt == CY_RSLT_SUCCESS);
 
 	rslt = cyhal_i2c_master_read(&i2cMonarchObj, devAddr, data, size, 100, true);
 
