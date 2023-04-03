@@ -5,9 +5,9 @@ namespace Logic {
 namespace DeadReckoning {
 
 struct Pose2D {
-    const float x;
-    const float y;
-    const float heading;
+    float x;
+    float y;
+    float heading;
 };
 
 } // namespace DeadReckoning

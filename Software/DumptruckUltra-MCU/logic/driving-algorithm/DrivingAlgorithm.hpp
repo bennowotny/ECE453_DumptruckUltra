@@ -1,8 +1,10 @@
 #ifndef _LOGIC_DRIVING_ALGORITHM_DRIVINGALGORITHM_HPP
 #define _LOGIC_DRIVING_ALGORITHM_DRIVINGALGORITHM_HPP
 
+#include "FreeRTOS.h" // IWYU pragma: keep
 #include "hw/motors/Motor.hpp"
 #include "logic/dead-reckoning/DeadReckoning.hpp"
+#include "task.h" // IWYU pragma: keep
 #include <functional>
 
 namespace Logic {
@@ -15,10 +17,14 @@ enum class DrivingAlgorithmStatus {
     ERROR
 };
 
+struct DriveMotorLayout {
+    Hardware::Motors::Motor leftMotor;
+    Hardware::Motors::Motor rightMotor;
+};
+
 class DrivingAlgorithm {
 public:
-    DrivingAlgorithm(const Hardware::Motors::Motor &leftMotor,
-                     const Hardware::Motors::Motor &rightMotor,
+    DrivingAlgorithm(DriveMotorLayout driveMotors,
                      std::function<float()> getDistanceFunction,
                      std::function<DeadReckoning::Pose2D()> getPoseFunction);
 
@@ -30,9 +36,18 @@ public:
 private:
     Hardware::Motors::Motor leftMotor;
     Hardware::Motors::Motor rightMotor;
+    const std::function<float()> getDistanceFunction;
+    const std::function<DeadReckoning::Pose2D()> getPoseFunction;
     DeadReckoning::Pose2D currentTarget;
 
+    TaskHandle_t drivingTaskHandle;
+    bool taskEnabled;
+
     [[noreturn]] void drivingTask();
+
+    static constexpr auto DRIVING_ALGORITHM_TASK_NAME{"Driving Algorithm"};
+    static constexpr uint16_t DRIVING_ALGORITHM_STACK_SIZE{configMINIMAL_STACK_SIZE};
+    static constexpr uint32_t DRIVING_ALGORITHM_PRIORITY{tskIDLE_PRIORITY + 1};
 };
 } // namespace DrivingAlgorithm
 } // namespace Logic
