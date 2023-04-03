@@ -26,6 +26,7 @@ void ledTask(void *pvParameters) {
 }
 
 int main() {
+    Hardware::Processor::setupProcessor();
 
     // Create simple task that toggles the onboard dev board LED
     // FIXME: Change to work with our PCB
