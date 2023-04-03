@@ -6,6 +6,11 @@
 namespace Hardware {
 namespace Motors {
 
+enum class MotorDirection {
+    FORWARD,
+    REVERSE
+};
+
 struct MotorPinDefinition {
     cyhal_gpio_t forwardPin;
     cyhal_gpio_t backwardPin;
@@ -13,7 +18,7 @@ struct MotorPinDefinition {
 
 class Motor {
 public:
-    explicit Motor(MotorPinDefinition motorPins);
+    explicit Motor(MotorPinDefinition motorPins, MotorDirection positiveDirection);
     void enable();
     void disable();
     void setPower(float power);
@@ -21,6 +26,7 @@ public:
 private:
     cyhal_pwm_t forwardPWMHandle;
     cyhal_pwm_t backwardPWMHandle;
+    const MotorDirection positiveDirection;
 
     // A guess.
     // There shouldn't be any protocol specific requirements for the frequency of an H-bridge (maybe upper limit for max switching frequency).
