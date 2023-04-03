@@ -8,10 +8,7 @@
 
 I2CBusManager::I2CBusManager(cyhal_gpio_t sda, cyhal_gpio_t scl) {
 	cy_rslt_t rslt = i2cInit(sda, scl);
-    if (rslt != CY_RSLT_SUCCESS)
-    {
-        CY_ASSERT(0);
-    }
+    CY_ASSERT(rslt == CY_RSLT_SUCCESS);
 }
 
 // Define the I2C monarch configuration structure
