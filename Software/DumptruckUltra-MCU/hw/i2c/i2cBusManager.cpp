@@ -73,7 +73,6 @@ cy_rslt_t I2CBusManager::i2cInit(cyhal_gpio_t sda, cyhal_gpio_t scl)
 
     // Configure the I2C resource to be monarch
 	 rslt = cyhal_i2c_configure(&i2cMonarchObj, &i2cMonarchConfig);
-	 if(rslt != CY_RSLT_SUCCESS)
-	 	while(1);
+	CY_ASSERT(rslt == CY_RSLT_SUCCESS);
 	 return rslt;
 }
