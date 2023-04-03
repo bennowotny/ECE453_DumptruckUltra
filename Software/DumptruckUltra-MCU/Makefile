@@ -106,13 +106,13 @@ VFP_SELECT=
 #
 # NOTE: Includes and defines should use the INCLUDES and DEFINES variable
 # above.
-CFLAGS=
+CFLAGS=-Wall -Werror
 
 # Additional / custom C++ compiler flags.
 #
 # NOTE: Includes and defines should use the INCLUDES and DEFINES variable
 # above.
-CXXFLAGS=-fno-exceptions
+CXXFLAGS=-fno-exceptions -fno-rtti -Wall -Werror
 
 # Additional / custom assembler flags.
 #
