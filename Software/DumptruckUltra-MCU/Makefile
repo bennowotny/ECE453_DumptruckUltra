@@ -79,7 +79,7 @@ VERBOSE=
 # ... then code in directories named COMPONENT_foo and COMPONENT_bar will be
 # added to the build
 #
-COMPONENTS=
+COMPONENTS=FREERTOS
 
 # Like COMPONENTS, but disable optional code that was enabled by default.
 DISABLE_COMPONENTS=
@@ -90,7 +90,7 @@ DISABLE_COMPONENTS=
 # by default, or otherwise not found by the build system.
 # TEAM03: Change this line to specify which file has the main you want to run
 # DEFAULT: Use main.cpp
-SOURCES=main.cpp
+SOURCES=test_freertos/test/test_freertos.cpp
 
 # Like SOURCES, but for include directories. Value should be paths to
 # directories (without a leading -I).
