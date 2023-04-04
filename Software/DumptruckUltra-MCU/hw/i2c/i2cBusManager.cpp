@@ -5,28 +5,32 @@
  *      Author: surao
  */
 #include "i2cBusManager.hpp"
+#include <memory>
 
 I2CBusManager::I2CBusManager(struct i2cPin_t *i2cPins) {
     cy_rslt_t rslt = i2cInit(i2cPins);
     CY_ASSERT(rslt == CY_RSLT_SUCCESS);
+    auto tmp1{std::make_unique<I2CBusManager>(i2cPins)};
+    auto tmp2{std::move(tmp1)};
 }
 
 // Define the I2C monarch configuration structure
-
-void I2CBusManager::i2cWriteReg(uint16_t devAddr, uint8_t reg, uint8_t *data, uint8_t size) {
+template <std::size_t N>
+void I2CBusManager::i2cWriteReg(uint16_t devAddr, uint8_t reg, const std::array<uint8_t, N> &data) {
     // Acquire mutex
     // Write register
-    uint8_t buf[size + 1];
-    buf[0] = reg;
-    memcpy(&(buf[1]), data, size);
+    std::array<uint8_t, N + 1> dataToSend{};
+    dataToSend.at(0) = reg;
+    std::copy(data.begin(), data.end(), dataToSend.begin() + 1);
 
-    cy_rslt_t rslt = cyhal_i2c_master_write(&i2cMonarchObj, devAddr, buf, size + 1, 100, true);
+    cy_rslt_t rslt = cyhal_i2c_master_write(&i2cMonarchObj, devAddr, dataToSend.data(), dataToSend.size(), 100, true);
     CY_ASSERT(rslt == CY_RSLT_SUCCESS);
 
     // Release mutex
 }
 
-void I2CBusManager::i2cReadReg(uint16_t devAddr, uint8_t reg, uint8_t *data, uint8_t size) {
+template <std::size_t N>
+void I2CBusManager::i2cReadReg(uint16_t devAddr, uint8_t reg, std::array<uint8_t, N> &data) {
     // Acquire mutex
     // Read register
 
@@ -34,7 +38,7 @@ void I2CBusManager::i2cReadReg(uint16_t devAddr, uint8_t reg, uint8_t *data, uin
 
     CY_ASSERT(rslt == CY_RSLT_SUCCESS);
 
-    rslt = cyhal_i2c_master_read(&i2cMonarchObj, devAddr, data, size, 100, true);
+    rslt = cyhal_i2c_master_read(&i2cMonarchObj, devAddr, data.size(), data.data(), 100, true);
 
     CY_ASSERT(rslt == CY_RSLT_SUCCESS);
 

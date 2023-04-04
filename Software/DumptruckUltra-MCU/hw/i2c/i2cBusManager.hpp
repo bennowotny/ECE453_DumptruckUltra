@@ -11,7 +11,8 @@
 #include "cy_pdl.h"
 #include "cybsp.h"
 #include "cyhal.h"
-#include "i2cBusManager.hpp"
+#include <array>
+#include <cstddef>
 #include <stdio.h>
 
 /* Public API */
@@ -23,8 +24,12 @@ public:
     };
 
     I2CBusManager(i2cPin_t *i2cPins);
-    void i2cWriteReg(uint16_t devAddr, uint8_t reg, uint8_t *data, uint8_t size);
-    void i2cReadReg(uint16_t devAddr, uint8_t reg, uint8_t *data, uint8_t size);
+
+    template <std::size_t N>
+    void i2cWriteReg(uint16_t devAddr, uint8_t reg, const std::array<uint8_t, N> &data);
+
+    template <std::size_t N>
+    void i2cReadReg(uint16_t devAddr, uint8_t reg, std::array<uint8_t, N> &data);
     // TODO: Add a get task handle function
 
 private:
