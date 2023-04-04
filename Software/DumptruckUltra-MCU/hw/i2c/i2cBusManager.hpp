@@ -26,10 +26,35 @@ public:
     I2CBusManager(i2cPin_t *i2cPins);
 
     template <std::size_t N>
-    void i2cWriteReg(uint16_t devAddr, uint8_t reg, const std::array<uint8_t, N> &data);
+    void i2cWriteReg(uint16_t devAddr, uint8_t reg, const std::array<uint8_t, N> &data) {
+        // Acquire mutex
+        // Write register
+        std::array<uint8_t, N + 1> dataToSend{};
+        dataToSend.at(0) = reg;
+        std::copy(data.begin(), data.end(), dataToSend.begin() + 1);
+
+        cy_rslt_t rslt = cyhal_i2c_master_write(&i2cMonarchObj, devAddr, dataToSend.data(), dataToSend.size(), 100, true);
+        CY_ASSERT(rslt == CY_RSLT_SUCCESS);
+
+        // Release mutex
+    }
 
     template <std::size_t N>
-    void i2cReadReg(uint16_t devAddr, uint8_t reg, std::array<uint8_t, N> &data);
+    void i2cReadReg(uint16_t devAddr, uint8_t reg, std::array<uint8_t, N> &data) {
+        // Acquire mutex
+        // Read register
+
+        cy_rslt_t rslt = cyhal_i2c_master_write(&i2cMonarchObj, devAddr, &reg, 1, 100, false);
+
+        CY_ASSERT(rslt == CY_RSLT_SUCCESS);
+
+        rslt = cyhal_i2c_master_read(&i2cMonarchObj, devAddr, data.data(), data.size(), 100, true);
+
+        CY_ASSERT(rslt == CY_RSLT_SUCCESS);
+
+        // Release mutex
+    }
+
     // TODO: Add a get task handle function
 
 private:

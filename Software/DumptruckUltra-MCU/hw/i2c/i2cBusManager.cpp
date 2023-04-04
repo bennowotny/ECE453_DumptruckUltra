@@ -14,37 +14,6 @@ I2CBusManager::I2CBusManager(struct i2cPin_t *i2cPins) {
     auto tmp2{std::move(tmp1)};
 }
 
-// Define the I2C monarch configuration structure
-template <std::size_t N>
-void I2CBusManager::i2cWriteReg(uint16_t devAddr, uint8_t reg, const std::array<uint8_t, N> &data) {
-    // Acquire mutex
-    // Write register
-    std::array<uint8_t, N + 1> dataToSend{};
-    dataToSend.at(0) = reg;
-    std::copy(data.begin(), data.end(), dataToSend.begin() + 1);
-
-    cy_rslt_t rslt = cyhal_i2c_master_write(&i2cMonarchObj, devAddr, dataToSend.data(), dataToSend.size(), 100, true);
-    CY_ASSERT(rslt == CY_RSLT_SUCCESS);
-
-    // Release mutex
-}
-
-template <std::size_t N>
-void I2CBusManager::i2cReadReg(uint16_t devAddr, uint8_t reg, std::array<uint8_t, N> &data) {
-    // Acquire mutex
-    // Read register
-
-    cy_rslt_t rslt = cyhal_i2c_master_write(&i2cMonarchObj, devAddr, &reg, 1, 100, false);
-
-    CY_ASSERT(rslt == CY_RSLT_SUCCESS);
-
-    rslt = cyhal_i2c_master_read(&i2cMonarchObj, devAddr, data.size(), data.data(), 100, true);
-
-    CY_ASSERT(rslt == CY_RSLT_SUCCESS);
-
-    // Release mutex
-}
-
 /** Initialize the I2C bus to the specified module site
  *
  * @param - None
