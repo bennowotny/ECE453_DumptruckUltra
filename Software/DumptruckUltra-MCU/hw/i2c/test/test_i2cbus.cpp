@@ -5,7 +5,8 @@ int main() {
     Hardware::Processor::setupProcessor();
 
     // Setup I2C
-    I2CBusManager i2cBus(P5_1, P5_0);
+    I2CBusManager::i2cPin_t i2cPins = {.sda = P5_1, .scl = P5_0};
+    I2CBusManager i2cBus(&i2cPins);
 
     uint8_t value = 0x00;
     i2cBus.i2cWriteReg(0x20, 0x03, &value, 1);

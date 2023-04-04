@@ -6,8 +6,8 @@
  */
 #include "i2cBusManager.hpp"
 
-I2CBusManager::I2CBusManager(cyhal_gpio_t sda, cyhal_gpio_t scl) {
-    cy_rslt_t rslt = i2cInit(sda, scl);
+I2CBusManager::I2CBusManager(struct i2cPin_t *i2cPins) {
+    cy_rslt_t rslt = i2cInit(i2cPins);
     CY_ASSERT(rslt == CY_RSLT_SUCCESS);
 }
 
@@ -45,15 +45,15 @@ void I2CBusManager::i2cReadReg(uint16_t devAddr, uint8_t reg, uint8_t *data, uin
  *
  * @param - None
  */
-cy_rslt_t I2CBusManager::i2cInit(cyhal_gpio_t sda, cyhal_gpio_t scl) {
+cy_rslt_t I2CBusManager::i2cInit(i2cPin_t *i2cPins) {
     cyhal_i2c_cfg_t i2cMonarchConfig =
         {
             CYHAL_I2C_MODE_MASTER,
             0, // address is not used for master mode
-            I2C_MASTER_FREQUENCY};
+            I2C_MASTER_FREQUENCY_HZ};
 
     // Initialize I2C monarch, set the SDA and SCL pins and assign a new clock
-    cy_rslt_t rslt = cyhal_i2c_init(&i2cMonarchObj, sda, scl, NULL);
+    cy_rslt_t rslt = cyhal_i2c_init(&i2cMonarchObj, i2cPins->sda, i2cPins->scl, NULL);
     CY_ASSERT(rslt == CY_RSLT_SUCCESS);
 
     // Configure the I2C resource to be monarch
