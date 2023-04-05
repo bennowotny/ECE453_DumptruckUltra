@@ -39,6 +39,7 @@ private:
     const std::function<float()> getFrontDistanceFunction;
     const std::function<DeadReckoning::Pose2D()> getPoseFunction;
     DeadReckoning::Pose2D currentTarget;
+    DrivingAlgorithmStatus currentStatus;
 
     TaskHandle_t drivingTaskHandle;
     bool taskEnabled;
@@ -46,8 +47,8 @@ private:
     [[noreturn]] void drivingTask();
 
     struct DrivingPower {
-        float leftPower;
-        float rightPower;
+        float leftSpeed;
+        float rightSpeed;
     };
 
     [[nodiscard]] auto static deltaAngleToDrivePowers(float angleDiff) -> DrivingPower;
@@ -55,6 +56,8 @@ private:
     static constexpr auto DRIVING_ALGORITHM_TASK_NAME{"Driving Algorithm"};
     static constexpr uint16_t DRIVING_ALGORITHM_STACK_SIZE{configMINIMAL_STACK_SIZE};
     static constexpr uint32_t DRIVING_ALGORITHM_PRIORITY{tskIDLE_PRIORITY + 1};
+
+    static constexpr float DISTANCE_THRESHOLD_METERS{0.5};
 };
 } // namespace DrivingAlgorithm
 } // namespace Logic

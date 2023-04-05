@@ -15,6 +15,7 @@ DrivingAlgorithm::DrivingAlgorithm(DriveMotorLayout driveMotors,
       getFrontDistanceFunction{std::move(getFrontDistanceFunction)},
       getPoseFunction{std::move(getPoseFunction)},
       currentTarget{.x = 0, .y = 0, .heading = 0},
+      currentStatus{DrivingAlgorithmStatus::STOPPED},
       drivingTaskHandle{},
       taskEnabled{false} {
     // Need valid functions
@@ -33,16 +34,22 @@ DrivingAlgorithm::DrivingAlgorithm(DriveMotorLayout driveMotors,
     CY_ASSERT(drivingTaskSetupResult == pdPASS);
 }
 
+auto DrivingAlgorithm::getStatus() const -> DrivingAlgorithmStatus {
+    return currentStatus;
+}
+
 void DrivingAlgorithm::start() {
     vTaskResume(drivingTaskHandle);
     leftMotor.enable();
     rightMotor.enable();
+    currentStatus = DrivingAlgorithmStatus::RUNNING;
 }
 
 void DrivingAlgorithm::stop() {
     vTaskSuspend(drivingTaskHandle);
     leftMotor.disable();
     rightMotor.disable();
+    currentStatus = DrivingAlgorithmStatus::STOPPED;
 }
 
 void DrivingAlgorithm::drivingTask() {
@@ -53,26 +60,33 @@ void DrivingAlgorithm::drivingTask() {
         // Find target heading
         const auto currPose{getPoseFunction()};
         const float targetHeading{std::atan2(currentTarget.y - currPose.y, currentTarget.x - currPose.x)};
-        if (getFrontDistanceFunction() < 0) { // FIXME: Create threshold (static constexpr, probably)
+        if (getFrontDistanceFunction() < DISTANCE_THRESHOLD_METERS) { // FIXME: Create threshold (static constexpr, probably)
             // Turn right
-            leftMotor.setPower(100);
+            leftMotor.setPower(Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS);
             rightMotor.setPower(0);
         } else {
             const auto motorPowers{deltaAngleToDrivePowers(targetHeading - currPose.heading)};
-            leftMotor.setPower(motorPowers.leftPower);
-            rightMotor.setPower(motorPowers.rightPower);
+            leftMotor.setPower(motorPowers.leftSpeed);
+            rightMotor.setPower(motorPowers.rightSpeed);
         }
+
+        // FIXME: Exit condition?
     }
 }
 
 // Different methods are here: https://www.desmos.com/calculator/ma2ul0p4ae
 auto DrivingAlgorithm::deltaAngleToDrivePowers(float angleDiff) -> DrivingAlgorithm::DrivingPower {
-    if (angleDiff < 0 && angleDiff > -M_PI_2) {
-        return {.leftPower = std::max((float)(4 / M_PI * angleDiff + 1), -1.0F), .rightPower = 1};
+    float leftSpeed{0};
+    float rightSpeed{0};
+    constexpr float CLIMB_RATE{4};
+    if (angleDiff < 0) {
+        leftSpeed = Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS * std::max(static_cast<float>(CLIMB_RATE / M_PI * angleDiff + 1), -1.0F);
+        rightSpeed = Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS;
+    } else {
+        leftSpeed = Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS;
+        rightSpeed = Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS * std::max(static_cast<float>(-CLIMB_RATE / M_PI * angleDiff + 1), -1.0F);
     }
-    elif x<-180 : return DriveTrainCmd(left_value = 1, right_value = max(-2 / 90 * x - 7, -1))
-               elif x> 0 and
-        x < 180 : return DriveTrainCmd(left_value = 1, right_value = max(-2 / 90 * x + 1, -1)) else : #X is greater than 180 return DriveTrainCmd(left_value = max(2 / 90 * x - 7, -1), right_value = 1)
+    return {.leftSpeed = leftSpeed, .rightSpeed = rightSpeed};
 }
 
 } // namespace DrivingAlgorithm
