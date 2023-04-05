@@ -50,7 +50,7 @@ private:
         float rightPower;
     };
 
-    [[nodiscard]] auto deltaAngleToDrivePowers(float angleDiff) -> DrivingPower;
+    [[nodiscard]] auto static deltaAngleToDrivePowers(float angleDiff) -> DrivingPower;
 
     static constexpr auto DRIVING_ALGORITHM_TASK_NAME{"Driving Algorithm"};
     static constexpr uint16_t DRIVING_ALGORITHM_STACK_SIZE{configMINIMAL_STACK_SIZE};
