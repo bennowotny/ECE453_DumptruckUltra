@@ -28,7 +28,7 @@ public:
                      std::function<float()> getFrontDistanceFunction,
                      std::function<DeadReckoning::Pose2D()> getPoseFunction);
 
-    void loadNewTarget(DeadReckoning::Pose2D position);
+    void loadNewTarget(const DeadReckoning::Pose2D &position);
     void start();
     void stop();
     [[nodiscard]] auto getStatus() const -> DrivingAlgorithmStatus;
@@ -52,12 +52,15 @@ private:
     };
 
     [[nodiscard]] auto static deltaAngleToDrivePowers(float angleDiff) -> DrivingPower;
+    [[nodiscard]] auto distanceToTarget(const DeadReckoning::Pose2D &currPosition) const -> float;
+    void stop(const DrivingAlgorithmStatus &stopStatus);
 
     static constexpr auto DRIVING_ALGORITHM_TASK_NAME{"Driving Algorithm"};
     static constexpr uint16_t DRIVING_ALGORITHM_STACK_SIZE{configMINIMAL_STACK_SIZE};
     static constexpr uint32_t DRIVING_ALGORITHM_PRIORITY{tskIDLE_PRIORITY + 1};
 
     static constexpr float DISTANCE_THRESHOLD_METERS{0.5};
+    static constexpr float TARGET_PROXIMITY_THRESHOLD_METERS{0.1};
 };
 } // namespace DrivingAlgorithm
 } // namespace Logic
