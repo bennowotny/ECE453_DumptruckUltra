@@ -18,7 +18,7 @@ public:
     explicit FreeRTOSBlinky(cyhal_gpio_t blinkyPin);
 
 private:
-    [[noreturn]] static void ledTask(FreeRTOSBlinky *obj);
+    [[noreturn]] void ledTask();
 
     const cyhal_gpio_t blinkyPin;
 
