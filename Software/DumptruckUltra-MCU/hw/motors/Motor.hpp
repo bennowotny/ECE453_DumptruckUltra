@@ -23,7 +23,7 @@ public:
     void disable();
     void setPower(float power);
 
-    static constexpr uint32_t MOTOR_MAX_SPEED_ABS{100};
+    static constexpr float MOTOR_MAX_SPEED_ABS{100};
 
 private:
     cyhal_pwm_t forwardPWMHandle;

@@ -4,6 +4,7 @@
 #include "FreeRTOS.h" // IWYU pragma: keep
 #include "hw/motors/Motor.hpp"
 #include "logic/dead-reckoning/DeadReckoning.hpp"
+#include "portmacro.h"
 #include "task.h" // IWYU pragma: keep
 #include <functional>
 
@@ -58,6 +59,7 @@ private:
     static constexpr auto DRIVING_ALGORITHM_TASK_NAME{"Driving Algorithm"};
     static constexpr uint16_t DRIVING_ALGORITHM_STACK_SIZE{configMINIMAL_STACK_SIZE};
     static constexpr uint32_t DRIVING_ALGORITHM_PRIORITY{tskIDLE_PRIORITY + 1};
+    static constexpr TickType_t DRIVING_ALGORITHM_TASK_PERIOD_TICKS{2 / portTICK_PERIOD_MS};
 
     static constexpr float DISTANCE_THRESHOLD_METERS{0.5};
     static constexpr float TARGET_PROXIMITY_THRESHOLD_METERS{0.1};

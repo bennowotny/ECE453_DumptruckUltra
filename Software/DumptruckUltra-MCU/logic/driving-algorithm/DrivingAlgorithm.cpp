@@ -1,7 +1,9 @@
 #include "DrivingAlgorithm.hpp"
+#include "Motor.hpp"
 #include "cy_utils.h"
 #include "logic/dead-reckoning/DeadReckoning.hpp"
 #include "logic/driving-algorithm/DrivingAlgorithm.hpp"
+#include "portmacro.h"
 #include <cmath>
 #include <utility>
 
@@ -76,7 +78,7 @@ void DrivingAlgorithm::drivingTask() {
             if (getFrontDistanceFunction() < DISTANCE_THRESHOLD_METERS) { // FIXME: Create threshold (static constexpr, probably)
                 // Turn right
                 leftMotor.setPower(Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS);
-                rightMotor.setPower(0);
+                rightMotor.setPower(-Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS);
             } else {
                 const auto motorPowers{deltaAngleToDrivePowers(targetHeading - currPose.heading)};
                 leftMotor.setPower(motorPowers.leftSpeed);
@@ -86,6 +88,7 @@ void DrivingAlgorithm::drivingTask() {
             // We are at our current target, so stop, signal complete, and wait for restart
             stop(DrivingAlgorithmStatus::COMPLETE);
         }
+        vTaskDelay(DRIVING_ALGORITHM_TASK_PERIOD_TICKS);
     }
 }
 
