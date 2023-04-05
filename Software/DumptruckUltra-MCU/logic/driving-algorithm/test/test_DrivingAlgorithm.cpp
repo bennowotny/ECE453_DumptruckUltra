@@ -13,7 +13,7 @@ auto main() -> int {
         .rightMotor = Hardware::Motors::Motor{{.forwardPin = P12_6, .backwardPin = P12_7}, Hardware::Motors::MotorDirection::REVERSE}};
     Logic::DrivingAlgorithm::DrivingAlgorithm uut{
         layout,
-        []() -> float { return 99; },                  // Nothing in the way
+        []() -> float { return 0.1; },                 // Nothing in the way
         []() -> Logic::DeadReckoning::Pose2D { return {// Don't move
                                                        .x = 0,
                                                        .y = 0,
