@@ -8,6 +8,7 @@ public:
     IMU();
 
 private:
-    I2CBusManager i2cBus;
+    static constexpr uint8_t IMU_ADDR{0x6A};
+    Hardware::I2C::I2CBusManager i2cBus;
     // Queue of some sort. FreeRTOS Queue?
 }
