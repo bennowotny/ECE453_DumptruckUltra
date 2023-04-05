@@ -15,13 +15,15 @@ void setupProcessor();
 
 class FreeRTOSBlinky {
 public:
-    FreeRTOSBlinky();
+    explicit FreeRTOSBlinky(cyhal_gpio_t blinkyPin);
 
 private:
-    [[noreturn]] static void ledTask();
+    [[noreturn]] void ledTask();
+
+    const cyhal_gpio_t blinkyPin;
 
     static constexpr auto BLINKY_TASK_NAME{"Blinky"};
-    static constexpr uint16_t BLINKY_STACK_SIZE{configMINIMAL_STACK_SIZE};
+    static constexpr uint32_t BLINKY_STACK_SIZE{configMINIMAL_STACK_SIZE};
     static constexpr uint32_t BLINKY_PRIORITY{tskIDLE_PRIORITY + 1};
 };
 
