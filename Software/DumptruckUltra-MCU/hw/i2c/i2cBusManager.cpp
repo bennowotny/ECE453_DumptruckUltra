@@ -53,7 +53,7 @@ cy_rslt_t I2CBusManager::i2cInit(i2cPin_t *i2cPins) {
             I2C_MASTER_FREQUENCY_HZ};
 
     // Initialize I2C monarch, set the SDA and SCL pins and assign a new clock
-    cy_rslt_t rslt = cyhal_i2c_init(&i2cMonarchObj, i2cPins->sda, i2cPins->scl, NULL);
+    cy_rslt_t rslt = cyhal_i2c_init(&i2cMonarchObj, i2cPins->sda, i2cPins->scl, nullptr);
     CY_ASSERT(rslt == CY_RSLT_SUCCESS);
 
     // Configure the I2C resource to be monarch
