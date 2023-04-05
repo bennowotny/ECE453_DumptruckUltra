@@ -12,27 +12,27 @@ void setupProcessor() {
     __enable_irq();
 }
 
-FreeRTOSBlinky::FreeRTOSBlinky() {
-    const auto drivingTaskSetupResult{
+FreeRTOSBlinky::FreeRTOSBlinky(cyhal_gpio_t blinkyPin) : blinkyPin{blinkyPin} {
+    const auto blinkyTaskSetupResult{
         xTaskCreate(
-            [](void *obj) { FreeRTOSBlinky::ledTask(); },
+            [](void *obj) { FreeRTOSBlinky::ledTask(static_cast<FreeRTOSBlinky *>(obj)); },
             BLINKY_TASK_NAME,
             BLINKY_STACK_SIZE,
-            nullptr,
+            this,
             BLINKY_PRIORITY,
             nullptr)};
-    CY_ASSERT(drivingTaskSetupResult == pdPASS);
+    CY_ASSERT(blinkyTaskSetupResult == pdPASS);
 }
 
-void FreeRTOSBlinky::ledTask() {
+void FreeRTOSBlinky::ledTask(FreeRTOSBlinky *obj) {
 
     // Initialize LED
-    const auto res{cyhal_gpio_init(P5_5, CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, false)};
+    const auto res{cyhal_gpio_init(obj->blinkyPin, CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, false)};
     CY_ASSERT(res == CY_RSLT_SUCCESS);
 
     // Toggle LED
     while (true) {
-        cyhal_gpio_toggle(P5_5);
+        cyhal_gpio_toggle(obj->blinkyPin);
         vTaskDelay(pdMS_TO_TICKS(500));
     }
 }
