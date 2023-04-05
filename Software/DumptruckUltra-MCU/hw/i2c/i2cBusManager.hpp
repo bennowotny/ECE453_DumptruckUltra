@@ -23,7 +23,7 @@ public:
         cyhal_gpio_t scl;
     };
 
-    I2CBusManager(i2cPin_t *i2cPins);
+    I2CBusManager(const i2cPin_t &i2cPins);
 
     template <std::size_t N>
     void i2cWriteReg(uint16_t devAddr, uint8_t reg, const std::array<uint8_t, N> &data) {
@@ -60,7 +60,7 @@ public:
 private:
     static constexpr uint32_t I2C_MASTER_FREQUENCY_HZ{100000};
     cyhal_i2c_t i2cMonarchObj;
-    cy_rslt_t i2cInit(I2CBusManager::i2cPin_t *i2cPins);
+    cy_rslt_t i2cInit(const i2cPin_t &i2cPins);
 };
 
 #endif /* I2CBUSMANAGER_HPP_ */
