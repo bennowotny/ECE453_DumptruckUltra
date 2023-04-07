@@ -19,8 +19,8 @@ DrivingAlgorithm::DrivingAlgorithm(DriveMotorLayout driveMotors,
       getPoseFunction{std::move(getPoseFunction)},
       currentTarget{.x = 0, .y = 0, .heading = 0},
       currentStatus{DrivingAlgorithmStatus::STOPPED},
-      drivingTaskHandle{},
-      taskEnabled{false} {
+      drivingTaskHandle{} {
+
     // Need valid functions
     CY_ASSERT(this->getFrontDistanceFunction != nullptr);
     CY_ASSERT(this->getPoseFunction != nullptr);

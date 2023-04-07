@@ -43,7 +43,6 @@ private:
     DrivingAlgorithmStatus currentStatus;
 
     TaskHandle_t drivingTaskHandle;
-    bool taskEnabled;
 
     [[noreturn]] void drivingTask();
 
