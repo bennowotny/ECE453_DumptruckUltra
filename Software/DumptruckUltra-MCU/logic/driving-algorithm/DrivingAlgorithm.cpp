@@ -75,11 +75,13 @@ void DrivingAlgorithm::drivingTask() {
         if (distanceToTarget(currPose) > TARGET_PROXIMITY_THRESHOLD_METERS) {
             // Find target heading
             const float targetHeading{std::atan2(currentTarget.y - currPose.y, currentTarget.x - currPose.x)};
-            if (getFrontDistanceFunction() < DISTANCE_THRESHOLD_METERS) { // FIXME: Create threshold (static constexpr, probably)
+            // If something is in the way...
+            if (getFrontDistanceFunction() < DISTANCE_THRESHOLD_METERS) {
                 // Turn right
                 leftMotor.setPower(Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS);
                 rightMotor.setPower(-Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS);
             } else {
+                // Otherwise, drive at the target
                 const auto motorPowers{deltaAngleToDrivePowers(targetHeading - currPose.heading)};
                 leftMotor.setPower(motorPowers.leftSpeed);
                 rightMotor.setPower(motorPowers.rightSpeed);
@@ -88,11 +90,12 @@ void DrivingAlgorithm::drivingTask() {
             // We are at our current target, so stop, signal complete, and wait for restart
             stop(DrivingAlgorithmStatus::COMPLETE);
         }
+        // Req'd to prevent constantly resetting the PWM and destroying the waveform
         vTaskDelay(DRIVING_ALGORITHM_TASK_PERIOD_TICKS);
     }
 }
 
-// Different methods are here: https://www.desmos.com/calculator/ma2ul0p4ae
+// Different methods are here: https://www.desmos.com/calculator/odrruerlc5
 auto DrivingAlgorithm::deltaAngleToDrivePowers(float angleDiff) -> DrivingAlgorithm::DrivingPower {
     float leftSpeed{0};
     float rightSpeed{0};
