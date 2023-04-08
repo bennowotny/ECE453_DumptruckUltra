@@ -1,4 +1,5 @@
-#include "test_distance_sensor.h"
+#include "test_distance_sensor.hpp"
+#include "vl53l1_platform_user_data.h"
 
 // #include "vl53l1_api.h"
 // #include "vl53l1_platform_init.h"
@@ -75,6 +76,7 @@ VL53L1_Error test_distance_sensor(VL53L1_DEV Dev) {
         printf("*********************************************\n");
         Status = ranging_loop(Dev, 15);
     }
+    return VL53L1_ERROR_NONE;
 }
 
 VL53L1_Error ranging_loop(VL53L1_DEV Dev, int no_of_measurements) {
@@ -114,4 +116,9 @@ VL53L1_Error ranging_loop(VL53L1_DEV Dev, int no_of_measurements) {
     }
 
     return Status;
+}
+
+auto main() -> int {
+    VL53L1_DEV uut{(VL53L1_DEV)malloc(sizeof(VL53L1_Dev_t))};
+    test_distance_sensor(uut);
 }
