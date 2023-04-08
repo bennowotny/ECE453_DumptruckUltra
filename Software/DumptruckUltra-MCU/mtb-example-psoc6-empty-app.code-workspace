@@ -24,7 +24,7 @@
             "cstdint": "c"
         },
         "clangd.arguments": [
-            "--query-driver=${env:CY_TOOLS_PATHS}gcc\\bin\\arm-none-eabi-g++"
+            "--query-driver=${env:CY_TOOLS_PATHS}gcc\\bin\\arm-none-eabi-g++,${env:CY_TOOLS_PATHS}gcc\\bin\\arm-none-eabi-gcc"
         ],
         "C_Cpp.intelliSenseEngine": "disabled",
         "editor.formatOnSave": true
