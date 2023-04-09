@@ -1,100 +1,71 @@
-#include "BareDriver/platform/inc/vl53l1_platform.h"
-#include "i2cBusManager.hpp"
-#include "vl53l1_error_codes.h"
-
-Hardware::I2C::I2CBusManager busManager{{.sda = P0_0, .scl = P0_0}};
+#include "DistanceSensor.hpp"
+#include "cyhal_system.h"
+#include "driver/platform/vl53l1_platform.h"
+#include <array>
 
 extern "C" {
-extern auto VL53L1_CommsInitialise(
-    VL53L1_Dev_t *pdev,
-    uint8_t comms_type,
-    uint16_t comms_speed_khz) -> VL53L1_Error {
-    return VL53L1_ERROR_NOT_IMPLEMENTED;
-    busManager.i2cReadReg(uint16_t devAddr, uint8_t reg, std::array<uint8_t, N> & data);
+auto VL53L1_WriteMulti(uint16_t dev, uint16_t index, uint8_t *pdata, uint32_t count) -> int8_t {
+    auto busManager{Hardware::DistanceSensor::DistanceSensor::getI2CBusManager()};
+    for (uint32_t i{0}; i < count; ++i) {
+        busManager.i2cWriteReg<1>(dev, index, {pdata[i]});
+    }
+    return 0;
 }
 
-extern VL53L1_Error VL53L1_CommsClose(
-    VL53L1_Dev_t *pdev) {
-    return VL53L1_ERROR_NOT_IMPLEMENTED;
+auto VL53L1_ReadMulti(uint16_t dev, uint16_t index, uint8_t *pdata, uint32_t count) -> int8_t {
+    auto busManager{Hardware::DistanceSensor::DistanceSensor::getI2CBusManager()};
+    std::array<uint8_t, 1> temporaryStoarge{};
+    for (uint32_t i{0}; i < count; ++i) {
+        busManager.i2cReadReg(dev, index, temporaryStoarge);
+        pdata[i] = temporaryStoarge.at(0);
+    }
+    return 0;
 }
 
-extern VL53L1_Error VL53L1_WriteMulti(
-    VL53L1_Dev_t *pdev,
-    uint16_t index,
-    uint8_t *pdata,
-    uint32_t count) {
-    return VL53L1_ERROR_NOT_IMPLEMENTED;
+auto VL53L1_WrByte(uint16_t dev, uint16_t index, uint8_t data) -> int8_t {
+    auto busManager{Hardware::DistanceSensor::DistanceSensor::getI2CBusManager()};
+    busManager.i2cWriteReg<1>(dev, index, {data});
+    return 0; // to be implemented
 }
 
-extern VL53L1_Error VL53L1_ReadMulti(
-    VL53L1_Dev_t *pdev,
-    uint16_t index,
-    uint8_t *pdata,
-    uint32_t count) {
-    return VL53L1_ERROR_NOT_IMPLEMENTED;
+auto VL53L1_WrWord(uint16_t dev, uint16_t index, uint16_t data) -> int8_t {
+    auto busManager{Hardware::DistanceSensor::DistanceSensor::getI2CBusManager()};
+    busManager.i2cWriteReg<2>(dev, index, {static_cast<uint8_t>((data >> 8) & 0xFF), static_cast<uint8_t>(data & 0xFF)});
+    return 0; // to be implemented
 }
 
-extern VL53L1_Error VL53L1_WrByte(
-    VL53L1_Dev_t *pdev,
-    uint16_t index,
-    uint8_t data) {
-    return VL53L1_ERROR_NOT_IMPLEMENTED;
+auto VL53L1_WrDWord(uint16_t dev, uint16_t index, uint32_t data) -> int8_t {
+    auto busManager{Hardware::DistanceSensor::DistanceSensor::getI2CBusManager()};
+    busManager.i2cWriteReg<4>(dev, index, {static_cast<uint8_t>((data >> 24) & 0xFF), static_cast<uint8_t>((data >> 16) & 0xFF), static_cast<uint8_t>((data >> 8) & 0xFF), static_cast<uint8_t>(data & 0xFF)});
+    return 0; // to be implemented
 }
 
-extern VL53L1_Error VL53L1_WrWord(
-    VL53L1_Dev_t *pdev,
-    uint16_t index,
-    uint16_t data) {
-    return VL53L1_ERROR_NOT_IMPLEMENTED;
+auto VL53L1_RdByte(uint16_t dev, uint16_t index, uint8_t *data) -> int8_t {
+    auto busManager{Hardware::DistanceSensor::DistanceSensor::getI2CBusManager()};
+    std::array<uint8_t, 1> tempStorage{};
+    busManager.i2cReadReg(dev, index, tempStorage);
+    *data = tempStorage.at(0);
+    return 0; // to be implemented
 }
 
-extern VL53L1_Error VL53L1_WrDWord(
-    VL53L1_Dev_t *pdev,
-    uint16_t index,
-    uint32_t data) {
-    return VL53L1_ERROR_NOT_IMPLEMENTED;
+auto VL53L1_RdWord(uint16_t dev, uint16_t index, uint16_t *data) -> int8_t {
+    auto busManager{Hardware::DistanceSensor::DistanceSensor::getI2CBusManager()};
+    std::array<uint8_t, 2> tempStorage{};
+    busManager.i2cReadReg(dev, index, tempStorage);
+    *data = static_cast<uint16_t>(tempStorage.at(0) << 8) | tempStorage.at(1);
+    return 0; // to be implemented
 }
 
-extern VL53L1_Error VL53L1_RdByte(
-    VL53L1_Dev_t *pdev,
-    uint16_t index,
-    uint8_t *pdata) {
-    return VL53L1_ERROR_NOT_IMPLEMENTED;
+auto VL53L1_RdDWord(uint16_t dev, uint16_t index, uint32_t *data) -> int8_t {
+    auto busManager{Hardware::DistanceSensor::DistanceSensor::getI2CBusManager()};
+    std::array<uint8_t, 4> tempStorage{};
+    busManager.i2cReadReg(dev, index, tempStorage);
+    *data = static_cast<uint32_t>(tempStorage.at(0) << 24) | static_cast<uint32_t>(tempStorage.at(1) << 16) | static_cast<uint32_t>(tempStorage.at(2) << 8) | tempStorage.at(3);
+    return 0; // to be implemented
 }
 
-extern VL53L1_Error VL53L1_RdWord(
-    VL53L1_Dev_t *pdev,
-    uint16_t index,
-    uint16_t *pdata) {
-    return VL53L1_ERROR_NOT_IMPLEMENTED;
-}
-
-extern VL53L1_Error VL53L1_RdDWord(
-    VL53L1_Dev_t *pdev,
-    uint16_t index,
-    uint32_t *pdata) {
-    return VL53L1_ERROR_NOT_IMPLEMENTED;
-}
-
-extern VL53L1_Error VL53L1_WaitUs(
-    VL53L1_Dev_t *pdev,
-    int32_t wait_us) {
-    return VL53L1_ERROR_NOT_IMPLEMENTED;
-}
-
-extern VL53L1_Error VL53L1_WaitMs(
-    VL53L1_Dev_t *pdev,
-    int32_t wait_ms) {
-    return VL53L1_ERROR_NOT_IMPLEMENTED;
-}
-
-extern VL53L1_Error VL53L1_WaitValueMaskEx(
-    VL53L1_Dev_t *pdev,
-    uint32_t timeout_ms,
-    uint16_t index,
-    uint8_t value,
-    uint8_t mask,
-    uint32_t poll_delay_ms) {
-    return VL53L1_ERROR_NOT_IMPLEMENTED;
+auto VL53L1_WaitMs(uint16_t dev, int32_t wait_ms) -> int8_t {
+    cyhal_system_delay_ms(wait_ms);
+    return 0; // to be implemented
 }
 }

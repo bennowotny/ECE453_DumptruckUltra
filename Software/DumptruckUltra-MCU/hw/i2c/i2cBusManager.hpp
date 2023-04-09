@@ -28,12 +28,13 @@ public:
     I2CBusManager(const i2cPin_t &i2cPins);
 
     template <std::size_t N>
-    void i2cWriteReg(uint16_t devAddr, uint8_t reg, const std::array<uint8_t, N> &data) {
+    void i2cWriteReg(uint16_t devAddr, uint16_t reg, const std::array<uint8_t, N> &data) {
         // Acquire mutex
         // Write register
-        std::array<uint8_t, N + 1> buf{};
-        buf.at(0) = reg;
-        std::copy(data.begin(), data.end(), buf.begin() + 1);
+        std::array<uint8_t, N + 2> buf{};
+        buf.at(0) = (reg >> 8) & 0xFF;
+        buf.at(1) = (reg)&0xFF;
+        std::copy(data.begin(), data.end(), buf.begin() + 2);
 
         cy_rslt_t rslt = cyhal_i2c_master_write(
             &i2cMonarchObj,
@@ -49,14 +50,15 @@ public:
     }
 
     template <std::size_t N>
-    void i2cReadReg(uint16_t devAddr, uint8_t reg, std::array<uint8_t, N> &data) {
+    void i2cReadReg(uint16_t devAddr, uint16_t reg, std::array<uint8_t, N> &data) {
         // Acquire mutex
         // Read register
+        uint8_t arr[2] = {static_cast<uint8_t>((reg >> 8) & 0xFF), static_cast<uint8_t>(reg & 0xFF)};
         cy_rslt_t rslt = cyhal_i2c_master_write(
             &i2cMonarchObj,
             devAddr,
-            &reg,
-            1,
+            arr,
+            2,
             100,
             false);
 
