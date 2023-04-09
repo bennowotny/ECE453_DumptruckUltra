@@ -95,7 +95,15 @@ void DrivingAlgorithm::drivingTask() {
     }
 }
 
-// Different methods are here: https://www.desmos.com/calculator/odrruerlc5
+/* Different methods are here: https://www.desmos.com/calculator/odrruerlc5
+ * In short:
+ *  - If the target is to the left, slow down the left wheel and keep the right wheel at full power
+ *  - Otherwise, slow down the right wheel and keep the left wheel at full power
+ * This change happens linearly with both wheels at maximum power at:
+ *  - 0 (driving forward)
+ *  - pi/2 (turning right)
+ *  - pi/2 (turning left)
+ */
 auto DrivingAlgorithm::deltaAngleToDrivePowers(float angleDiff) -> DrivingAlgorithm::DrivingPower {
     float leftSpeed{0};
     float rightSpeed{0};
