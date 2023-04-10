@@ -72,12 +72,11 @@ void DrivingAlgorithm::drivingTask() {
     while (true) {
         const auto currPose{getPoseFunction()};
         // If we are not at the target...
-        if (distanceToTarget(currPose) > TARGET_PROXIMITY_THRESHOLD_METERS 
-            && (currentTarget.heading - currPose.heading) > TARGET_HEADING_THRESHOLD_RADIANS) {
+        if (distanceToTarget(currPose) > TARGET_PROXIMITY_THRESHOLD_METERS && (currentTarget.heading - currPose.heading) > TARGET_HEADING_THRESHOLD_RADIANS) {
             // Find target heading (if we are already close to the target, turn to match the goal heading)
-            const float targetHeading{(distanceToTarget(currPose) > TARGET_PROXIMITY_THRESHOLD_METERS) 
-                                        ? std::atan2(currentTarget.y - currPose.y, currentTarget.x - currPose.x)
-                                        : currentTarget.heading};
+            const float headingToTarget{(distanceToTarget(currPose) > TARGET_PROXIMITY_THRESHOLD_METERS)
+                                            ? std::atan2(currentTarget.y - currPose.y, currentTarget.x - currPose.x)
+                                            : currentTarget.heading};
             // If something is in the way...
             if (getFrontDistanceFunction() < DISTANCE_THRESHOLD_METERS) {
                 // Turn right
@@ -85,7 +84,7 @@ void DrivingAlgorithm::drivingTask() {
                 rightMotor.setPower(-Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS);
             } else {
                 // Otherwise, drive at the target
-                const auto motorPowers{deltaAngleToDrivePowers(targetHeading - currPose.heading)};
+                const auto motorPowers{deltaAngleToDrivePowers(headingToTarget - currPose.heading)};
                 leftMotor.setPower(motorPowers.leftSpeed);
                 rightMotor.setPower(motorPowers.rightSpeed);
             }
