@@ -6,24 +6,32 @@
 #include "queue.h"
 #include <array>
 #include <cstddef>
+#include <memory>
+
+namespace Hardware {
+namespace IMU {
+
+struct AccelData {
+    float Ax;
+    float Ay;
+    float Az;
+    float Ats;
+};
+
+struct GyroData {
+    float Gx;
+    float Gy;
+    float Gz;
+    float Gts;
+};
 
 class IMU {
 public:
-    struct imuData_t {
-        std::array<float, 3> accel_float; // X, Y, Z
-        std::array<float, 3> gyro_float;  // X, Y, Z
-        uint32_t timestamp;
-    };
-
-    IMU(const Hardware::I2C::I2CBusManager::i2cPin_t &);
-
-    template <std::size_t N>
-    auto getIMUData(std::array<imuData_t, N> dataBuf, TickType_t tickToWait) -> void;
+    explicit IMU(std::shared_ptr<Hardware::I2C::I2CBusManager>);
 
 private:
     static constexpr uint8_t IMU_ADDR{0x6A};
-
-    Hardware::I2C::I2CBusManager i2cBus;
-    // Queue of some sort. FreeRTOS Queue?
-    QueueHandle_t imuQueue;
+    const std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus;
 };
+} // namespace IMU
+} // namespace Hardware
