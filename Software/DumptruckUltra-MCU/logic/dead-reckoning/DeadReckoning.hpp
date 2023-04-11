@@ -14,15 +14,24 @@ struct Pose2D {
 
 class DeadReckoning {
 public:
-    void sendAccelerometerMessage(const Hardware::IMU::AccelerometerData &msg) {
-        // Do integration
-    }
 
-    void sendGyroscopeMessage(const Hardware::IMU::GyroscopeData &msg) {
-        // Do integration
-    }
+    DeadReckoning();
+
+    void sendAccelerometerMessage(const Hardware::IMU::AccelerometerData &msg);
+
+    void sendGyroscopeMessage(const Hardware::IMU::GyroscopeData &msg);
 
     [[nodiscard]] auto getCurrentPose() const -> Pose2D;
+
+private:
+    Pose2D currentPosition;
+    
+    struct LinearVelocity2D{
+        float dx;
+        float dy;
+    };
+
+    LinearVelocity2D currentVelocity;
 };
 } // namespace DeadReckoning
 } // namespace Logic
