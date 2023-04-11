@@ -1,6 +1,7 @@
-#pragma once
+#ifndef _LOGIC_DEAD_RECKONING_DEADRECKONING_HPP
+#define _LOGIC_DEAD_RECKONING_DEADRECKONING_HPP
 
-#include "imu.hpp"
+#include "hw/imu/imu.hpp"
 
 namespace Logic {
 namespace DeadReckoning {
@@ -25,3 +26,5 @@ public:
 };
 } // namespace DeadReckoning
 } // namespace Logic
+
+#endif
