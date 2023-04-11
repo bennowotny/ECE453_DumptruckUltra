@@ -1,4 +1,5 @@
 #include "proc_setup.hpp"
+#include "cy_result.h"
 #include "cybsp.h"
 
 namespace Hardware {
