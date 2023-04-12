@@ -2,6 +2,8 @@
 
 #include "FreeRTOS.h"
 #include "cy_syslib.h"
+#include "cyhal_gpio.h"
+#include "cyhal_psoc6_01_43_smt.h"
 #include "hw/i2c/i2cBusManager.hpp"
 #include "portmacro.h"
 #include "queue.h"
@@ -33,6 +35,9 @@ public:
 private:
     const std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus;
 
+    auto getDataCallback() -> void;
+
+    static constexpr cyhal_gpio_t IMU_INT_PIN{P9_2};
     static constexpr uint8_t IMU_ADDR{0x6A};
 
     static constexpr uint8_t CTRL1_XL{0x10};
