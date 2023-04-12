@@ -17,9 +17,9 @@ auto main() -> int {
     cy_retarget_io_init(P5_1, P5_0, 9600);
 
     while (true) {
-        uut.sendGyroscopeMessage({.Gx = 0, .Gy = 0, .Gz = std::cos(elapsedTime), .Gts = static_cast<float>(TEST_UPDATE_PERIOD_MS) / MS_PER_S});
+        uut.sendAccelerometerMessage({.Ax = std::cos(elapsedTime), .Ay = 0, .Az = 0, .Ats = static_cast<float>(TEST_UPDATE_PERIOD_MS) / MS_PER_S});
         const auto currentPosition{uut.getCurrentPose()};
-        std::cout << elapsedTime << "," << std::cos(elapsedTime) << "," << currentPosition.heading << "\r\n"; // NOLINT(cppcoreguidelines-pro-type-vararg,hicpp-vararg); required b/c embedded
+        std::cout << std::fixed << std::setprecision(3) << elapsedTime << "," << std::cos(elapsedTime) << "," << currentPosition.x << "\r\n"; // NOLINT(cppcoreguidelines-pro-type-vararg,hicpp-vararg); required b/c embedded
         cyhal_system_delay_ms(TEST_UPDATE_PERIOD_MS);
         elapsedTime += static_cast<float>(TEST_UPDATE_PERIOD_MS) / MS_PER_S;
     }
