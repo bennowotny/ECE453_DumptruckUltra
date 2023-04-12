@@ -40,6 +40,10 @@ DistanceSensor::DistanceSensor(std::shared_ptr<I2C::I2CBusManager> busManager, u
     VL53L1X_StartRanging(this->deviceAddress);
 }
 
+/**
+ * Note: This implementation does not continually poll the sensor,
+ * only gets a single "on-demand" reading from the sensor
+ */
 auto DistanceSensor::getDistanceMeters() const -> float {
     VL53L1X_ClearInterrupt(deviceAddress);
     uint8_t dataReady{0};
