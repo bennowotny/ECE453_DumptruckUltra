@@ -9,6 +9,7 @@
 #include "queue.h"
 #include <array>
 #include <cstddef>
+#include <functional>
 #include <memory>
 
 namespace Hardware {
@@ -30,10 +31,14 @@ struct GyroscopeData {
 
 class IMU {
 public:
-    explicit IMU(std::shared_ptr<Hardware::I2C::I2CBusManager>);
+    explicit IMU(std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus,
+                 std::function<void(AccelerometerData &)> sendAccelData,
+                 std::function<void(GyroscopeData &)> sendGyroData);
 
 private:
     const std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus;
+    const std::function<void(AccelerometerData &)> sendAccelData;
+    const std::function<void(GyroscopeData &)> sendGyroData;
 
     auto getDataCallback() -> void;
 

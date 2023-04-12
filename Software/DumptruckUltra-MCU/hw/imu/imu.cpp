@@ -4,12 +4,20 @@
 #include "cy_utils.h"
 #include "cyhal_psoc6_01_43_smt.h"
 #include "i2cBusManager.hpp"
+#include <functional>
 #include <memory>
+#include <utility>
 
 namespace Hardware {
 namespace IMU {
 // https://github.com/stm32duino/LSM6DSOX
-IMU::IMU(std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus) : i2cBus{std::move(i2cBus)} {
+IMU::IMU(std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus,
+         std::function<void(AccelerometerData &)> sendAccelData,
+         std::function<void(GyroscopeData &)> sendGyroData)
+    : i2cBus{std::move(i2cBus)},
+      sendAccelData{std::move(sendAccelData)},
+      sendGyroData{std::move(sendGyroData)} {
+
     // Set up interrupt pin
     cy_rslt_t res;
     res = cyhal_gpio_init(IMU_INT_PIN, CYHAL_GPIO_DIR_INPUT, CYHAL_GPIO_DRIVE_NONE, false);
