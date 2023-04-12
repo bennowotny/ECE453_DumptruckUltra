@@ -14,14 +14,14 @@
 namespace Hardware {
 namespace IMU {
 
-struct AccelData {
+struct AccelerometerData {
     float Ax;
     float Ay;
     float Az;
     float Ats;
 };
 
-struct GyroData {
+struct GyroscopeData {
     float Gx;
     float Gy;
     float Gz;
