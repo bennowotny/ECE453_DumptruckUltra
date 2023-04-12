@@ -32,8 +32,8 @@ struct GyroscopeData {
 class IMU {
 public:
     explicit IMU(std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus,
-                 std::function<void(AccelerometerData &)> sendAccelData,
-                 std::function<void(GyroscopeData &)> sendGyroData);
+                 std::function<void(const AccelerometerData &)> sendAccelData,
+                 std::function<void(const GyroscopeData &)> sendGyroData);
 
 private:
     const std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus;

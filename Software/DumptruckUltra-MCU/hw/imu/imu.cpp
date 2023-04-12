@@ -2,6 +2,7 @@
 #include "FreeRTOS.h"
 #include "cy_result.h"
 #include "cy_utils.h"
+#include "cyhal_gpio.h"
 #include "cyhal_psoc6_01_43_smt.h"
 #include "i2cBusManager.hpp"
 #include <functional>
@@ -12,8 +13,8 @@ namespace Hardware {
 namespace IMU {
 // https://github.com/stm32duino/LSM6DSOX
 IMU::IMU(std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus,
-         std::function<void(AccelerometerData &)> sendAccelData,
-         std::function<void(GyroscopeData &)> sendGyroData)
+         std::function<void(const AccelerometerData &)> sendAccelData,
+         std::function<void(const GyroscopeData &)> sendGyroData)
     : i2cBus{std::move(i2cBus)},
       sendAccelData{std::move(sendAccelData)},
       sendGyroData{std::move(sendGyroData)} {
@@ -24,6 +25,11 @@ IMU::IMU(std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus,
     CY_ASSERT(res == CY_RSLT_SUCCESS);
 
     // Set up interrupt callback
+    cyhal_gpio_callback_data_t imuGetDataCallback =
+        {
+            .callback = [](void *param, cyhal_gpio_event_t event) -> void { static_cast<IMU *>(param)->getDataCallback(); },
+            .callback_arg = this};
+    cyhal_gpio_register_callback(IMU_INT_PIN, &imuGetDataCallback);
 
     // Disable I3C
     std::array<uint8_t, 1> dataToSend{XL_DISABLE_I3C};
