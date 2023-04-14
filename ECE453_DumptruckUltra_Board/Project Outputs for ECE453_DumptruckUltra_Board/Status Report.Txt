@@ -1,14 +1,13 @@
-Project Outputs Generation Report
----------------------------------
-Start Output Generation At 10:14:25 On 02-Mar-23
+Output: NC Drill Files
+Type  : NC Drill
+From  : PCB Document [MainBoard.PcbDoc]
+   Generated File[MainBoard-RoundHoles.TXT]
+   Generated File[MainBoard-SlotHoles.TXT]
+   Generated File[MainBoard.LDP]
+   Generated File[MainBoard.DRR]
 
-Output: Bill of Materials
-Type  : BOM
-From  : Variant [[No Variations]] of BOM Document [ECE453_DumptruckUltra_Board.BomDoc]
-   Generated File[Bill of Materials-ECE453_DumptruckUltra_Board.xls]
 
-
-Files Generated   : 1
+Files Generated   : 4
 Documents Printed : 0
 
-Finished Output Generation At 10:14:29 On 02-Mar-23
+Finished Output Generation At 5:40:29 PM On 3/29/2023
