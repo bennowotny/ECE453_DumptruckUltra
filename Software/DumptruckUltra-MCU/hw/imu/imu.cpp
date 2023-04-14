@@ -1,10 +1,14 @@
 #include "hw/imu/imu.hpp"
 #include "FreeRTOS.h"
+#include "FreeRTOSConfig.h"
 #include "cy_result.h"
 #include "cy_utils.h"
 #include "cyhal_gpio.h"
 #include "cyhal_psoc6_01_43_smt.h"
 #include "i2cBusManager.hpp"
+#include "portmacro.h"
+#include "projdefs.h"
+#include <array>
 #include <functional>
 #include <memory>
 #include <utility>
@@ -19,17 +23,9 @@ IMU::IMU(std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus,
       sendAccelData{std::move(sendAccelData)},
       sendGyroData{std::move(sendGyroData)} {
 
-    // Set up interrupt pin
-    cy_rslt_t res;
-    res = cyhal_gpio_init(IMU_INT_PIN, CYHAL_GPIO_DIR_INPUT, CYHAL_GPIO_DRIVE_NONE, false);
-    CY_ASSERT(res == CY_RSLT_SUCCESS);
-
-    // Set up interrupt callback
-    cyhal_gpio_callback_data_t imuGetDataCallback =
-        {
-            .callback = [](void *param, cyhal_gpio_event_t event) -> void { static_cast<IMU *>(param)->getDataCallback(); },
-            .callback_arg = this};
-    cyhal_gpio_register_callback(IMU_INT_PIN, &imuGetDataCallback);
+    // Reset sensors
+    i2cBus->i2cWriteReg<1>(IMU_ADDR, CTRL1_XL, {0x00});
+    i2cBus->i2cWriteReg<1>(IMU_ADDR, CTRL2_G, {0x00});
 
     // Disable I3C
     std::array<uint8_t, 1> dataToSend{XL_DISABLE_I3C};
@@ -55,18 +51,94 @@ IMU::IMU(std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus,
     dataToSend[0] = EN_BDR_INT;
     i2cBus->i2cWriteReg<1>(IMU_ADDR, INT1_CTRL, dataToSend);
 
+    // Check device ID
+    std::array<uint8_t, 1> dataToRec{};
+    i2cBus->i2cReadReg<1>(IMU_ADDR, WHO_AM_I, dataToRec);
+    CY_ASSERT(dataToRec[0] == IMU_DEV_ID);
+
+    // Create FreeRTOS task
+    xTaskCreate(
+        [](void *params) -> void { static_cast<IMU *>(params)->imuTask(); },
+        "imuTask",
+        configMINIMAL_STACK_SIZE,
+        this,
+        IMU_TASK_PRIORITY,
+        &imuTaskHandle);
+}
+
+auto IMU::imuTask() -> void {
+    // Set up interrupt callback
+    cyhal_gpio_callback_data_t imuGetDataCallback =
+        {
+            .callback = [](void *param, cyhal_gpio_event_t event) -> void { static_cast<IMU *>(param)->dataReadyCallback(); },
+            .callback_arg = this};
+    cyhal_gpio_register_callback(IMU_INT_PIN, &imuGetDataCallback);
+
+    // Set up interrupt pin
+    cy_rslt_t res;
+    res = cyhal_gpio_init(IMU_INT_PIN, CYHAL_GPIO_DIR_INPUT, CYHAL_GPIO_DRIVE_NONE, false);
+    CY_ASSERT(res == CY_RSLT_SUCCESS);
+
     // Enable both the accelerometer and gyroscope
+    // Set output data rate (ODR), scaling, and filtering
+    std::array<uint8_t, 1> dataToSend{};
     dataToSend[0] = XL_CTRL;
     i2cBus->i2cWriteReg(IMU_ADDR, CTRL1_XL, dataToSend);
     dataToSend[0] = G_CTRL;
     i2cBus->i2cWriteReg(IMU_ADDR, CTRL2_G, dataToSend);
 
-    // Check device ID
+    std::array<uint8_t, 1> dataToRec{};     // Data read from control registers
+    std::array<uint8_t, 4> rawTimestamp{};  // Raw timestamp bytes
+    std::array<uint8_t, 6> rawSensorData{}; // All 6 bytes of data from both sensors
+    std::array<int16_t, 3> sensorData{};    // Signed data from both IMU sensors
 
-    // Create FreeRTOS task
+    uint32_t timestamp{0x00000000};
+
+    // Get data when woken up
+    while (true) {
+        // Wait for data to become available
+        ulTaskNotifyTake(pdFALSE, portMAX_DELAY);
+
+        // Check that the data is actually there
+        i2cBus->i2cReadReg<1>(IMU_ADDR, FIFO_STATUS1, dataToRec);
+        CY_ASSERT(dataToRec[0] >= CNT_BDR_TH);
+#ifdef DEBUG
+        if (dataToRec[0] > 128)
+            printf("Unread data in IMU FIFO getting large: %d data points", dataToRec[0]);
+#endif
+
+        // Read data tag
+        i2cBus->i2cReadReg<1>(IMU_ADDR, FIFO_DATA_OUT_TAG, dataToRec);
+
+        // Get timestamp
+        i2cBus->i2cReadReg(IMU_ADDR, TIMESTAMP_REGS, rawTimestamp);
+        timestamp = (rawTimestamp[0] << 24) | (rawTimestamp[1] << 16) | (rawTimestamp[2] << 8) | rawTimestamp[3];
+
+        // Read data and send it to another task
+        if (dataToRec[0] == GYRO_DATA_TAG) {
+            i2cBus->i2cReadReg<6>(IMU_ADDR, FIFO_DATA_OUT_BEGIN, rawSensorData);
+
+            // Reconstruct signed data
+            sensorData[0] = (rawSensorData[1] << 8) | rawSensorData[0];
+            sensorData[1] = (rawSensorData[3] << 8) | rawSensorData[2];
+            sensorData[2] = (rawSensorData[5] << 8) | rawSensorData[4];
+
+            // Convert data to float
+            GyroscopeData gd = {
+                .Gx = static_cast<float>(sensorData[0]),
+                .Gy = static_cast<float>(sensorData[1]),
+                .Gz = static_cast<float>(sensorData[2]),
+                .Gts = static_cast<float>(timestamp / TIMESTAMP_RES)};
+        }
+        // Send data to other task
+    }
 }
 
-auto IMU::getDataCallback() -> void {
+auto IMU::dataReadyCallback() -> void {
+    // Wake imuTask when data is ready
+    BaseType_t taskWoken = pdFALSE;
+    vTaskNotifyGiveFromISR(imuTaskHandle, taskWoken);
+    portYIELD_FROM_ISR(taskWoken);
 }
 } // namespace IMU
 } // namespace Hardware
