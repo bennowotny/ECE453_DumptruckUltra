@@ -74,7 +74,7 @@ private:
 
     static constexpr uint8_t GYRO_DATA_TAG{0x01};
     static constexpr uint8_t ACCEL_DATA_TAG{0x02};
-    static constexpr float TIMESTAMP_RES { 0.025 }
+    static constexpr float TIMESTAMP_RES{0.025};
 };
 } // namespace IMU
 } // namespace Hardware
