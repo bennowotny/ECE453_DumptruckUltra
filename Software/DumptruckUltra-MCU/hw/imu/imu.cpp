@@ -94,18 +94,20 @@ auto IMU::imuTask() -> void {
     std::array<int16_t, 3> sensorData{};    // Signed data from both IMU sensors
 
     uint32_t timestamp{0x00000000};
+    uint8_t numDataSamples = 0;
 
     // Get data when woken up
     while (true) {
         // Wait for data to become available
         ulTaskNotifyTake(pdFALSE, portMAX_DELAY);
 
-        // Check that the data is actually there
+        // Check how much data is in FIFO
         i2cBus->i2cReadReg<1>(IMU_ADDR, FIFO_STATUS1, dataToRec);
         CY_ASSERT(dataToRec[0] >= CNT_BDR_TH);
+        numDataSamples = dataToRec[0];
 #ifdef DEBUG
         if (dataToRec[0] > 128)
-            printf("Unread data in IMU FIFO getting large: %d data points", dataToRec[0]);
+            printf("IMU:: Unread data in IMU FIFO getting large: %d data points", dataToRec[0]);
 #endif
 
         // Read data tag
@@ -116,40 +118,49 @@ auto IMU::imuTask() -> void {
         timestamp = (rawTimestamp[0] << 24) | (rawTimestamp[1] << 16) | (rawTimestamp[2] << 8) | rawTimestamp[3];
 
         // Read data and send it to another task
-        if (dataToRec[0] == GYRO_DATA_TAG) {
-            i2cBus->i2cReadReg<6>(IMU_ADDR, FIFO_DATA_OUT_BEGIN, rawSensorData);
+        for (int i = 0; i < numDataSamples; i++) {
+            if (dataToRec[0] == GYRO_DATA_TAG) {
+                // Read gyro data
+                i2cBus->i2cReadReg<6>(IMU_ADDR, FIFO_DATA_OUT_BEGIN, rawSensorData);
 
-            // Reconstruct signed data
-            sensorData[0] = (rawSensorData[1] << 8) | rawSensorData[0];
-            sensorData[1] = (rawSensorData[3] << 8) | rawSensorData[2];
-            sensorData[2] = (rawSensorData[5] << 8) | rawSensorData[4];
+                // Reconstruct signed data
+                sensorData[0] = (rawSensorData[1] << 8) | rawSensorData[0];
+                sensorData[1] = (rawSensorData[3] << 8) | rawSensorData[2];
+                sensorData[2] = (rawSensorData[5] << 8) | rawSensorData[4];
 
-            // Convert data to float
-            GyroscopeData gd = {
-                .Gx = static_cast<float>(sensorData[0]),
-                .Gy = static_cast<float>(sensorData[1]),
-                .Gz = static_cast<float>(sensorData[2]),
-                .Gts = static_cast<float>(timestamp / TIMESTAMP_RES)};
+                // Convert data to float
+                GyroscopeData gd = {
+                    .Gx = static_cast<float>(sensorData[0]),
+                    .Gy = static_cast<float>(sensorData[1]),
+                    .Gz = static_cast<float>(sensorData[2]),
+                    .Gts = static_cast<float>(timestamp / TIMESTAMP_RES)};
 
-            // Send data to other task
-            sendGyroData(gd);
-        } else if (dataToRec[0] == ACCEL_DATA_TAG) {
-            i2cBus->i2cReadReg<6>(IMU_ADDR, FIFO_DATA_OUT_BEGIN, rawSensorData);
+                // Send data to other task
+                sendGyroData(gd);
+            } else if (dataToRec[0] == ACCEL_DATA_TAG) {
+                // Read accelerometer data
+                i2cBus->i2cReadReg<6>(IMU_ADDR, FIFO_DATA_OUT_BEGIN, rawSensorData);
 
-            // Reconstruct signed data
-            sensorData[0] = (rawSensorData[1] << 8) | rawSensorData[0];
-            sensorData[1] = (rawSensorData[3] << 8) | rawSensorData[2];
-            sensorData[2] = (rawSensorData[5] << 8) | rawSensorData[4];
+                // Reconstruct signed data
+                sensorData[0] = (rawSensorData[1] << 8) | rawSensorData[0];
+                sensorData[1] = (rawSensorData[3] << 8) | rawSensorData[2];
+                sensorData[2] = (rawSensorData[5] << 8) | rawSensorData[4];
 
-            // Convert data to float
-            AccelerometerData ad = {
-                .Ax = static_cast<float>(sensorData[0]),
-                .Ay = static_cast<float>(sensorData[1]),
-                .Az = static_cast<float>(sensorData[2]),
-                .Ats = static_cast<float>(timestamp / TIMESTAMP_RES)};
+                // Convert data to float
+                AccelerometerData ad = {
+                    .Ax = static_cast<float>(sensorData[0]),
+                    .Ay = static_cast<float>(sensorData[1]),
+                    .Az = static_cast<float>(sensorData[2]),
+                    .Ats = static_cast<float>(timestamp / TIMESTAMP_RES)};
 
-            // Send data to other task
-            sendAccelData(ad);
+                // Send data to other task
+                sendAccelData(ad);
+            }
+#ifdef DEBUG
+            else {
+                printf("IMU:: Other tag received! %x", dataToRec[0]);
+            }
+#endif
         }
     }
 }
