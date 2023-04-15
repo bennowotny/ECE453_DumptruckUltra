@@ -3,6 +3,7 @@
 
 #include "FreeRTOS.h" // IWYU pragma: keep
 #include "FreeRTOSConfig.h"
+#include "cycfg_pins.h"
 #include "cyhal.h" // IWYU pragma: keep
 #include "task.h"  // IWYU pragma: keep
 
@@ -21,7 +22,7 @@ constexpr cyhal_gpio_t M2_Backward(P6_2);
 constexpr cyhal_gpio_t Servo3_PWM(P6_3);
 constexpr cyhal_gpio_t MCU_RX_FTDI_TX(P6_4);
 constexpr cyhal_gpio_t MCU_TX_FTDI_RX(P6_5);
-constexpr cyhal_gpio_t SWDIO(P6_6);
+// SWDIO already defined
 constexpr cyhal_gpio_t SWDCLK(P6_7);
 
 constexpr cyhal_gpio_t USER_LED(P7_1);
