@@ -6,6 +6,7 @@
 #include "cycfg_pins.h"
 #include "cyhal.h" // IWYU pragma: keep
 #include "task.h"  // IWYU pragma: keep
+#include <string>
 
 namespace Hardware {
 
@@ -48,14 +49,15 @@ void setupProcessor();
 
 class FreeRTOSBlinky {
 public:
-    explicit FreeRTOSBlinky(cyhal_gpio_t blinkyPin);
+    explicit FreeRTOSBlinky(cyhal_gpio_t blinkyPin, uint32_t delayMs = 0, const char *taskName = BLINKY_TASK_NAME);
 
 private:
     [[noreturn]] void ledTask();
 
     const cyhal_gpio_t blinkyPin;
+    const uint32_t delayMs;
 
-    static constexpr auto BLINKY_TASK_NAME{"Blinky"};
+    static char const *const BLINKY_TASK_NAME;
     static constexpr uint32_t BLINKY_STACK_SIZE{configMINIMAL_STACK_SIZE};
     static constexpr uint32_t BLINKY_PRIORITY{tskIDLE_PRIORITY + 1};
 };
