@@ -55,6 +55,16 @@ auto DistanceSensor::getDistanceMeters() const -> float {
     return static_cast<float>(distance_mm) / MM_PER_METER;
 }
 
+// auto DistanceSensor::getDistanceMetersPoll() const -> float {
+//     VL53L1X_ClearInterrupt(deviceAddress);
+//     uint8_t dataReady{0};
+//     while (dataReady == 0) {
+//         VL53L1X_CheckForDataReady(deviceAddress, &dataReady);
+//     }
+//     return static_cast<float>(distance_mm) / MM_PER_METER;
+
+// }
+
 auto DistanceSensor::getI2CBusManager() -> I2C::I2CBusManager & {
     return *DistanceSensor::busManager;
 }
