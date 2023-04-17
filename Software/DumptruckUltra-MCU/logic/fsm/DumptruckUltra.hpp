@@ -5,21 +5,30 @@
 #include "Motor.hpp"
 #include "i2cBusManager.hpp"
 #include "imu.hpp"
+#include <functional>
+#include <map>
 
+namespace Logic {
 namespace FSM {
-using namespace Hardware;
-using namespace Logic;
-
 class DumptruckUltra {
+    enum class FSMStates {
+        INIT,
+        DRIVE_TO_SEARCH,
+        LOCAL_SEARCH,
+        DISPENSE,
+        APPROACH,
+        PICKUP,
+        DRIVE_TO_START
+    };
+
 public:
     DumptruckUltra();
+    void addToStateTable(FSMStates state, std::function<void()> stateAction);
 
 private:
-    I2C::I2CBusManager i2cBus;
-    IMU::IMU imu;
-
-    DrivingAlgorithm::DriveMotorLayout driveBase;
-    DeadReckoning::DeadReckoning deadReck;
-    DrivingAlgorithm::DrivingAlgorithm driveAlg;
+    std::map<FSMStates, std::function<FSMStates()>> stateActionMap;
+    auto fsmTask() -> void;
+    FSMStates currState;
 };
 } // namespace FSM
+} // namespace Logic

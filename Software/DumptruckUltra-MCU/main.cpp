@@ -39,12 +39,21 @@
  * indemnify Cypress against all liability.
  *******************************************************************************/
 
+#include "DrivingAlgorithm.hpp"
+#include "DumptruckUltra.hpp"
 #include "hw/proc/proc_setup.hpp"
+#include <memory>
 
 auto main() -> int {
     Hardware::Processor::setupProcessor();
 
-    for (;;) {
+    auto drivingAlg{std::make_unique<Logic::DrivingAlgorithm::DrivingAlgorithm>(nullptr)};
+    FSM::DumptruckUltra sm;
+    sm.addToStateTable(FSMStates state, [drivingAlg]() {
+
+    })
+
+        for (;;) {
     }
 }
 
