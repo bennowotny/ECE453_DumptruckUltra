@@ -98,7 +98,8 @@ auto IMU::imuTask() -> void {
 
     // Get data when woken up
     while (true) {
-        // Wait for data to become available
+        // Wait for data to become available. The notification value keeps track
+        // of the number of times the interrupt was fired.
         ulTaskNotifyTake(pdFALSE, portMAX_DELAY);
 
         // Check how much data is in FIFO
@@ -166,7 +167,8 @@ auto IMU::imuTask() -> void {
 }
 
 auto IMU::dataReadyCallback() -> void {
-    // Wake imuTask when data is ready
+    // Wake imuTask when data is ready. This will increment the notification value.
+    // When the imuTask will stay awake while the notification value is above zero.
     BaseType_t taskWoken = pdFALSE;
     vTaskNotifyGiveFromISR(imuTaskHandle, &taskWoken);
     portYIELD_FROM_ISR(taskWoken);
