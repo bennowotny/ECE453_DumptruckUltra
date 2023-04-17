@@ -100,7 +100,7 @@ INCLUDES=
 DEFINES=
 
 # Select softfp or hardfp floating point. Default is softfp.
-VFP_SELECT=
+VFP_SELECT=hardfp
 
 # Additional / custom C compiler flags.
 #
