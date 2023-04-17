@@ -1,9 +1,9 @@
-#include "../imu.hpp"
 #include "i2cBusManager.hpp"
 #include "imu.hpp"
 #include "proc_setup.hpp"
 #include <functional>
 #include <memory>
+
 
 void printAccelData(const Hardware::IMU::AccelerometerData &aData) {
     printf("AccelData:\n\tx %f\n\ty %f\n\tz %f\n\ttimestamp %f\n", aData.Ax, aData.Ay, aData.Ay, aData.Ats);
@@ -19,8 +19,8 @@ auto main() -> int {
     Hardware::Processor::setupProcessor();
 
     I2CBusManager::i2cPin_t i2cPins = {.sda = P9_1, .scl = P9_0};
-    I2CBusManager i2cBus(i2cPins);
-    IMU imu(std::make_shared<I2CBusManager>(i2cBus), printAccelData, printGyroData);
+    auto i2cBus(std::make_shared<I2CBusManager>(i2cPins));
+    auto imu(std::make_unique<IMU>(i2cBus, printAccelData, printGyroData));
 
     vTaskStartScheduler();
 

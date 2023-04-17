@@ -25,8 +25,8 @@ IMU::IMU(std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus,
       sendGyroData{std::move(sendGyroData)} {
 
     // Reset sensors
-    i2cBus->i2cWriteReg<1>(IMU_ADDR, CTRL1_XL, {0x00});
-    i2cBus->i2cWriteReg<1>(IMU_ADDR, CTRL2_G, {0x00});
+    this->i2cBus->i2cWriteReg<1>(IMU_ADDR, CTRL1_XL, {0x00});
+    this->i2cBus->i2cWriteReg<1>(IMU_ADDR, CTRL2_G, {0x00});
 
     // Set up interrupt callback
     cyhal_gpio_callback_data_t imuGetDataCallback =
@@ -42,31 +42,31 @@ IMU::IMU(std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus,
 
     // Disable I3C
     std::array<uint8_t, 1> dataToSend{XL_DISABLE_I3C};
-    i2cBus->i2cWriteReg<1>(IMU_ADDR, CTRL9_XL, dataToSend);
+    this->i2cBus->i2cWriteReg<1>(IMU_ADDR, CTRL9_XL, dataToSend);
 
     // Register address auto-incremented on multi-byte read by default
 
     // Enable block data update
     dataToSend[0] = SET_BLK_DATA_UPDATE;
-    i2cBus->i2cWriteReg<1>(IMU_ADDR, CTRL3_C, dataToSend);
+    this->i2cBus->i2cWriteReg<1>(IMU_ADDR, CTRL3_C, dataToSend);
 
     // Select FIFO Mode
     dataToSend[0] = CONT_MODE;
-    i2cBus->i2cWriteReg<1>(IMU_ADDR, FIFO_CTRL4, dataToSend);
+    this->i2cBus->i2cWriteReg<1>(IMU_ADDR, FIFO_CTRL4, dataToSend);
 
     // Set BDR counter threshold. Two register control this threshold. First reg
     // should always be 0 unless we need a threshold over 255.
     dataToSend[0] = CNT_BDR_TH;
-    i2cBus->i2cWriteReg<1>(IMU_ADDR, COUNTER_BDR_REG1, {0x00});
-    i2cBus->i2cWriteReg<1>(IMU_ADDR, COUNTER_BDR_REG2, dataToSend);
+    this->i2cBus->i2cWriteReg<1>(IMU_ADDR, COUNTER_BDR_REG1, {0x00});
+    this->i2cBus->i2cWriteReg<1>(IMU_ADDR, COUNTER_BDR_REG2, dataToSend);
 
     // Configure interrupt generation on IMU
     dataToSend[0] = EN_BDR_INT;
-    i2cBus->i2cWriteReg<1>(IMU_ADDR, INT1_CTRL, dataToSend);
+    this->i2cBus->i2cWriteReg<1>(IMU_ADDR, INT1_CTRL, dataToSend);
 
     // Check device ID
     std::array<uint8_t, 1> dataToRec{};
-    i2cBus->i2cReadReg<1>(IMU_ADDR, WHO_AM_I, dataToRec);
+    this->i2cBus->i2cReadReg(IMU_ADDR, WHO_AM_I, dataToRec);
     CY_ASSERT(dataToRec[0] == IMU_DEV_ID);
 
     // Create FreeRTOS task

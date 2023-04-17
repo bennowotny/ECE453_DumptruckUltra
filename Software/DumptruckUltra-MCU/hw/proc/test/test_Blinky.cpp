@@ -4,7 +4,7 @@
 auto main() -> int {
     Hardware::Processor::setupProcessor();
 
-    const auto blinky{std::make_unique<Hardware::Processor::FreeRTOSBlinky>(P5_5)};
+    const auto blinky{std::make_unique<Hardware::Processor::FreeRTOSBlinky>(P7_1)};
 
     vTaskStartScheduler();
 
