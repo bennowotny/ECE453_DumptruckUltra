@@ -38,9 +38,12 @@ void setup()
 void loop() 
 {
   //Set the initial positions of steering gears
-  Servo_0.write(90);
-  Servo_1.write(90 );
-  Servo_2.write(90);
+  //Servo_0.write(90);
+  Servo_0.write(200);
+  Servo_1.write(35);
+  //Servo_2.write(90);
+  Servo_2.write(120);
   Servo_3.write(170);
+  //Servo_3.write(190);
   while(1);
 }
