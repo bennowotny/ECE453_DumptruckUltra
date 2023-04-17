@@ -31,7 +31,7 @@ public:
      * One Byte Register Index
      */
     template <std::size_t N>
-    void i2cWriteReg(uint16_t devAddr, uint8_t reg, const std::array<uint8_t, N> &data) {
+    void i2cWrite1ByteReg(uint16_t devAddr, uint8_t reg, const std::array<uint8_t, N> &data) {
         // Acquire mutex
         // Write register
         std::array<uint8_t, N + 1> buf{};
@@ -55,7 +55,7 @@ public:
      * Two Byte Register Index
      */
     template <std::size_t N>
-    void i2cWriteReg(uint16_t devAddr, uint16_t reg, const std::array<uint8_t, N> &data) {
+    void i2cWrite2ByteReg(uint16_t devAddr, uint16_t reg, const std::array<uint8_t, N> &data) {
         // Acquire mutex
         // Write register
         std::array<uint8_t, N + 2> buf{};
@@ -80,7 +80,7 @@ public:
      * One Byte Register Index
      */
     template <std::size_t N>
-    void i2cReadReg(uint16_t devAddr, uint8_t reg, std::array<uint8_t, N> &data) {
+    void i2cRead1ByteReg(uint16_t devAddr, uint8_t reg, std::array<uint8_t, N> &data) {
         // Acquire mutex
         // Read register
         cy_rslt_t rslt = cyhal_i2c_master_write(
@@ -110,7 +110,7 @@ public:
      * Two Byte Register Index
      */
     template <std::size_t N>
-    void i2cReadReg(uint16_t devAddr, uint16_t reg, std::array<uint8_t, N> &data) {
+    void i2cRead2ByteReg(uint16_t devAddr, uint16_t reg, std::array<uint8_t, N> &data) {
         // Acquire mutex
         // Read register
         uint8_t arr[2] = {static_cast<uint8_t>((reg >> 8) & 0xFF), static_cast<uint8_t>(reg & 0xFF)};
