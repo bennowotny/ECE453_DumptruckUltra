@@ -13,7 +13,7 @@ namespace Pressure_Sensor {
 class Pressure {
 public:
     explicit Pressure(cyhal_gpio_t pin);
-    void read();
+    int32_t read();
     void free();
 
 private:

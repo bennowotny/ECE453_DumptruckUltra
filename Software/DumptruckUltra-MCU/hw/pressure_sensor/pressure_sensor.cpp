@@ -2,7 +2,9 @@
 #include "cy_result.h"
 #include "cyhal_adc.h"
 #include "pressure_sensor/pressure_sensor.hpp"
-#include <iostream>
+#include <cstdio>
+
+// using namespace std;
 
 namespace Hardware {
 namespace Pressure_Sensor {
@@ -19,10 +21,10 @@ Pressure::Pressure(cyhal_gpio_t pin) : adcHandle{},
     CY_ASSERT(CY_RSLT_SUCCESS == result);
 }
 
-void Pressure::read() {
+int32_t Pressure::read() {
     // Read ADC conversion result for corresponding ADC channel
     auto adc_out{cyhal_adc_read(&adc_chan_0_obj)};
-    std::cout << adc_out;
+    return adc_out;
 }
 
 void Pressure::free() {
