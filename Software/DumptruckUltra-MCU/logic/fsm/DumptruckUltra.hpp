@@ -11,7 +11,7 @@
 namespace Logic {
 namespace FSM {
 class DumptruckUltra {
-    enum class FSMStates {
+    enum class FSMState {
         INIT,
         DRIVE_TO_SEARCH,
         LOCAL_SEARCH,
@@ -23,12 +23,15 @@ class DumptruckUltra {
 
 public:
     DumptruckUltra();
-    void addToStateTable(FSMStates state, std::function<void()> stateAction);
+    void addToStateTable(FSMState state, std::function<void()> stateAction);
 
 private:
-    std::map<FSMStates, std::function<FSMStates()>> stateActionMap;
+    std::map<FSMState, std::function<FSMState()>> stateActionMap;
     auto fsmTask() -> void;
-    FSMStates currState;
+    FSMState currState;
+    TaskHandle_t fsmTaskHandle;
+
+    static constexpr FSMState INITIAL_STATE{FSMState::INIT};
 };
 } // namespace FSM
 } // namespace Logic
