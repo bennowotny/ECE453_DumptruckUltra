@@ -23,9 +23,11 @@ class DumptruckUltra {
 
 public:
     DumptruckUltra();
-    void addToStateTable(FSMState state, std::function<void()> stateAction);
+    void addToStateTable(FSMState state, std::function<FSMState()> stateAction);
 
 private:
+    // Each action function should return the next state
+    // Could be the same state as current if there is no state change
     std::map<FSMState, std::function<FSMState()>> stateActionMap;
     auto fsmTask() -> void;
     FSMState currState;

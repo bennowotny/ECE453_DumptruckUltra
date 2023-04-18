@@ -27,8 +27,8 @@ auto DumptruckUltra::fsmTask() -> void {
     currState = nextState;
 }
 
-void DumptruckUltra::addToStateTable(FSMState state, std::function<void()> stateAction) {
-    stateActionMap[state] = stateAction;
+void DumptruckUltra::addToStateTable(FSMState state, std::function<FSMState()> stateAction) {
+    stateActionMap[state] = std::move(stateAction);
 }
 } // namespace FSM
 } // namespace Logic
