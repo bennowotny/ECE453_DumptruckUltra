@@ -1,0 +1,3 @@
+https://github.com/ariwasch/OpenCV-Distance-Angle-Demo/blob/master/Vision.py
+https://stackoverflow.com/questions/50544727/distance-to-object-webcam-c920hd-or-use-opencv-calibrate-py
+https://github.com/freedomwebtech/hand-distance/blob/main/handdist.py
