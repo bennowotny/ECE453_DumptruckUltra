@@ -2,81 +2,20 @@
 FileName = MainBoard.GBR
 AutoAperture = True
 *************************************************************
-Generating : Top Layer
-      File : MainBoard.GTL
+Generating : Bottom Overlay
+      File : MainBoard.GBO
 
-    Adding Layer      : Top Layer
+    Adding Layer      : Bottom Overlay
 
     Adding Layer      : Mechanical 1
 
-    Adding Layer      : Multi-Layer
-
 
 Used DCodes :
+    D10
+    D11
     D12
+    D14
     D16
-    D17
-    D19
-    D20
-    D21
-    D22
-    D23
-    D24
-    D25
-    D26
-    D27
-    D28
-    D29
-    D30
-    D31
-    D32
-    D33
-    D34
-    D35
-    D36
-    D37
-    D38
-    D39
-    D40
-    D41
-    D42
-    D43
-    D44
-    D45
-    D46
-    D47
-    D48
-    D49
-    D50
-    D51
-    D52
-    D53
-    D65
-    D81
-    D82
-    D92
-    D93
-    D94
-    D97
-    D98
-    D99
-    D100
-    D101
-    D102
-    D103
-    D104
-    D105
-    D106
-    D107
-    D108
-    D109
-    D110
-    D111
-    D112
-    D113
-    D114
-    D115
-    D116
 *************************************************************
 
 *************************************************************
@@ -93,14 +32,10 @@ Generating : Bottom Paste
 
 
 Used DCodes :
+    D12
     D16
-    D17
-    D37
+    D22
     D41
-    D53
-    D117
-    D118
-    D119
     D120
     D121
     D122
@@ -111,26 +46,6 @@ Used DCodes :
     D127
     D128
     D129
-*************************************************************
-
-*************************************************************
-Generating : Top Overlay
-      File : MainBoard.GTO
-
-    Adding Layer      : Top Overlay
-
-    Adding Layer      : Mechanical 1
-
-
-Used DCodes :
-    D10
-    D11
-    D12
-    D13
-    D14
-    D15
-    D16
-    D17
 *************************************************************
 
 *************************************************************
@@ -147,11 +62,10 @@ Generating : Bottom Solder
 
 
 Used DCodes :
+    D12
     D16
-    D17
-    D37
-    D66
-    D72
+    D22
+    D67
     D73
     D74
     D75
@@ -176,147 +90,17 @@ Used DCodes :
     D94
     D95
     D96
-    D117
-    D118
-    D119
+    D97
     D120
-    D124
-    D125
-    D126
+    D121
+    D122
+    D123
     D129
     D130
     D131
     D132
     D133
     D134
-*************************************************************
-
-*************************************************************
-Generating : Top Paste
-      File : MainBoard.GTP
-
-    Adding Layer      : Top Paste
-
-    Adding Layer      : Mechanical 1
-
-    Adding Layer      : Top Layer
-
-    Adding Layer      : Multi-Layer
-
-
-Used DCodes :
-    D16
-    D17
-    D18
-    D19
-    D20
-    D21
-    D22
-    D23
-    D24
-    D25
-    D26
-    D27
-    D28
-    D29
-    D30
-    D31
-    D32
-    D33
-    D34
-    D35
-    D36
-    D37
-    D38
-    D39
-    D40
-    D41
-    D42
-    D43
-    D44
-    D45
-    D46
-    D47
-    D48
-    D49
-    D50
-    D51
-    D52
-    D53
-*************************************************************
-
-*************************************************************
-Generating : Bottom Overlay
-      File : MainBoard.GBO
-
-    Adding Layer      : Bottom Overlay
-
-    Adding Layer      : Mechanical 1
-
-
-Used DCodes :
-    D10
-    D11
-    D14
-    D16
-    D17
-*************************************************************
-
-*************************************************************
-Generating : Bottom Layer
-      File : MainBoard.GBL
-
-    Adding Layer      : Bottom Layer
-
-    Adding Layer      : Mechanical 1
-
-    Adding Layer      : Multi-Layer
-
-
-Used DCodes :
-    D12
-    D16
-    D17
-    D37
-    D41
-    D53
-    D81
-    D82
-    D92
-    D93
-    D94
-    D98
-    D99
-    D100
-    D101
-    D102
-    D103
-    D104
-    D105
-    D106
-    D107
-    D108
-    D109
-    D110
-    D111
-    D112
-    D113
-    D114
-    D115
-    D116
-    D117
-    D118
-    D119
-    D120
-    D121
-    D122
-    D123
-    D124
-    D125
-    D126
-    D127
-    D128
-    D129
 *************************************************************
 
 *************************************************************
@@ -333,25 +117,26 @@ Generating : Top Solder
 
 
 Used DCodes :
+    D12
     D16
-    D17
     D19
-    D20
-    D24
-    D30
+    D22
+    D26
+    D27
+    D28
+    D29
     D32
-    D33
-    D34
     D35
     D37
-    D39
+    D38
     D40
     D42
     D43
     D45
     D46
     D50
-    D52
+    D51
+    D53
     D54
     D55
     D56
@@ -395,5 +180,215 @@ Used DCodes :
     D94
     D95
     D96
+    D97
+*************************************************************
+
+*************************************************************
+Generating : Top Paste
+      File : MainBoard.GTP
+
+    Adding Layer      : Top Paste
+
+    Adding Layer      : Mechanical 1
+
+    Adding Layer      : Top Layer
+
+    Adding Layer      : Multi-Layer
+
+
+Used DCodes :
+    D12
+    D16
+    D17
+    D18
+    D19
+    D20
+    D21
+    D22
+    D23
+    D24
+    D25
+    D26
+    D27
+    D28
+    D29
+    D30
+    D31
+    D32
+    D33
+    D34
+    D35
+    D36
+    D37
+    D38
+    D39
+    D40
+    D41
+    D42
+    D43
+    D44
+    D45
+    D46
+    D47
+    D48
+    D49
+    D50
+    D51
+    D52
+    D53
+*************************************************************
+
+*************************************************************
+Generating : Top Overlay
+      File : MainBoard.GTO
+
+    Adding Layer      : Top Overlay
+
+    Adding Layer      : Mechanical 1
+
+
+Used DCodes :
+    D10
+    D11
+    D12
+    D13
+    D14
+    D15
+    D16
+*************************************************************
+
+*************************************************************
+Generating : Bottom Layer
+      File : MainBoard.GBL
+
+    Adding Layer      : Bottom Layer
+
+    Adding Layer      : Mechanical 1
+
+    Adding Layer      : Multi-Layer
+
+
+Used DCodes :
+    D12
+    D16
+    D22
+    D41
+    D84
+    D85
+    D93
+    D94
+    D96
+    D98
+    D99
+    D100
+    D101
+    D102
+    D103
+    D104
+    D105
+    D106
+    D107
+    D108
+    D109
+    D110
+    D111
+    D112
+    D113
+    D114
+    D115
+    D116
+    D117
+    D118
+    D119
+    D120
+    D121
+    D122
+    D123
+    D124
+    D125
+    D126
+    D127
+    D128
+    D129
+*************************************************************
+
+*************************************************************
+Generating : Top Layer
+      File : MainBoard.GTL
+
+    Adding Layer      : Top Layer
+
+    Adding Layer      : Mechanical 1
+
+    Adding Layer      : Multi-Layer
+
+
+Used DCodes :
+    D12
+    D16
+    D17
+    D18
+    D19
+    D20
+    D21
+    D22
+    D23
+    D24
+    D25
+    D26
+    D27
+    D28
+    D29
+    D30
+    D31
+    D32
+    D33
+    D34
+    D35
+    D36
+    D37
+    D38
+    D39
+    D40
+    D41
+    D42
+    D43
+    D44
+    D45
+    D46
+    D47
+    D48
+    D49
+    D50
+    D51
+    D52
+    D53
+    D84
+    D85
+    D93
+    D94
+    D96
+    D98
+    D99
+    D100
+    D101
+    D102
+    D103
+    D104
+    D105
+    D106
+    D107
+    D108
+    D109
+    D110
+    D111
+    D112
+    D113
+    D114
+    D115
+    D116
+    D117
+    D118
+    D119
 *************************************************************
 

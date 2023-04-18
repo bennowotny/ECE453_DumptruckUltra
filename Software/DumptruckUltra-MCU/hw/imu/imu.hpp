@@ -44,7 +44,7 @@ private:
     auto dataReadyCallback() -> void;
     auto imuTask() -> void;
 
-    static constexpr UBaseType_t IMU_TASK_PRIORITY{3};
+    static constexpr UBaseType_t IMU_TASK_PRIORITY{tskIDLE_PRIORITY + 2};
     static constexpr cyhal_gpio_t IMU_INT_PIN{P9_2};
     static constexpr uint8_t IMU_ADDR{0x6A};
 

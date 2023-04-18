@@ -6,22 +6,31 @@
 #include "cycfg_pins.h"
 #include "cyhal.h" // IWYU pragma: keep
 #include "task.h"  // IWYU pragma: keep
+#include <string>
+
 
 namespace Hardware {
 
 namespace Processor {
 constexpr cyhal_gpio_t MCU_RX_PI_TX(P5_0);
 constexpr cyhal_gpio_t MCU_TX_PI_RX(P5_1);
-constexpr cyhal_gpio_t MI_FORWARD(P5_2);
-constexpr cyhal_gpio_t Servo1_PWM(P5_3);
-constexpr cyhal_gpio_t M1_Backward(P5_4);
-constexpr cyhal_gpio_t Servo2_PWM(P5_5);
-constexpr cyhal_gpio_t M2_Forward(P5_6);
 
+constexpr cyhal_gpio_t MI_FORWARD(P5_2);
+constexpr cyhal_gpio_t M1_Backward(P5_4);
+constexpr cyhal_gpio_t M2_Forward(P5_6);
 constexpr cyhal_gpio_t M2_Backward(P6_2);
+
+constexpr cyhal_gpio_t Servo1_PWM(P5_3);
+constexpr cyhal_gpio_t Servo2_PWM(P5_5);
 constexpr cyhal_gpio_t Servo3_PWM(P6_3);
+constexpr cyhal_gpio_t Servo4_PWM(P10_1);
+constexpr cyhal_gpio_t Servo5_PWM(P10_3);
+constexpr cyhal_gpio_t Servo6_PWM(P10_5);
+constexpr cyhal_gpio_t Servo7_PWM(P12_7);
+
 constexpr cyhal_gpio_t MCU_RX_FTDI_TX(P6_4);
 constexpr cyhal_gpio_t MCU_TX_FTDI_RX(P6_5);
+
 // SWDIO already defined
 constexpr cyhal_gpio_t SWDCLK(P6_7);
 
@@ -30,27 +39,26 @@ constexpr cyhal_gpio_t PB_IN(P7_2);
 
 constexpr cyhal_gpio_t I2C_SCL(P9_0);
 constexpr cyhal_gpio_t I2C_SDA(P9_1);
+
 constexpr cyhal_gpio_t IMU_INT(P9_2);
+
 constexpr cyhal_gpio_t DIST_INT(P9_3);
 
 constexpr cyhal_gpio_t PressureSensorADC(P10_0);
-constexpr cyhal_gpio_t Servo4_PWM(P10_1);
-constexpr cyhal_gpio_t Servo5_PWM(P10_3);
-constexpr cyhal_gpio_t Servo6_PWM(P10_5);
-constexpr cyhal_gpio_t Servo7_PWM(P12_7);
 
 void setupProcessor();
 
 class FreeRTOSBlinky {
 public:
-    explicit FreeRTOSBlinky(cyhal_gpio_t blinkyPin);
+    explicit FreeRTOSBlinky(cyhal_gpio_t blinkyPin, uint32_t delayMs = 0, const char *taskName = BLINKY_TASK_NAME);
 
 private:
     [[noreturn]] void ledTask();
 
     const cyhal_gpio_t blinkyPin;
+    const uint32_t delayMs;
 
-    static constexpr auto BLINKY_TASK_NAME{"Blinky"};
+    static char const *const BLINKY_TASK_NAME;
     static constexpr uint32_t BLINKY_STACK_SIZE{configMINIMAL_STACK_SIZE};
     static constexpr uint32_t BLINKY_PRIORITY{tskIDLE_PRIORITY + 1};
 };
