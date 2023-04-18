@@ -11,17 +11,17 @@
 namespace Logic {
 namespace FSM {
 class DumptruckUltra {
+public:
     enum class FSMState {
         INIT,
         DRIVE_TO_SEARCH,
         LOCAL_SEARCH,
-        DISPENSE,
         APPROACH,
         PICKUP,
-        DRIVE_TO_START
+        DRIVE_TO_START,
+        DISPENSE
     };
 
-public:
     DumptruckUltra();
     void addToStateTable(FSMState state, std::function<FSMState()> stateAction);
 
