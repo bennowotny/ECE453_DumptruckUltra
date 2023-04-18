@@ -23,52 +23,54 @@ IMU::IMU(std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus,
     : i2cBus{std::move(i2cBus)},
       sendAccelData{std::move(sendAccelData)},
       sendGyroData{std::move(sendGyroData)} {
+    /*
+        // Reset sensors
+        this->i2cBus->i2cWriteReg<1>(IMU_ADDR, CTRL1_XL, {0x00});
+        this->i2cBus->i2cWriteReg<1>(IMU_ADDR, CTRL2_G, {0x00});
+    */
 
-    // Reset sensors
-    this->i2cBus->i2cWriteReg<1>(IMU_ADDR, CTRL1_XL, {0x00});
-    this->i2cBus->i2cWriteReg<1>(IMU_ADDR, CTRL2_G, {0x00});
+    // Set up interrupt pin
+    cy_rslt_t res;
+    res = cyhal_gpio_init(P5_6, CYHAL_GPIO_DIR_INPUT, CYHAL_GPIO_DRIVE_NONE, false);
+    CY_ASSERT(res == CY_RSLT_SUCCESS);
 
     // Set up interrupt callback
     cyhal_gpio_callback_data_t imuGetDataCallback =
         {
             .callback = [](void *param, cyhal_gpio_event_t event) -> void { static_cast<IMU *>(param)->dataReadyCallback(); },
             .callback_arg = this};
-    cyhal_gpio_register_callback(IMU_INT_PIN, &imuGetDataCallback);
+    cyhal_gpio_register_callback(P5_6, &imuGetDataCallback);
+    cyhal_gpio_enable_event(P5_6, CYHAL_GPIO_IRQ_FALL, 3, true);
+    /*
+        // Disable I3C
+        std::array<uint8_t, 1> dataToSend{XL_DISABLE_I3C};
+        this->i2cBus->i2cWriteReg<1>(IMU_ADDR, CTRL9_XL, dataToSend);
 
-    // Set up interrupt pin
-    cy_rslt_t res;
-    res = cyhal_gpio_init(IMU_INT_PIN, CYHAL_GPIO_DIR_INPUT, CYHAL_GPIO_DRIVE_NONE, false);
-    CY_ASSERT(res == CY_RSLT_SUCCESS);
+        // Register address auto-incremented on multi-byte read by default
 
-    // Disable I3C
-    std::array<uint8_t, 1> dataToSend{XL_DISABLE_I3C};
-    this->i2cBus->i2cWriteReg<1>(IMU_ADDR, CTRL9_XL, dataToSend);
+        // Enable block data update
+        dataToSend[0] = SET_BLK_DATA_UPDATE;
+        this->i2cBus->i2cWriteReg<1>(IMU_ADDR, CTRL3_C, dataToSend);
 
-    // Register address auto-incremented on multi-byte read by default
+        // Select FIFO Mode
+        dataToSend[0] = CONT_MODE;
+        this->i2cBus->i2cWriteReg<1>(IMU_ADDR, FIFO_CTRL4, dataToSend);
 
-    // Enable block data update
-    dataToSend[0] = SET_BLK_DATA_UPDATE;
-    this->i2cBus->i2cWriteReg<1>(IMU_ADDR, CTRL3_C, dataToSend);
+        // Set BDR counter threshold. Two register control this threshold. First reg
+        // should always be 0 unless we need a threshold over 255.
+        dataToSend[0] = CNT_BDR_TH;
+        this->i2cBus->i2cWriteReg<1>(IMU_ADDR, COUNTER_BDR_REG1, {0x00});
+        this->i2cBus->i2cWriteReg<1>(IMU_ADDR, COUNTER_BDR_REG2, dataToSend);
 
-    // Select FIFO Mode
-    dataToSend[0] = CONT_MODE;
-    this->i2cBus->i2cWriteReg<1>(IMU_ADDR, FIFO_CTRL4, dataToSend);
+        // Configure interrupt generation on IMU
+        dataToSend[0] = EN_BDR_INT;
+        this->i2cBus->i2cWriteReg<1>(IMU_ADDR, INT1_CTRL, dataToSend);
 
-    // Set BDR counter threshold. Two register control this threshold. First reg
-    // should always be 0 unless we need a threshold over 255.
-    dataToSend[0] = CNT_BDR_TH;
-    this->i2cBus->i2cWriteReg<1>(IMU_ADDR, COUNTER_BDR_REG1, {0x00});
-    this->i2cBus->i2cWriteReg<1>(IMU_ADDR, COUNTER_BDR_REG2, dataToSend);
-
-    // Configure interrupt generation on IMU
-    dataToSend[0] = EN_BDR_INT;
-    this->i2cBus->i2cWriteReg<1>(IMU_ADDR, INT1_CTRL, dataToSend);
-
-    // Check device ID
-    std::array<uint8_t, 1> dataToRec{};
-    this->i2cBus->i2cReadReg(IMU_ADDR, WHO_AM_I, dataToRec);
-    CY_ASSERT(dataToRec[0] == IMU_DEV_ID);
-
+        // Check device ID
+        std::array<uint8_t, 1> dataToRec{};
+        this->i2cBus->i2cReadReg(IMU_ADDR, WHO_AM_I, dataToRec);
+        CY_ASSERT(dataToRec[0] == IMU_DEV_ID);
+    */
     // Create FreeRTOS task
     xTaskCreate(
         [](void *params) -> void { static_cast<IMU *>(params)->imuTask(); },
@@ -80,6 +82,7 @@ IMU::IMU(std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus,
 }
 
 auto IMU::imuTask() -> void {
+    /*
     // Enable both the accelerometer and gyroscope
     // Set output data rate (ODR), scaling, and filtering
     std::array<uint8_t, 1> dataToSend{};
@@ -163,7 +166,8 @@ auto IMU::imuTask() -> void {
             }
 #endif
         }
-    }
+    }*/
+    vTaskDelay(portMAX_DELAY);
 }
 
 auto IMU::dataReadyCallback() -> void {
