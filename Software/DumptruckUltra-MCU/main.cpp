@@ -76,9 +76,9 @@ auto main() -> int {
 
     Logic::DrivingAlgorithm::DriveMotorLayout layout{
         .leftMotor = Hardware::Motors::Motor{
-            {.forwardPin = Hardware::Processor::M1_Forward, .backwardPin = Hardware::Processor::M1_Backward},
+            {.forwardPin = Hardware::Processor::M1_FORWARD, .backwardPin = Hardware::Processor::M1_BACKWARD},
             Hardware::Motors::MotorDirection::FORWARD}, // TODO: Pick pins
-        .rightMotor = Hardware::Motors::Motor{{.forwardPin = Hardware::Processor::M2_Forward, .backwardPin = Hardware::Processor::M2_Backward}, Hardware::Motors::MotorDirection::REVERSE}};
+        .rightMotor = Hardware::Motors::Motor{{.forwardPin = Hardware::Processor::M2_FORWARD, .backwardPin = Hardware::Processor::M2_FORWARD}, Hardware::Motors::MotorDirection::REVERSE}};
 
     auto drivingAlg{std::make_unique<Logic::DrivingAlgorithm::DrivingAlgorithm>(
         layout,
