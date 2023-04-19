@@ -8,14 +8,13 @@
 #include "task.h"  // IWYU pragma: keep
 #include <string>
 
-
 namespace Hardware {
 
 namespace Processor {
 constexpr cyhal_gpio_t MCU_RX_PI_TX(P5_0);
 constexpr cyhal_gpio_t MCU_TX_PI_RX(P5_1);
 
-constexpr cyhal_gpio_t MI_FORWARD(P5_2);
+constexpr cyhal_gpio_t M1_Forward(P5_2);
 constexpr cyhal_gpio_t M1_Backward(P5_4);
 constexpr cyhal_gpio_t M2_Forward(P5_6);
 constexpr cyhal_gpio_t M2_Backward(P6_2);

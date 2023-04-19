@@ -39,22 +39,79 @@
  * indemnify Cypress against all liability.
  *******************************************************************************/
 
+#include "DeadReckoning.hpp"
+#include "DistanceSensor.hpp"
 #include "DrivingAlgorithm.hpp"
 #include "DumptruckUltra.hpp"
+#include "cy_utils.h"
+#include "fsmStates.hpp"
 #include "hw/proc/proc_setup.hpp"
+#include "i2cBusManager.hpp"
+#include "imu.hpp"
+#include "proc_setup.hpp"
 #include <memory>
 
 auto main() -> int {
     Hardware::Processor::setupProcessor();
 
-    auto drivingAlg{std::make_unique<Logic::DrivingAlgorithm::DrivingAlgorithm>(nullptr)};
-    FSM::DumptruckUltra sm;
-    sm.addToStateTable(FSMStates state, [drivingAlg]() {
+    // Make all objects
+    // const auto blinkyLED{Hardware::Processor::FreeRTOSBlinky(Hardware::Processor::USER_LED, 0, "Blinky")};
 
-    })
+    Hardware::I2C::I2CBusManager::i2cPin_t i2cPins{
+        .sda = Hardware::Processor::I2C_SDA,
+        .scl = Hardware::Processor::I2C_SCL};
 
-        for (;;) {
-    }
+    auto i2cBus{std::make_shared<Hardware::I2C::I2CBusManager>(&i2cPins)};
+
+    auto deadReckoning{std::make_shared<Logic::DeadReckoning::DeadReckoning>()};
+
+    auto imu{std::make_unique<Hardware::IMU::IMU>(
+        i2cBus,
+        [deadReckoning](const Hardware::IMU::AccelerometerData &accelData) { deadReckoning->sendAccelerometerMessage(accelData); },
+        [deadReckoning](const Hardware::IMU::GyroscopeData &gyroData) { deadReckoning->sendGyroscopeMessage(gyroData); })};
+
+    auto distSensor{std::make_shared<Hardware::DistanceSensor::DistanceSensor>(
+        i2cBus,
+        0x52 >> 1)};
+
+    Logic::DrivingAlgorithm::DriveMotorLayout layout{
+        .leftMotor = Hardware::Motors::Motor{
+            {.forwardPin = Hardware::Processor::M1_Forward, .backwardPin = Hardware::Processor::M1_Backward},
+            Hardware::Motors::MotorDirection::FORWARD}, // TODO: Pick pins
+        .rightMotor = Hardware::Motors::Motor{{.forwardPin = Hardware::Processor::M2_Forward, .backwardPin = Hardware::Processor::M2_Backward}, Hardware::Motors::MotorDirection::REVERSE}};
+
+    auto drivingAlg{std::make_unique<Logic::DrivingAlgorithm::DrivingAlgorithm>(
+        layout,
+        [distSensor]() -> float { return distSensor->getDistanceMeters(); },
+        [deadReckoning]() -> Logic::DeadReckoning::Pose2D { return deadReckoning->getCurrentPose(); })};
+
+    // Create FSM and add states
+    auto dumptruckFSM = std::make_unique<Logic::FSM::DumptruckUltra>();
+    dumptruckFSM->addToStateTable(
+        Logic::FSM::DumptruckUltra::FSMState::INIT,
+        []() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::initStateAction(); });
+    dumptruckFSM->addToStateTable(
+        Logic::FSM::DumptruckUltra::FSMState::DRIVE_TO_SEARCH,
+        []() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::driveToSearchAction(); });
+    dumptruckFSM->addToStateTable(
+        Logic::FSM::DumptruckUltra::FSMState::LOCAL_SEARCH,
+        []() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::localSearchAction(); });
+    dumptruckFSM->addToStateTable(
+        Logic::FSM::DumptruckUltra::FSMState::APPROACH,
+        []() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::approachAction(); });
+    dumptruckFSM->addToStateTable(
+        Logic::FSM::DumptruckUltra::FSMState::PICKUP,
+        []() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::pickupAction(); });
+    dumptruckFSM->addToStateTable(
+        Logic::FSM::DumptruckUltra::FSMState::DRIVE_TO_START,
+        []() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::driveToStartAction(); });
+    dumptruckFSM->addToStateTable(
+        Logic::FSM::DumptruckUltra::FSMState::DISPENSE,
+        []() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::dispenseAction(); });
+
+    vTaskStartScheduler();
+
+    CY_ASSERT(0); // Should never reach this
 }
 
 /* [] END OF FILE */

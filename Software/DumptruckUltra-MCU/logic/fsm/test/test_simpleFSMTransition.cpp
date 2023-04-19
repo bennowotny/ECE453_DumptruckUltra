@@ -27,4 +27,6 @@ auto main() -> int {
     dumptruckFSM->addToStateTable(
         DumptruckUltra::FSMState::DISPENSE,
         []() -> DumptruckUltra::FSMState { return Logic::FSM::dispenseAction(); });
+
+    vTaskStartScheduler();
 }
