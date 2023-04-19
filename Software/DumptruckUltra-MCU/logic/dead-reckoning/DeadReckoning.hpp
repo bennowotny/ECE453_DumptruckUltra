@@ -14,7 +14,6 @@ struct Pose2D {
 
 class DeadReckoning {
 public:
-
     DeadReckoning();
 
     void sendAccelerometerMessage(const Hardware::IMU::AccelerometerData &msg);
@@ -25,8 +24,8 @@ public:
 
 private:
     Pose2D currentPosition;
-    
-    struct LinearVelocity2D{
+
+    struct LinearVelocity2D {
         float dx;
         float dy;
     };
