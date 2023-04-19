@@ -1,5 +1,3 @@
-
-
 #ifndef HW_PRESSURE_SENSOR_HPP_
 #define HW_PRESSURE_SENSOR_HPP_
 
@@ -8,20 +6,20 @@
 #include <cstdint>
 
 namespace Hardware {
-namespace Pressure_Sensor {
+namespace PressureSensor {
 
-class Pressure {
+class PressureSensor {
 public:
-    explicit Pressure(cyhal_gpio_t pin);
-    int32_t read();
-    void free();
+    explicit PressureSensor(cyhal_gpio_t pin);
+    auto read() -> int32_t;
+    auto isPressed() -> bool;
 
 private:
     cyhal_adc_t adcHandle;
     cyhal_adc_channel_t adc_chan_0_obj;
 };
 
-} // namespace Pressure_Sensor
+} // namespace PressureSensor
 } // namespace Hardware
 
 #endif
