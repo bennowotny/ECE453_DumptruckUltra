@@ -92,6 +92,34 @@ void inverse_kinematics_2(
 }
 
 
+
+// Function to calculate the inverse kinematics for a 3-link planar robot arm
+void inverseKinematicsTest(double L1, double L2, double L3, double D) {
+    // Assume the base of the robot arm is located at the origin (0,0)
+    double x = D;
+    double y = 0;
+
+    // Calculate the angle of the third joint using the law of cosines
+    double cosGamma = (x*x + y*y - L2*L2 - L3*L3) / (2 * L2 * L3);
+    double sinGamma = sqrt(1 - cosGamma*cosGamma);
+    double gamma = atan2(sinGamma, cosGamma);
+
+    // Calculate the angle of the second joint using the law of cosines
+    double cosBeta = (x*x + y*y + L2*L2 - L3*L3) / (2 * L2 * sqrt(x*x + y*y));
+    double sinBeta = sqrt(1 - cosBeta*cosBeta);
+    double beta = atan2(sinBeta, cosBeta);
+
+    // Calculate the angle of the first joint using trigonometry
+    double alpha = atan2(y, x) - atan2(L3*sin(gamma), L2 + L3*cos(gamma));
+
+    // Convert the angles to degrees and print the results
+    double alphaDeg = alpha * 180 / M_PI;
+    double betaDeg = beta * 180 / M_PI;
+    double gammaDeg = gamma * 180 / M_PI;
+    printf("Joint angles: %f %f %f\n", alphaDeg, betaDeg, gammaDeg);
+}
+
+
 void forwardKinematics(double theta1, double theta2, double theta3, double &x, double &y, double &z) {
     // Calculate homogeneous transformation matrices
     double T01[4][4] = {{cos(theta1), -sin(theta1), 0, 0},
@@ -142,12 +170,13 @@ void forwardKinematics(double theta1, double theta2, double theta3, double &x, d
 
 
 int main(){
-    double x = 2.0;
-    double y = 1.0;
-    double z = 1.5;
-    double L1 = 1.0;
-    double L2 = 2.0;
-    double L3 = 1.5;
+    double x = 50;      // 40 mm
+    double y = 19.6;    // 1.96 cm
+    double z = 19.6;    // 1.96 cm
+    // double L1 = 60.0;   // 6.0 cm
+    double L1 = 94.0;   // 9.4 cm (from ground)
+    double L2 = 97.0;   // 9.7 cm
+    double L3 = 54.0;   // 5.4 cm        
 
     // Forward kinematics
     double theta1 = 0.0;
@@ -157,18 +186,42 @@ int main(){
     double theta2_prime = 0.0;
     double theta3_prime = 0.0;
     inverse_kinematics(x, y, z, L1, L2, L3, theta1, theta2, theta3);
+    theta1 = theta1 * 180 / M_PI;
+    theta2 = theta2 * 180 / M_PI;
+    theta3 = theta3 * 180 / M_PI;
+
     inverse_kinematics_2(x, y, z, L1, L2, L3, theta1_prime, theta2_prime, theta3_prime);
+    theta1_prime = theta1_prime * 180 / M_PI;
+    theta2_prime = theta2_prime * 180 / M_PI;
+    theta3_prime = theta3_prime * 180 / M_PI;
+
+
+
+    L1 = 9.4;
+    L2 = 9.7;
+    L3 = 5.4;
+    x = 6.5;
+    inverseKinematicsTest(L1, L2, L3, x);
+
+    printf("====================================\n");
+    printf("Theta 1: %f %f\n", theta1, theta1_prime);
+    printf("Theta 2: %f %f\n", theta2, theta2_prime);
+    printf("Theta 3: %f %f\n", theta3, theta3_prime);
+    printf("====================================\n");
+
 
     double px = L1*cos(theta1) + L2*cos(theta1)*cos(theta2) - L2*sin(theta1)*sin(theta2)*cos(theta3) + L3*(cos(theta1)*cos(theta2)*cos(theta3) - sin(theta1)*sin(theta3));
     double py = L1*sin(theta1) + L2*cos(theta2)*sin(theta1) - L2*cos(theta1)*sin(theta2)*cos(theta3) + L3*(cos(theta2)*sin(theta1)*cos(theta3) + cos(theta1)*sin(theta3));
     double pz = L1 + L2*sin(theta2)*sin(theta3) + L2*cos(theta2)*cos(theta3) + L3*sin(theta2)*cos(theta3);
-    double px_prime = L1*cos(theta1) + L2*cos(theta1)*cos(theta2) - L2*sin(theta1)*sin(theta2)*cos(theta3) + L3*(cos(theta1)*cos(theta2)*cos(theta3) - sin(theta1)*sin(theta3));
-    double py_prime = L1*sin(theta1) + L2*cos(theta2)*sin(theta1) - L2*cos(theta1)*sin(theta2)*cos(theta3) + L3*(cos(theta2)*sin(theta1)*cos(theta3) + cos(theta1)*sin(theta3));
-    double pz_prime = L1 + L2*sin(theta2)*sin(theta3) + L2*cos(theta2)*cos(theta3) + L3*sin(theta2)*cos(theta3);
-    printf("====================================");
-    printf("x0: %f, y0: %f, z0: %f\n", x, y, z);
-    printf("x: %f, y: %f, z: %f\n", px, py, pz);
-    printf("x': %f, y': %f, z': %f", px_prime, py_prime, pz_prime);
+    double px_prime = L1*cos(theta1_prime) + L2*cos(theta1_prime)*cos(theta2_prime) - L2*sin(theta1_prime)*sin(theta2_prime)*cos(theta3_prime) + L3*(cos(theta1_prime)*cos(theta2_prime)*cos(theta3_prime) - sin(theta1_prime)*sin(theta3_prime));
+    double py_prime = L1*sin(theta1_prime) + L2*cos(theta2_prime)*sin(theta1_prime) - L2*cos(theta1_prime)*sin(theta2_prime)*cos(theta3_prime) + L3*(cos(theta2_prime)*sin(theta1_prime)*cos(theta3_prime) + cos(theta1_prime)*sin(theta3_prime));
+    double pz_prime = L1 + L2*sin(theta2_prime)*sin(theta3_prime) + L2*cos(theta2_prime)*cos(theta3_prime) + L3*sin(theta2_prime)*cos(theta3_prime);
+    printf("====================================\n");
+    printf("Initial: x0: %f\n, y0: %f\n, z0: %f\n", x, y, z);
+    printf("====================================\n");
+    printf("First: x: %f\n, y: %f\n, z: %f\n", px, py, pz);
+    printf("====================================\n");
+    printf("Second: x': %f\n, y': %f\n, z': %f\n", px_prime, py_prime, pz_prime);
     printf("====================================");
 
     return 0;
