@@ -43,11 +43,14 @@
 #include "DistanceSensor.hpp"
 #include "DrivingAlgorithm.hpp"
 #include "DumptruckUltra.hpp"
+#include "Servo.hpp"
+#include "arm-inverse-kinematics/ArmControl.hpp"
 #include "cy_utils.h"
 #include "fsmStates.hpp"
 #include "hw/proc/proc_setup.hpp"
 #include "i2cBusManager.hpp"
 #include "imu.hpp"
+#include "pressure_sensor/pressure_sensor.hpp"
 #include "proc_setup.hpp"
 #include <memory>
 
@@ -74,16 +77,28 @@ auto main() -> int {
         i2cBus,
         0x52 >> 1)};
 
-    Logic::DrivingAlgorithm::DriveMotorLayout layout{
+    Logic::DrivingAlgorithm::DriveMotorLayout driveLayout{
         .leftMotor = Hardware::Motors::Motor{
             {.forwardPin = Hardware::Processor::M1_FORWARD, .backwardPin = Hardware::Processor::M1_BACKWARD},
             Hardware::Motors::MotorDirection::FORWARD}, // TODO: Pick pins
         .rightMotor = Hardware::Motors::Motor{{.forwardPin = Hardware::Processor::M2_FORWARD, .backwardPin = Hardware::Processor::M2_FORWARD}, Hardware::Motors::MotorDirection::REVERSE}};
 
     auto drivingAlg{std::make_unique<Logic::DrivingAlgorithm::DrivingAlgorithm>(
-        layout,
+        driveLayout,
         [distSensor]() -> float { return distSensor->getDistanceMeters(); },
         [deadReckoning]() -> Logic::DeadReckoning::Pose2D { return deadReckoning->getCurrentPose(); })};
+
+    auto pressureSensor{std::make_shared<Hardware::PressureSensor::PressureSensor>(Hardware::Processor::PRESSURE_SENSOR_ADC)};
+
+    Logic::Arm::ArmLayout armLayout{
+        .shoulder = Hardware::Servos::Servo{Hardware::Processor::SERVO1_PWM},
+        .elbow = Hardware::Servos::Servo{Hardware::Processor::SERVO2_PWM},
+        .wrist = Hardware::Servos::Servo{Hardware::Processor::SERVO3_PWM},
+        .claw = Hardware::Servos::Servo{Hardware::Processor::SERVO4_PWM}};
+
+    auto arm{std::make_unique<Logic::Arm::ArmControl>(
+        armLayout,
+        [pressureSensor]() -> bool { return pressureSensor->isPressed(); })};
 
     // Create FSM and add states
     auto dumptruckFSM = std::make_unique<Logic::FSM::DumptruckUltra>();
