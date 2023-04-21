@@ -33,13 +33,15 @@ class IMU {
 public:
     explicit IMU(std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus,
                  std::function<void(const AccelerometerData &)> sendAccelData,
-                 std::function<void(const GyroscopeData &)> sendGyroData);
+                 std::function<void(const GyroscopeData &)> sendGyroData,
+                 std::function<void(uint8_t)> printError);
 
 private:
     TaskHandle_t imuTaskHandle;
     const std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus;
     const std::function<void(AccelerometerData &)> sendAccelData;
     const std::function<void(GyroscopeData &)> sendGyroData;
+    const std::function<void(uint8_t)> printError;
 
     auto dataReadyCallback() -> void;
     auto imuTask() -> void;
@@ -52,6 +54,7 @@ private:
     static constexpr uint8_t CTRL2_G{0x11};
     static constexpr uint8_t CTRL9_XL{0x18};
     static constexpr uint8_t CTRL3_C{0x12};
+    static constexpr uint8_t FIFO_CTRL3{0x09};
     static constexpr uint8_t FIFO_CTRL4{0x0A};
     static constexpr uint8_t COUNTER_BDR_REG1{0x0B};
     static constexpr uint8_t COUNTER_BDR_REG2{0x0C};
@@ -64,6 +67,7 @@ private:
 
     static constexpr uint8_t XL_CTRL{0x40};
     static constexpr uint8_t G_CTRL{0x4C};
+    static constexpr uint8_t FIFO_ODR{0x44};
     static constexpr uint8_t XL_DISABLE_I3C{0xE2};
     static constexpr uint8_t SET_BLK_DATA_UPDATE{0x44};
     static constexpr uint8_t FIFO_MODE{0x01};

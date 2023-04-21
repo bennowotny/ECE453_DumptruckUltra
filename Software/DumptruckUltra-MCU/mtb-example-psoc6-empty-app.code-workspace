@@ -1,12 +1,12 @@
 {
-    "folders": [
-        {
-            "path": "."
-        },
+	"folders": [
+		{
+			"path": "."
+		},
         {
             "path": "../mtb_shared"
         }
-    ],
+	],
     "settings": {
         //mtb//  If this project will be shared with multiple users, the
         //mtb//  modustoolbox.toolsPath property must be placed in user settings
@@ -17,23 +17,8 @@
         //mtb//      macOS  : $HOME/Library/Application Support/Code/User/settings.json
         //mtb//      Linux  : $HOME/.config/Code/User/settings.json
         //mtb//
-        "modustoolbox.toolsPath": "${env:CY_TOOLS_PATHS}",
+        "modustoolbox.toolsPath": "C:/Users/surao/ModusToolbox/tools_2.4/",
         "cortex-debug.armToolchainPath": "${config:modustoolbox.toolsPath}/gcc/bin",
-        "cortex-debug.openocdPath": "${config:modustoolbox.toolsPath}/openocd/bin/openocd",
-        "files.associations": {
-            "cstdint": "c"
-        },
-        "clangd.arguments": [
-            "--query-driver=${env:CY_TOOLS_PATHS}gcc\\bin\\arm-none-eabi-g++"
-        ],
-        "C_Cpp.intelliSenseEngine": "disabled",
-        "editor.formatOnSave": true
-    },
-    "extensions": {
-        "recommendations": [
-            "llvm-vs-code-extensions.vscode-clangd",
-            "marus25.cortex-debug",
-            "ms-vscode.cpptools-extension-pack"
-        ]
+        "cortex-debug.openocdPath": "${config:modustoolbox.toolsPath}/openocd/bin/openocd"
     }
 }
