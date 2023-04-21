@@ -2,7 +2,6 @@
 #include "cyhal_psoc6_01_43_smt.h"
 #include "hw/pressure_sensor/pressure_sensor.hpp"
 #include "proc_setup.hpp"
-#include <iostream>
 
 using namespace std;
 
@@ -15,5 +14,5 @@ int main() {
 
     // Setup ADC
     PressureSensor adc(P10_0);
-    cout << "ADC Reading: " << adc.read() + "\r\n";
+    printf("ADC Reading: %d\r\n", adc.read());
 }
