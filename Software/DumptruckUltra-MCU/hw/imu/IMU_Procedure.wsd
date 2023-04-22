@@ -1,22 +1,28 @@
 @startuml IMUFlow
-(*) --> "Query WHO_AM_I" as whoami
-whoami --> "Configure Interrupt" as conf_int
-conf_int --> "Disable I3C" as no_i3c
-no_i3c --> "Enable autoincrement" as autoinc
-autoinc --> "Enable BDU" as bdu
-bdu --> "Enable XL and G" as sense_enable
-sense_enable --> "Set XL and G scale" as sense_scale
-sense_scale --> "Set Batch Data Rate (BDR) on XL and G" as sense_batch_rate
-sense_batch_rate --> "Configure BYPASS FIFO (clear data)" as fifo_clear
-fifo_clear --> "Configure FIFO WTM Interrupt" as fifo_int
-fifo_int --> "Set FIFO WTM Level" as fifo_wtm
-fifo_wtm --> "Configure CONTINUOUS FIFO" as fifo_start
+(*) --> "Constructor Call" as call
+
+partition Constructor {
+    call --> "Query WHO_AM_I" as whoami
+    whoami --> "Configure Interrupt" as conf_int
+    conf_int --> "Disable I3C" as no_i3c
+    no_i3c --> "Enable autoincrement" as autoinc
+    autoinc --> "Enable BDU" as bdu
+    bdu --> "Enable XL and G" as sense_enable
+    sense_enable --> "Set XL and G scale" as sense_scale
+    sense_scale --> "Set Batch Data Rate (BDR) on XL and G" as sense_batch_rate
+    sense_batch_rate --> "Configure BYPASS FIFO (clear data)" as fifo_clear
+    fifo_clear --> "Configure FIFO WTM Interrupt" as fifo_int
+    fifo_int --> "Set FIFO WTM Level" as fifo_wtm
+    fifo_wtm --> "Configure CONTINUOUS FIFO" as fifo_start
+}
+
 fifo_start --> "Wait" as wait
 if "Interrupt received?" then
 -->[true] "Enter ISR" as isr_start
 else
 -->[false] wait
 endif
+partition ISR/Task {
 isr_start --> "Get FIFO sample count" as fifo_count
 if "Read all samples?" as check then
 -->[true] wait
@@ -25,6 +31,11 @@ else
 endif
 tag --> "Get raw FIFO axes" as fifo_read
 fifo_read --> "Multiply against sensitivity" as mult
+note left
+    Maybe cache this value, since we 
+    aren't dynamically changing the scaling
+end note
 mult --> "Dispatch appropriate message" as dispatch
 dispatch --> check
+}
 @enduml
