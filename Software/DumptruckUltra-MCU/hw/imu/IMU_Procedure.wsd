@@ -7,8 +7,8 @@ partition Constructor {
     conf_int --> "Disable I3C" as no_i3c
     no_i3c --> "Enable autoincrement" as autoinc
     autoinc --> "Enable BDU" as bdu
-    bdu --> "Enable XL and G" as sense_enable
-    sense_enable --> "Set XL and G scale" as sense_scale
+    bdu --> "Set XL and G scale" as sense_enable
+    sense_enable --> "Enable XL and G w/ ODR" as sense_scale
     sense_scale --> "Set Batch Data Rate (BDR) on XL and G" as sense_batch_rate
     sense_batch_rate --> "Configure BYPASS FIFO (clear data)" as fifo_clear
     fifo_clear --> "Configure FIFO WTM Interrupt" as fifo_int
