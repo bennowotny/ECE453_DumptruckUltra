@@ -90,7 +90,7 @@ DISABLE_COMPONENTS=
 # by default, or otherwise not found by the build system.
 # TEAM03: Change this line to specify which file has the main you want to run
 # DEFAULT: Use main.cpp
-SOURCES=hw/proc/test/test_Blinky.cpp
+SOURCES=main.cpp
 
 # Like SOURCES, but for include directories. Value should be paths to
 # directories (without a leading -I).
@@ -100,7 +100,7 @@ INCLUDES=
 DEFINES=
 
 # Select softfp or hardfp floating point. Default is softfp.
-VFP_SELECT=
+VFP_SELECT=hardfp
 
 # Additional / custom C compiler flags.
 #
