@@ -9,11 +9,18 @@ from tflite_support.task import vision
 import utils
 import serial
 
-from distance_sampler import DistanceSampler, DistanceSampler2
+from distance_sampler import DistanceSampler2
 
 
-def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
-        enable_edgetpu: bool, visualize_image: bool) -> None:
+def run(
+    model: str,
+    camera_id: int,
+    width: int,
+    height: int,
+    num_threads: int,
+    enable_edgetpu: bool,
+    visualize_image: bool
+) -> None:
 
   # Variables to calculate FPS
   counter, fps = 0, 0
@@ -43,12 +50,13 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
   knownDistance = 50      # in mm
   absoluteWidth = 49.784  # 1.96 in
   absoluteHeight = 49.784 # 1.96 in
-  distanceSampler2 = DistanceSampler2(
+  distanceSampler = DistanceSampler2(
         float(pixel_size),
         float(knownDistance),
         float(absoluteWidth),
         float(absoluteHeight)
     )
+
 
   # Continuously capture images from the camera and run inference
   while cap.isOpened():
@@ -74,7 +82,7 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
         object_class = detection_object.categories[0].category_name
         print(f'x,y,w,h,object_class: {x,y,w,h,object_class}')
         bbox_height = h-y
-        distance = distanceSampler2.getDistance(bbox_height)
+        distance = distanceSampler.getDistance(bbox_height)
         print(f'Estimated distance: {distance}')
 
     if visualize_image:
