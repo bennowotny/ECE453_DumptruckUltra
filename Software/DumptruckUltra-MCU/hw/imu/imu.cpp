@@ -106,7 +106,7 @@ auto IMU::imuTask() -> void {
         i2cBus->i2cRead1ByteReg<1>(IMU_ADDR, FIFO_STATUS1, dataToRec);
         CY_ASSERT(dataToRec[0] >= CNT_BDR_TH);
         numDataSamples = dataToRec[0];
-#ifdef DEBUG
+#if 0
         if (dataToRec[0] > 128)
             printf("IMU:: Unread data in IMU FIFO getting large: %d data points", dataToRec[0]);
 #endif
@@ -157,7 +157,7 @@ auto IMU::imuTask() -> void {
                 // Send data to other task
                 sendAccelData(ad);
             }
-#ifdef DEBUG
+#if 0
             else {
                 printf("IMU:: Other tag received! %x", dataToRec[0]);
             }

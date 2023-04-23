@@ -12,19 +12,16 @@
 #include "cybsp.h"
 #include "cyhal.h"
 #include <array>
-#include <cstddef>
-#include <cstdio>
 
 namespace Hardware {
 namespace I2C {
+struct i2cPin_t {
+    cyhal_gpio_t sda;
+    cyhal_gpio_t scl;
+};
 
 class I2CBusManager {
 public:
-    struct i2cPin_t {
-        cyhal_gpio_t sda;
-        cyhal_gpio_t scl;
-    };
-
     I2CBusManager(const i2cPin_t &i2cPins);
 
     /**
