@@ -7,11 +7,11 @@
 #include <memory>
 
 void printAccelData(const Hardware::IMU::AccelerometerData &aData) {
-    printf("AccelData:\r\n\tx %f\r\n\ty %f\r\n\tz %f\r\n\ttimestamp %f\r\n", aData.Ax, aData.Ay, aData.Az, aData.Ats);
+    // printf("AccelData:\r\n\tx %f\r\n\ty %f\r\n\tz %f\r\n\ttimestamp %f\r\n", aData.Ax, aData.Ay, aData.Az, aData.Ats);
 }
 
 void printGyroData(const Hardware::IMU::GyroscopeData &gData) {
-    printf("GyroData:\r\n\tx %f\r\n\ty %f\r\n\tz %f\r\n\ttimestamp %f\r\n", gData.Gx, gData.Gy, gData.Gz, gData.Gts);
+    // printf("GyroData:\r\n\tx %f\r\n\ty %f\r\n\tz %f\r\n\ttimestamp %f\r\n", gData.Gx, gData.Gy, gData.Gz, gData.Gts);
 }
 
 auto main() -> int {

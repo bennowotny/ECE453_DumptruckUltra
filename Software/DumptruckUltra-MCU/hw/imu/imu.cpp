@@ -50,6 +50,9 @@ IMU::IMU(std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus,
     // Configure BYPASS FIFO (clear data)
     this->i2cBus->i2cWrite1ByteReg<1>(IMU_ADDR, FIFO_CTRL4, {0x00});
 
+    // FIXME: DEBUG timing setup
+    cyhal_gpio_init(P12_6, CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, false);
+
     // Create FreeRTOS task
     xTaskCreate(
         [](void *params) -> void { static_cast<IMU *>(params)->imuTask(); },
@@ -83,6 +86,8 @@ auto IMU::imuTask() -> void {
     while (true) {
         // Trigger an IMU read every READ_INTERVAL_TICKS ticks
         vTaskDelayUntil(&lastWakeTime, READ_INTERVAL_TICKS);
+        // DEBUG: Timing start
+        cyhal_gpio_toggle(P12_6);
 
         // Get timestamp
         i2cBus->i2cRead1ByteReg(IMU_ADDR, TIMESTAMP_REGS, rawTimestamp);
@@ -122,6 +127,8 @@ auto IMU::imuTask() -> void {
 
         // Update last timestamp
         lastTimestamp = timestampFloat;
+        // DEBUG: Timing end
+        cyhal_gpio_toggle(P12_6);
     }
 }
 } // namespace IMU
