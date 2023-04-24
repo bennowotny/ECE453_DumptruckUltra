@@ -70,7 +70,7 @@ auto main() -> int {
     /*
     auto imu(std::make_unique<IMU>(i2cBus, printAccelData, printGyroData));
 
-     vTaskStartScheduler();*/
+    vTaskStartScheduler();*/
 
     // // Query WHO_AM_I
     // std::array<uint8_t, 1> dataToRec{};
