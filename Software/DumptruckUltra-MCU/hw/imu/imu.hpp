@@ -109,7 +109,7 @@ private:
     static constexpr float GYRO_SCALE{70.0F / 1000.0F};
     static constexpr float ACCEL_SCALE{9.81F * 0.061F / 1000.0F};
 
-    static constexpr TickType_t READ_INTERVAL_TICKS{pdMS_TO_TICKS(10)};
+    static constexpr uint8_t READ_INTERVAL_MS{10};
 };
 } // namespace IMU
 } // namespace Hardware

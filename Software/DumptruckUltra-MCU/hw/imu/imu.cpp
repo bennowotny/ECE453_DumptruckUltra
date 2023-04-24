@@ -70,14 +70,6 @@ auto IMU::imuTask() -> void {
 
     std::array<int16_t, 3> xlData{};
     std::array<int16_t, 3> gData{};
-    uint32_t timestampTicks{0x00000000};
-    float timestampFloat{0.0F};
-
-    // Initialize last timestamp
-    float lastTimestamp{0.0F};
-    i2cBus->i2cRead1ByteReg(IMU_ADDR, TIMESTAMP_REGS, rawTimestamp);
-    timestampTicks = (rawTimestamp[0] << 24) | (rawTimestamp[1] << 16) | (rawTimestamp[2] << 8) | rawTimestamp[3];
-    lastTimestamp = static_cast<float>(timestampTicks) / TIMESTAMP_RES;
 
     // Initialize last wake up time
     TickType_t lastWakeTime = xTaskGetTickCount();
@@ -85,14 +77,9 @@ auto IMU::imuTask() -> void {
     // Get data when woken up
     while (true) {
         // Trigger an IMU read every READ_INTERVAL_TICKS ticks
-        vTaskDelayUntil(&lastWakeTime, READ_INTERVAL_TICKS);
+        vTaskDelayUntil(&lastWakeTime, pdMS_TO_TICKS(READ_INTERVAL_MS));
         // DEBUG: Timing start
         cyhal_gpio_toggle(P12_6);
-
-        // Get timestamp
-        i2cBus->i2cRead1ByteReg(IMU_ADDR, TIMESTAMP_REGS, rawTimestamp);
-        timestampTicks = (rawTimestamp[0] << 24) | (rawTimestamp[1] << 16) | (rawTimestamp[2] << 8) | rawTimestamp[3];
-        timestampFloat = static_cast<float>(timestampTicks) / TIMESTAMP_RES;
 
         // Read all sensor data
         i2cBus->i2cRead1ByteReg(IMU_ADDR, SENSOR_DATA_BEGIN, rawSensorData);
@@ -107,7 +94,7 @@ auto IMU::imuTask() -> void {
             .Gx = static_cast<float>(gData[0]) * GYRO_SCALE,
             .Gy = static_cast<float>(gData[1]) * GYRO_SCALE,
             .Gz = static_cast<float>(gData[2]) * GYRO_SCALE,
-            .Gts = timestampFloat - lastTimestamp};
+            .Gts = READ_INTERVAL_MS};
 
         sendGyroData(gd);
 
@@ -121,12 +108,10 @@ auto IMU::imuTask() -> void {
             .Ax = static_cast<float>(xlData[0]) * ACCEL_SCALE,
             .Ay = static_cast<float>(xlData[1]) * ACCEL_SCALE,
             .Az = static_cast<float>(xlData[2]) * ACCEL_SCALE,
-            .Ats = timestampFloat - lastTimestamp};
+            .Ats = READ_INTERVAL_MS};
 
         sendAccelData(ad);
 
-        // Update last timestamp
-        lastTimestamp = timestampFloat;
         // DEBUG: Timing end
         cyhal_gpio_toggle(P12_6);
     }
