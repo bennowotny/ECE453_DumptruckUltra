@@ -3,4 +3,5 @@ numpy>=1.20.0  			# Match OpenCV version
 opencv-python~=4.5.3.56
 tflite-support>=0.4.2
 protobuf>=3.18.0,<4
+serial
 #tensorflow~=1.14.0	 	# Might not need if we just use tflite-runtime?

@@ -21,6 +21,9 @@ def run(
     enable_edgetpu: bool,
     visualize_image: bool
 ) -> None:
+  
+  ser = serial.Serial('/dev/ttyACM0',9600,timeout=1)
+  ser.reset_input_buffer()    # flush
 
   # Variables to calculate FPS
   counter, fps = 0, 0
@@ -80,10 +83,18 @@ def run(
         bounding_box = detection_object.bounding_box
         (x,y,w,h) = bounding_box.origin_x, bounding_box.origin_y, bounding_box.width, bounding_box.height
         object_class = detection_object.categories[0].category_name
-        print(f'x,y,w,h,object_class: {x,y,w,h,object_class}')
-        bbox_height = h-y
-        distance = distanceSampler.getDistance(bbox_height)
-        print(f'Estimated distance: {distance}')
+        #print(f'x,y,w,h,object_class: {x,y,w,h,object_class}')
+        ser.write(b'{object_class},{x},{y},{w},{h}')
+        ser.write(b'x,y,w,h,d,object_class: ')
+        ser.write(max(x,0))     # bbox W can be negative
+        ser.write(max(y,0))     # bbox H can be negative
+        ser.write(w)
+        ser.write(h)
+        distance = distanceSampler.getDistance(y)
+        ser.write(distance)
+        ser.write(object_class.encode('utf-8'))
+        ser.write(b'\n')
+        # line = ser.readline().decode('utf-8').rstrip()
 
     if visualize_image:
 
