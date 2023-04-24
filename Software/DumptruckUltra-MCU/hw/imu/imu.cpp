@@ -27,34 +27,34 @@ IMU::IMU(std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus,
 
     // Query WHO_AM_I
     std::array<uint8_t, 1> dataToRec{};
-    i2cBus->i2cRead1ByteReg(IMU_ADDR, WHO_AM_I, dataToRec);
+    this->i2cBus->i2cRead1ByteReg(IMU_ADDR, WHO_AM_I, dataToRec);
     CY_ASSERT(dataToRec[0] == IMU_DEV_ID);
 
     // Disable I3C
     std::array<uint8_t, 1> dataToSend;
     dataToSend[0] = XL_DISABLE_I3C;
-    i2cBus->i2cWrite1ByteReg<1>(IMU_ADDR, CTRL9_XL, dataToSend);
+    this->i2cBus->i2cWrite1ByteReg<1>(IMU_ADDR, CTRL9_XL, dataToSend);
 
     // Enable block data update && autoincrement on read/write
     dataToSend[0] = SET_BLK_DATA_UPDATE | SET_AUTO_INCREMENT;
-    i2cBus->i2cWrite1ByteReg<1>(IMU_ADDR, CTRL3_C, dataToSend);
+    this->i2cBus->i2cWrite1ByteReg<1>(IMU_ADDR, CTRL3_C, dataToSend);
 
     // Set XL and G scale
     // Enable XL and G w/ ODR
     dataToSend[0] = XL_CTRL;
-    i2cBus->i2cWrite1ByteReg<1>(IMU_ADDR, CTRL1_XL, dataToSend);
+    this->i2cBus->i2cWrite1ByteReg<1>(IMU_ADDR, CTRL1_XL, dataToSend);
 
     dataToSend[0] = G_CTRL;
-    i2cBus->i2cWrite1ByteReg<1>(IMU_ADDR, CTRL2_G, dataToSend);
+    this->i2cBus->i2cWrite1ByteReg<1>(IMU_ADDR, CTRL2_G, dataToSend);
 
     // Configure BYPASS FIFO (clear data)
-    i2cBus->i2cWrite1ByteReg<1>(IMU_ADDR, FIFO_CTRL4, {0x00});
+    this->i2cBus->i2cWrite1ByteReg<1>(IMU_ADDR, FIFO_CTRL4, {0x00});
 
     // Create FreeRTOS task
     xTaskCreate(
         [](void *params) -> void { static_cast<IMU *>(params)->imuTask(); },
         "imuTask",
-        configMINIMAL_STACK_SIZE,
+        4 * configMINIMAL_STACK_SIZE,
         this,
         IMU_TASK_PRIORITY,
         &imuTaskHandle);
@@ -99,9 +99,9 @@ auto IMU::imuTask() -> void {
 
         // Create gyroscope data struct and send
         GyroscopeData gd = {
-            .Gx = static_cast<float>(gData[0]),
-            .Gy = static_cast<float>(gData[1]),
-            .Gz = static_cast<float>(gData[2]),
+            .Gx = static_cast<float>(gData[0]) * GYRO_SCALE,
+            .Gy = static_cast<float>(gData[1]) * GYRO_SCALE,
+            .Gz = static_cast<float>(gData[2]) * GYRO_SCALE,
             .Gts = timestampFloat - lastTimestamp};
 
         sendGyroData(gd);
@@ -113,9 +113,9 @@ auto IMU::imuTask() -> void {
 
         // Create accelerometer data struct and send
         AccelerometerData ad = {
-            .Ax = static_cast<float>(xlData[0]),
-            .Ay = static_cast<float>(xlData[1]),
-            .Az = static_cast<float>(xlData[2]),
+            .Ax = static_cast<float>(xlData[0]) * ACCEL_SCALE,
+            .Ay = static_cast<float>(xlData[1]) * ACCEL_SCALE,
+            .Az = static_cast<float>(xlData[2]) * ACCEL_SCALE,
             .Ats = timestampFloat - lastTimestamp};
 
         sendAccelData(ad);
