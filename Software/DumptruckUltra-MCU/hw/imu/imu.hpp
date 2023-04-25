@@ -33,17 +33,19 @@ class IMU {
 public:
     explicit IMU(std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus,
                  std::function<void(const AccelerometerData &)> sendAccelData,
-                 std::function<void(const GyroscopeData &)> sendGyroData);
+                 std::function<void(const GyroscopeData &)> sendGyroData,
+                 std::function<void(int16_t)> sendRawData);
 
 private:
     TaskHandle_t imuTaskHandle;
     const std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus;
     const std::function<void(AccelerometerData &)> sendAccelData;
     const std::function<void(GyroscopeData &)> sendGyroData;
+    const std::function<void(int16_t)> sendRawData;
 
     auto imuTask() -> void;
 
-    static constexpr UBaseType_t IMU_TASK_PRIORITY{tskIDLE_PRIORITY + 2};
+    static constexpr UBaseType_t IMU_TASK_PRIORITY{tskIDLE_PRIORITY + 3};
     static constexpr cyhal_gpio_t IMU_INT_PIN{P9_2};
     static constexpr uint8_t IMU_ADDR{0x6A};
 
@@ -51,6 +53,7 @@ private:
     // Sensor control registers
     static constexpr uint8_t CTRL1_XL{0x10};
     static constexpr uint8_t CTRL2_G{0x11};
+    static constexpr uint8_t CTRL8_XL{0x17};
     static constexpr uint8_t CTRL9_XL{0x18};
     static constexpr uint8_t CTRL3_C{0x12};
 
@@ -88,8 +91,11 @@ private:
     // CONTROL WORDS
     static constexpr uint8_t IMU_DEV_ID{0x6C};
 
-    static constexpr uint8_t XL_CTRL{0x40}; // Accelerometer ODR and scale
-    static constexpr uint8_t G_CTRL{0x4C};  // Gyroscope ODR and scale
+    // static constexpr uint8_t XL_CTRL{0x40}; // Accelerometer ODR and scale
+    // static constexpr uint8_t XL_CTRL{0x44};        // Accelerometer ODR and scale
+    static constexpr uint8_t XL_CTRL{0x46}; // Accelerometer ODR, scale, second stage filter enable
+    static constexpr uint8_t XL_SET_LPF2_ODR_OVER_45{0x60};
+    static constexpr uint8_t G_CTRL{0x4C}; // Gyroscope ODR and scale
     static constexpr uint8_t XL_DISABLE_I3C{0xE2};
 
     static constexpr uint8_t SET_BLK_DATA_UPDATE{0x40};
@@ -107,7 +113,8 @@ private:
 
     static constexpr float TIMESTAMP_RES{0.025};
     static constexpr float GYRO_SCALE{70.0F / 1000.0F};
-    static constexpr float ACCEL_SCALE{9.81F * 0.061F / 1000.0F};
+    // static constexpr float ACCEL_SCALE{9.81F * 0.061F / 1000.0F};
+    static constexpr float ACCEL_SCALE{9.81F * 0.488F / 1000.0F};
 
     static constexpr uint8_t READ_INTERVAL_MS{10};
 };

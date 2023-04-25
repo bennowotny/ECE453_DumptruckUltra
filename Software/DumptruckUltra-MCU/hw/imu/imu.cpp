@@ -19,10 +19,12 @@ namespace IMU {
 // https://github.com/stm32duino/LSM6DSOX
 IMU::IMU(std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus,
          std::function<void(const AccelerometerData &)> sendAccelData,
-         std::function<void(const GyroscopeData &)> sendGyroData)
+         std::function<void(const GyroscopeData &)> sendGyroData,
+         std::function<void(int16_t)> sendRawData)
     : i2cBus{std::move(i2cBus)},
       sendAccelData{std::move(sendAccelData)},
-      sendGyroData{std::move(sendGyroData)} {
+      sendGyroData{std::move(sendGyroData)},
+      sendRawData{std::move(sendRawData)} {
     // TODO: take address as parameter
 
     // Query WHO_AM_I
@@ -47,6 +49,10 @@ IMU::IMU(std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus,
     dataToSend[0] = G_CTRL;
     this->i2cBus->i2cWrite1ByteReg<1>(IMU_ADDR, CTRL2_G, dataToSend);
 
+    // Set low pass filter amount
+    dataToSend[0] = XL_SET_LPF2_ODR_OVER_45;
+    this->i2cBus->i2cWrite1ByteReg(IMU_ADDR, CTRL8_XL, dataToSend);
+
     // Configure BYPASS FIFO (clear data)
     this->i2cBus->i2cWrite1ByteReg<1>(IMU_ADDR, FIFO_CTRL4, {0x00});
 
@@ -64,7 +70,6 @@ IMU::IMU(std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus,
 }
 
 auto IMU::imuTask() -> void {
-    std::array<uint8_t, 4> rawTimestamp{}; // Raw timestamp bytes
     // std::array<uint8_t, 15> rawSensorData{}; // All raw sensor data
     std::array<uint8_t, 12> rawSensorData{}; // All raw sensor data
 
@@ -94,7 +99,7 @@ auto IMU::imuTask() -> void {
             .Gx = static_cast<float>(gData[0]) * GYRO_SCALE,
             .Gy = static_cast<float>(gData[1]) * GYRO_SCALE,
             .Gz = static_cast<float>(gData[2]) * GYRO_SCALE,
-            .Gts = READ_INTERVAL_MS};
+            .Gts = READ_INTERVAL_MS / 1000.0F};
 
         sendGyroData(gd);
 
@@ -105,12 +110,14 @@ auto IMU::imuTask() -> void {
 
         // Create accelerometer data struct and send
         AccelerometerData ad = {
-            .Ax = static_cast<float>(xlData[0]) * ACCEL_SCALE,
-            .Ay = static_cast<float>(xlData[1]) * ACCEL_SCALE,
+            .Ax = (static_cast<float>(xlData[0]) * ACCEL_SCALE) - 0.2F /*- 0.075F*/,
+            .Ay = (static_cast<float>(xlData[1]) * ACCEL_SCALE) - 0.6F /*- 0.138F*/,
             .Az = static_cast<float>(xlData[2]) * ACCEL_SCALE,
-            .Ats = READ_INTERVAL_MS};
+            .Ats = READ_INTERVAL_MS / 1000.0F};
 
         sendAccelData(ad);
+
+        sendRawData(xlData[0]);
 
         // DEBUG: Timing end
         cyhal_gpio_toggle(P12_6);

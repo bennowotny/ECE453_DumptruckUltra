@@ -14,7 +14,7 @@ auto main() -> int {
     constexpr uint32_t MS_PER_S{1000};
     float elapsedTime{0};
 
-    cy_retarget_io_init(P5_1, P5_0, 9600);
+    cy_retarget_io_init(P5_1, P5_0, 115200);
 
     while (true) {
         uut.sendAccelerometerMessage({.Ax = std::cos(elapsedTime), .Ay = 0, .Az = 0, .Ats = static_cast<float>(TEST_UPDATE_PERIOD_MS) / MS_PER_S});
