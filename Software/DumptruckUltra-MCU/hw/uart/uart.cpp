@@ -21,12 +21,12 @@ size_t tx_length = 80;
 #define STOP_BITS 1
 
 
+/*
 ////////////////////////////////////////////
 // Initialization of UART and Interrupts
 // Registering of all interrupt sources
 ////////////////////////////////////////////
 static void uart_init_event_irq(void){
-
     cyhal_uart_t uart_obj;
     const cyhal_uart_cfg_t uart_config = {
         .data_bits = DATA_BITS,
@@ -52,6 +52,22 @@ static void uart_init_event_irq(void){
         true
     );
 }
+*/
+
+////////////////////////////////////////////
+// UART Callback Function
+////////////////////////////////////////////
+void uart_event_handler(void *handler_arg, cyhal_uart_event_t event){
+    (void) handler_arg;
+    if((event & CYHAL_UART_IRQ_TX_ERROR) == CYHAL_UART_IRQ_TX_ERROR){
+        printf("TX Error");
+        //TODO: Handle TX ERROR
+    }else if((event & CYHAL_UART_IRQ_TX_DONE) == CYHAL_UART_IRQ_TX_DONE){
+        // All Tx data hass been transmitted
+    }else if((event & CYHAL_UART_RX_DONE) == CYHAL_UART_RX_DONE){
+        // All Rx data has been received
+    }
+}
 
 
 //////////////////////////////////////////////////////////
@@ -68,31 +84,8 @@ void console_event_handler(void *handler_arg, cyhal_uart_event_t event)
 	if(rslt == CY_RSLT_SUCCESS){
 		if((c=='\n') || (c=='\r')){
 			ALERT_STR = true;
-
 		}
-		/*else {
-			// Loop back around to start of buffer if full
-			buffer[counter] = c;
-			counter = (counter+1)%BUFFER_SIZE;
-		}
-*/
 	}
-}
-
-
-////////////////////////////////////////////
-// UART Callback Function
-////////////////////////////////////////////
-void uart_event_handler(void *handler_arg, cyhal_uart_event_t event){
-    (void) handler_arg;
-    if((event & CYHAL_UART_IRQ_TX_ERROR) == CYHAL_UART_IRQ_TX_ERROR){
-        printf("TX Error");
-        //TODO: Handle TX ERROR
-    }else if((event & CYHAL_UART_IRQ_TX_DONE) == CYHAL_UART_IRQ_TX_DONE){
-        // All Tx data hass been transmitted
-    }else if((event & CYHAL_UART_RX_DONE) == CYHAL_UART_RX_DONE){
-        // All Rx data has been received
-    }
 }
 
 
@@ -117,15 +110,11 @@ static void console_init_irq(void)
 
 //////////////////////////////////////////////////////////
 // Setup for console retarget IO
+// Initial Baud Rate: 115200, 8N1
 //////////////////////////////////////////////////////////
 static void console_init_retarget(void)
 {
-
-    /* Initialize retarget-io to use the debug UART port, 8N1 */
-	// Baud rate is initially set to 115200, 8N1
-	cy_retarget_io_init(PIN_CONSOLE_TX,
-						PIN_CONSOLE_RX,
-						CY_RETARGET_IO_BAUDRATE);
+	cy_retarget_io_init(UART_TX, UART_RX, CY_RETARGET_IO_BAUDRATE);
 }
 
 //////////////////////////////////////////////////////////
@@ -135,6 +124,5 @@ void console_init(void)
 {
 	console_init_retarget();
 	console_init_irq();
-	printf("Hello\n");
 }
 
