@@ -100,6 +100,8 @@ auto main() -> int {
         armLayout,
         [pressureSensor]() -> bool { return pressureSensor->isPressed(); })};
 
+    auto dispenserServo{std::make_shared<Hardware::Servos::Servo>(Hardware::Processor::SERVO7_PWM)};
+
     // Create FSM and add states
     auto dumptruckFSM = std::make_unique<Logic::FSM::DumptruckUltra>();
     dumptruckFSM->addToStateTable(
@@ -107,7 +109,7 @@ auto main() -> int {
         []() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::initStateAction(); });
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::DRIVE_TO_SEARCH,
-        []() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::driveToSearchAction(); });
+        [drivingAlg]() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::driveToSearchAction(); });
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::LOCAL_SEARCH,
         []() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::localSearchAction(); });
@@ -116,13 +118,13 @@ auto main() -> int {
         []() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::approachAction(); });
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::PICKUP,
-        []() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::pickupAction(); });
+        [distSensor, arm, pressureSensor]() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::pickupAction(); });
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::DRIVE_TO_START,
         []() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::driveToStartAction(); });
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::DISPENSE,
-        []() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::dispenseAction(); });
+        [dispenserServo]() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::dispenseAction(); });
 
     vTaskStartScheduler();
 
