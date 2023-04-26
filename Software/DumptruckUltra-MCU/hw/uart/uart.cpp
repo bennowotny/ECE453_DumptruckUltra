@@ -5,26 +5,24 @@
  
 #include "uart.hpp"
 
-// Global UART Variables
-volatile uint8_t buffer[BUFFER_SIZE];
-volatile bool ALERT_STR = false;		        
-volatile uint16_t Rx_cnt = 0;					
-volatile int counter = 0;
-size_t tx_length = 80;
-
 // UART Macros
 #define  BAUD_RATE 115200
 #define  UART_DELAY 10u
-#define TX_BUF_SIZE 4
 #define INT_PRIORITY 3
 #define DATA_BITS 8
 #define STOP_BITS 1
+#define TX_BUF_SIZE 4
+#define RX_BUF_SIZE 4
+
+// Global UART Variables
+volatile bool ALERT_STR = false;		        
+volatile uint16_t rx_count = 0;					
+volatile uint8_t tx_buf[TX_BUF_SIZE]={'1','2','3','4'};
+volatile uint8_t rx_buf[RX_BUF_SIZE];
 
 
-/*
-////////////////////////////////////////////
+///////////////////////////////////////////
 // Initialization of UART and Interrupts
-// Registering of all interrupt sources
 ////////////////////////////////////////////
 static void uart_init_event_irq(void){
     cyhal_uart_t uart_obj;
@@ -33,7 +31,6 @@ static void uart_init_event_irq(void){
         .stop_bits = STOP_BITS,
         .parity = CYHAL_UART_PARITY_NONE,
         .rx_buffer = NULL, 
-        .rx_buffer_size = 0,  // TODO: Implement RX Buffer    
     }
 
     // Initialize UART
@@ -51,8 +48,13 @@ static void uart_init_event_irq(void){
         INT_PRIORITY,
         true
     );
+
+    // Read
+    uint8_t rx_data;
+    rslt = cyhal_uart_getc(&uart_obj, &rx_data, UART_DELAY);
+    CY_ASSERT(CY_RSLT_SUCCESS == rslt);
 }
-*/
+
 
 ////////////////////////////////////////////
 // UART Callback Function
@@ -64,8 +66,9 @@ void uart_event_handler(void *handler_arg, cyhal_uart_event_t event){
         //TODO: Handle TX ERROR
     }else if((event & CYHAL_UART_IRQ_TX_DONE) == CYHAL_UART_IRQ_TX_DONE){
         // All Tx data hass been transmitted
-    }else if((event & CYHAL_UART_RX_DONE) == CYHAL_UART_RX_DONE){
+    }else if((event & CYHAL_UART_IRQ_RX_DONE) == CYHAL_UART_IRQ_RX_DONE){
         // All Rx data has been received
+
     }
 }
 
@@ -78,8 +81,8 @@ void console_event_handler(void *handler_arg, cyhal_uart_event_t event)
     (void) handler_arg;
 	uint8_t c;
 	cy_rslt_t rslt = cyhal_uart_getc(&cy_retarget_io_uart_obj, &c, 0); // changed (uint8_t*)&c to &c
-	buffer[Rx_cnt] = c;
-	Rx_cnt++;
+	rx_buf[rx_count] = c;
+	rx_count++;
 	rslt = cyhal_uart_putc(&cy_retarget_io_uart_obj,(uint32_t)c);
 	if(rslt == CY_RSLT_SUCCESS){
 		if((c=='\n') || (c=='\r')){
