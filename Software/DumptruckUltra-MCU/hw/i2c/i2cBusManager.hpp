@@ -8,9 +8,12 @@
 #ifndef I2CBUSMANAGER_HPP_
 #define I2CBUSMANAGER_HPP_
 
+#include "FreeRTOS.h"
 #include "cy_pdl.h"
 #include "cybsp.h"
 #include "cyhal.h"
+#include "portmacro.h"
+#include "semphr.h"
 #include <array>
 #include <cstddef>
 #include <cstdio>
@@ -33,6 +36,8 @@ public:
     template <std::size_t N>
     void i2cWrite1ByteReg(uint16_t devAddr, uint8_t reg, const std::array<uint8_t, N> &data) {
         // Acquire mutex
+        xSemaphoreTake(mutex, portMAX_DELAY);
+
         // Write register
         std::array<uint8_t, N + 1> buf{};
         buf.at(0) = reg;
@@ -49,6 +54,7 @@ public:
         CY_ASSERT(rslt == CY_RSLT_SUCCESS);
 
         // Release mutex
+        xSemaphoreGive(mutex);
     }
 
     /**
@@ -57,6 +63,8 @@ public:
     template <std::size_t N>
     void i2cWrite2ByteReg(uint16_t devAddr, uint16_t reg, const std::array<uint8_t, N> &data) {
         // Acquire mutex
+        xSemaphoreTake(mutex, portMAX_DELAY);
+
         // Write register
         std::array<uint8_t, N + 2> buf{};
         buf.at(0) = (reg >> 8) & 0xFF;
@@ -74,6 +82,7 @@ public:
         CY_ASSERT(rslt == CY_RSLT_SUCCESS);
 
         // Release mutex
+        xSemaphoreGive(mutex);
     }
 
     /**
@@ -82,6 +91,8 @@ public:
     template <std::size_t N>
     void i2cRead1ByteReg(uint16_t devAddr, uint8_t reg, std::array<uint8_t, N> &data) {
         // Acquire mutex
+        xSemaphoreTake(mutex, portMAX_DELAY);
+
         // Read register
         cy_rslt_t rslt = cyhal_i2c_master_write(
             &i2cMonarchObj,
@@ -104,6 +115,7 @@ public:
         CY_ASSERT(rslt == CY_RSLT_SUCCESS);
 
         // Release mutex
+        xSemaphoreGive(mutex);
     }
 
     /**
@@ -112,6 +124,8 @@ public:
     template <std::size_t N>
     void i2cRead2ByteReg(uint16_t devAddr, uint16_t reg, std::array<uint8_t, N> &data) {
         // Acquire mutex
+        xSemaphoreTake(mutex, portMAX_DELAY);
+
         // Read register
         uint8_t arr[2] = {static_cast<uint8_t>((reg >> 8) & 0xFF), static_cast<uint8_t>(reg & 0xFF)};
         cy_rslt_t rslt = cyhal_i2c_master_write(
@@ -135,7 +149,10 @@ public:
         CY_ASSERT(rslt == CY_RSLT_SUCCESS);
 
         // Release mutex
+        xSemaphoreGive(mutex);
     }
+
+    SemaphoreHandle_t mutex{nullptr};
 
     // TODO: Add a get task handle function
 
