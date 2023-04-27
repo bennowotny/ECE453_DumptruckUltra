@@ -24,7 +24,13 @@ IMU::IMU(std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus,
     : i2cBus{std::move(i2cBus)},
       sendAccelData{std::move(sendAccelData)},
       sendGyroData{std::move(sendGyroData)},
-      sendRawData{std::move(sendRawData)} {
+      sendRawData{std::move(sendRawData)},
+      avg_xl_x_off{0},
+      avg_xl_y_off{0},
+      avg_xl_z_off{0},
+      avg_g_x_off{0},
+      avg_g_y_off{0},
+      avg_g_z_off{0} {
     // TODO: take address as parameter
 
     // Query WHO_AM_I
@@ -76,6 +82,9 @@ auto IMU::imuTask() -> void {
     std::array<int16_t, 3> xlData{};
     std::array<int16_t, 3> gData{};
 
+    // Calibrate
+    calibrate();
+
     // Initialize last wake up time
     TickType_t lastWakeTime = xTaskGetTickCount();
 
@@ -96,9 +105,9 @@ auto IMU::imuTask() -> void {
 
         // Create gyroscope data struct and send
         GyroscopeData gd = {
-            .Gx = static_cast<float>(gData[0]) * GYRO_SCALE,
-            .Gy = static_cast<float>(gData[1]) * GYRO_SCALE,
-            .Gz = static_cast<float>(gData[2]) * GYRO_SCALE,
+            .Gx = static_cast<float>(gData[0]) * GYRO_SCALE - avg_g_x_off,
+            .Gy = static_cast<float>(gData[1]) * GYRO_SCALE - avg_g_y_off,
+            .Gz = static_cast<float>(gData[2]) * GYRO_SCALE - avg_g_z_off,
             .Gts = static_cast<float>(READ_INTERVAL_MS) / 1000.0F};
 
         sendGyroData(gd);
@@ -110,9 +119,9 @@ auto IMU::imuTask() -> void {
 
         // Create accelerometer data struct and send
         AccelerometerData ad = {
-            .Ax = (static_cast<float>(xlData[0]) * ACCEL_SCALE) - 0.2F /*- 0.075F*/,
-            .Ay = (static_cast<float>(xlData[1]) * ACCEL_SCALE) - 0.6F /*- 0.138F*/,
-            .Az = static_cast<float>(xlData[2]) * ACCEL_SCALE,
+            .Ax = (static_cast<float>(xlData[0]) * ACCEL_SCALE) - avg_xl_x_off /*- 0.075F*/,
+            .Ay = (static_cast<float>(xlData[1]) * ACCEL_SCALE) - avg_xl_y_off /*- 0.138F*/,
+            .Az = static_cast<float>(xlData[2]) * ACCEL_SCALE - avg_xl_z_off,
             .Ats = static_cast<float>(READ_INTERVAL_MS) / 1000.0F};
 
         sendAccelData(ad);
@@ -122,6 +131,56 @@ auto IMU::imuTask() -> void {
         // DEBUG: Timing end
         cyhal_gpio_toggle(P12_6);
     }
+}
+
+auto IMU::calibrate() -> void {
+    std::array<uint8_t, 12> rawSensorData{}; // All raw sensor data
+    std::array<int16_t, 3> xlData{};
+    std::array<int16_t, 3> gData{};
+
+    float tot_xl_x = 0.0F;
+    float tot_xl_y = 0.0F;
+    float tot_xl_z = 0.0F;
+    float tot_g_x = 0.0F;
+    float tot_g_y = 0.0F;
+    float tot_g_z = 0.0F;
+
+    // Wait for the device to power up
+    vTaskDelay(pdMS_TO_TICKS(15));
+
+    // Calculate average offset
+    for (int i = 0; i < 1000; i++) {
+        // Read all sensor data
+        i2cBus->i2cRead1ByteReg(IMU_ADDR, SENSOR_DATA_BEGIN, rawSensorData);
+
+        // Reconstruct signed gyro data
+        gData[0] = (rawSensorData[1] << 8) | rawSensorData[0];
+        gData[1] = (rawSensorData[3] << 8) | rawSensorData[2];
+        gData[2] = (rawSensorData[5] << 8) | rawSensorData[4];
+
+        // Create gyroscope data struct and send
+        tot_g_x += static_cast<float>(gData[0]) * GYRO_SCALE;
+        tot_g_y += static_cast<float>(gData[1]) * GYRO_SCALE;
+        tot_g_z += static_cast<float>(gData[2]) * GYRO_SCALE;
+
+        // Reconstruct signed accel data
+        xlData[0] = (rawSensorData[7] << 8) | rawSensorData[6];
+        xlData[1] = (rawSensorData[9] << 8) | rawSensorData[8];
+        xlData[2] = (rawSensorData[11] << 8) | rawSensorData[10];
+
+        // Create accelerometer data struct and send
+        tot_xl_x += (static_cast<float>(xlData[0]) * ACCEL_SCALE);
+        tot_xl_y += (static_cast<float>(xlData[1]) * ACCEL_SCALE);
+        tot_xl_z += static_cast<float>(xlData[2]) * ACCEL_SCALE;
+    }
+
+    // Calculate average samples
+    avg_xl_x_off = tot_xl_x / 1000.0F;
+    avg_xl_y_off = tot_xl_y / 1000.0F;
+    avg_xl_z_off = tot_xl_z / 1000.0F;
+    avg_g_x_off = tot_g_x / 1000.0F;
+    avg_g_y_off = tot_g_y / 1000.0F;
+    avg_g_z_off = tot_g_z / 1000.0F;
 }
 } // namespace IMU
 } // namespace Hardware

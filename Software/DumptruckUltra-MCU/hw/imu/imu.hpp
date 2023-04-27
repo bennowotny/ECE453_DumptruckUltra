@@ -42,8 +42,15 @@ private:
     const std::function<void(AccelerometerData &)> sendAccelData;
     const std::function<void(GyroscopeData &)> sendGyroData;
     const std::function<void(int16_t)> sendRawData;
+    float avg_xl_x_off;
+    float avg_xl_y_off;
+    float avg_xl_z_off;
+    float avg_g_x_off;
+    float avg_g_y_off;
+    float avg_g_z_off;
 
     auto imuTask() -> void;
+    auto calibrate() -> void;
 
     static constexpr UBaseType_t IMU_TASK_PRIORITY{tskIDLE_PRIORITY + 3};
     static constexpr cyhal_gpio_t IMU_INT_PIN{P9_2};
