@@ -99,7 +99,7 @@ auto IMU::imuTask() -> void {
             .Gx = static_cast<float>(gData[0]) * GYRO_SCALE,
             .Gy = static_cast<float>(gData[1]) * GYRO_SCALE,
             .Gz = static_cast<float>(gData[2]) * GYRO_SCALE,
-            .Gts = READ_INTERVAL_MS / 1000.0F};
+            .Gts = static_cast<float>(READ_INTERVAL_MS) / 1000.0F};
 
         sendGyroData(gd);
 
@@ -113,7 +113,7 @@ auto IMU::imuTask() -> void {
             .Ax = (static_cast<float>(xlData[0]) * ACCEL_SCALE) - 0.2F /*- 0.075F*/,
             .Ay = (static_cast<float>(xlData[1]) * ACCEL_SCALE) - 0.6F /*- 0.138F*/,
             .Az = static_cast<float>(xlData[2]) * ACCEL_SCALE,
-            .Ats = READ_INTERVAL_MS / 1000.0F};
+            .Ats = static_cast<float>(READ_INTERVAL_MS) / 1000.0F};
 
         sendAccelData(ad);
 

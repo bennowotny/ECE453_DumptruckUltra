@@ -17,7 +17,8 @@ void printAccelData(const Hardware::IMU::AccelerometerData &aData) {
 }
 
 void printGyroData(const Hardware::IMU::GyroscopeData &gData) {
-    printf("\033[2J\033[H");
+    // printf("\033[2J\033[H");
+    printf("\033[H");
     printf("GyroData:\r\n\tx %f\r\n\ty %f\r\n\tz %f\r\n\ttimestamp %f\r\n", gData.Gx, gData.Gy, gData.Gz, gData.Gts);
 }
 
