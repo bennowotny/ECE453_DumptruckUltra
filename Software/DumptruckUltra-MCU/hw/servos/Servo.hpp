@@ -33,7 +33,7 @@ private:
 
     // Servo positions are floats on [0,100]
     static constexpr float SERVO_POSITION_LOWER_BOUND{0};
-    static constexpr float SERVO_POSITION_UPPER_BOUND{100};
+    static constexpr float SERVO_POSITION_UPPER_BOUND{180};
 };
 
 } // namespace Servos

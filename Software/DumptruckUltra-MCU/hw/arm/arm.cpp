@@ -1,4 +1,5 @@
 
+/*
 #include <cy_result.h>
 #include <cyhal_pwm.h>
 #include <cy_pdl.h>
@@ -17,7 +18,6 @@ const float L3 = 54.0;          // 5.4 cm
 const int openM3 = 80;          // Servo angle for open claw
 const int closeM3 = 180;        // Servo angle for closed claw
 const int Servo_Cy_SysLib_Delay = 20;     // Cy_SysLib_Delay between servo movements
-
 
 namespace Servo{
     cyhal_pwm_t servo_0;
@@ -51,12 +51,12 @@ namespace Servo{
         cyhal_pwm_start(&servo_2);
         cyhal_pwm_start(&servo_3);
     }
-    
 
+*/
     ///////////////////////////////////////////////////
     // Initial Function for IK
     ///////////////////////////////////////////////////
-    void inverseKinematics(double x,double y,double z,double L1,double L2,double L3,double &theta1,double &theta2,double &theta3){ 
+    //void inverseKinematics(double x,double y,double z,double L1,double L2,double L3,double &theta1,double &theta2,double &theta3){ 
         /*
             x: desired x position
             y: desired y position
@@ -67,7 +67,6 @@ namespace Servo{
             theta1: angle between base and first link [shoulder]
             theta2: angle between first and second links [elbow]
             theta3: angle between second link and end-effector [wrist]
-        */
         // IK for shoulder calculated using inverse tangent in the (x,y) plane
         theta1 = atan2(y, x);
 
@@ -213,13 +212,12 @@ namespace Servo{
 
 
 
-int main(){
+int main(){*/
   /*
    * M0: Shoulder, lower angles to left w.r.t it facing towards you
    * M1: Elbow, lower angles above w.r.t it facing towards you
    * M2: Wrist, lower angles below w.r.t it facing towards you
    * M3: Claw, lower angles to open w.r.t it facing towards you
-  */
   resetArmPosition(90,30,100,closeM3);
   Cy_SysLib_Delay(1000);
   gradualMovement(180, 90, Servo_3);    // open claw
@@ -245,3 +243,4 @@ int main(){
 
   return 0;
 }
+*/

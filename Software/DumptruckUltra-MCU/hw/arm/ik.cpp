@@ -55,7 +55,7 @@ void inverse_kinematics(
     // Second term in theta2 is the angle between the projection of the wrist position onto the x-y plane and the second link
     double x_wrist = cos(theta1) * ((L2 * cos(theta2)) + (L3 * cos(theta2 + theta3)));
     double y_wrist = sin(theta1) * ((L2 * cos(theta2)) + (L3 * cos(theta2 + theta3)));
-    double z_wrist = L1 + (L2 * sin(theta2)) + (L3 * sin(theta2 + theta3));
+    //double z_wrist = L1 + (L2 * sin(theta2)) + (L3 * sin(theta2 + theta3));
     theta2 = atan2(y_wrist, x_wrist) - atan2(L3 * sin(theta3), L2 + (L3 * cos(theta3)));
 }
 
@@ -136,7 +136,7 @@ void inverseKinematics4(double x, double y, double z, double &theta1, double &th
 } 
 
 
-
+/*
 int main(){
     //double x = 50;      // 40 mm
     //double y = 19.6;    // 1.96 cm
@@ -160,9 +160,6 @@ int main(){
     double theta1_prime = 0.0;
     double theta2_prime = 0.0;
     double theta3_prime = 0.0;
-    double theta1_prime2 = 0.0;
-    double theta2_prime2 = 0.0;
-    double theta3_prime2 = 0.0;
     double theta1_prime3 = 0.0;
     double theta2_prime3 = 0.0;
     double theta3_prime3 = 0.0;
@@ -171,12 +168,6 @@ int main(){
     int initialTheta1 = 90;
     int initialTheta2 = 45;
     int initialTheta3 = 90;
-
-  int initialM0 = 90;      
-  //int initialM1 = 30;
-  int initialM1 = 45;
-  //int initialM2 = 100;
-  int initialM2 = 90;
 
 
 
@@ -225,3 +216,4 @@ int main(){
 
     return 0;
 }
+*/
