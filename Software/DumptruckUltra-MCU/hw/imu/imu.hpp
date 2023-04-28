@@ -34,14 +34,14 @@ public:
     explicit IMU(std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus,
                  std::function<void(const AccelerometerData &)> sendAccelData,
                  std::function<void(const GyroscopeData &)> sendGyroData,
-                 std::function<void(int16_t)> sendRawData);
+                 std::function<void(const char *)> printStr);
 
 private:
     TaskHandle_t imuTaskHandle;
     const std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus;
     const std::function<void(AccelerometerData &)> sendAccelData;
     const std::function<void(GyroscopeData &)> sendGyroData;
-    const std::function<void(int16_t)> sendRawData;
+    const std::function<void(const char *)> printStr;
     float avg_xl_x_off;
     float avg_xl_y_off;
     float avg_xl_z_off;
@@ -124,6 +124,7 @@ private:
     static constexpr float ACCEL_SCALE{9.81F * 0.488F / 1000.0F};
 
     static constexpr uint8_t READ_INTERVAL_MS{10};
+    static constexpr uint16_t NUM_CALIBRATION_SAMPLES{500};
 };
 } // namespace IMU
 } // namespace Hardware
