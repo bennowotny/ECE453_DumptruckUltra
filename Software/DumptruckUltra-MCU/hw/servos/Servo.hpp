@@ -21,6 +21,13 @@ public:
     void disable();
     void setPosition(float position);
 
+    struct SweepConfiguration {
+        uint32_t stepDuration_ms{SWEEP_STEP_DURATION_MS};
+        uint32_t stepCount{SWEEP_STEP_COUNT};
+    };
+
+    void sweep(float start, float end, SweepConfiguration sweepParams);
+
 private:
     cyhal_pwm_t pwmHandle;
     // A guess, based on servo properties
@@ -34,6 +41,8 @@ private:
     // Servo positions are floats on [0,100]
     static constexpr float SERVO_POSITION_LOWER_BOUND{0};
     static constexpr float SERVO_POSITION_UPPER_BOUND{100};
+    static constexpr uint32_t SWEEP_STEP_DURATION_MS{5};
+    static constexpr uint32_t SWEEP_STEP_COUNT{100};
 };
 
 } // namespace Servos
