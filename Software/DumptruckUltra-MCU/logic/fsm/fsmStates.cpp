@@ -23,9 +23,6 @@ auto initStateAction() -> DumptruckUltra::FSMState {
     return DumptruckUltra::FSMState::DRIVE_TO_SEARCH;
 }
 
-// TODO: Take in driving algo as param
-// Make random number 1-10 for x and y coordinates
-// start() allows for repeated calls to getStatus()
 auto driveToSearchAction(Logic::DrivingAlgorithm::DrivingAlgorithm &drivingAlg) -> DumptruckUltra::FSMState {
     // printf("%s", "Doing driveToSearch state\n");
     std::random_device randomSource{};
@@ -66,6 +63,7 @@ auto localSearchAction(DrivingAlgorithm::DriveMotorLayout &driveMotors, Logic::V
 }
 
 auto approachAction(Logic::DrivingAlgorithm::DrivingAlgorithm &drivingAlg, Logic::Vision::ObjectDetector &vision) -> DumptruckUltra::FSMState {
+    // printf("%s", "Doing approachAction state\n");
 
     const auto target{vision.currentObjectLocation()};
 
@@ -78,7 +76,6 @@ auto approachAction(Logic::DrivingAlgorithm::DrivingAlgorithm &drivingAlg, Logic
     return DumptruckUltra::FSMState::PICKUP;
 }
 
-// TODO: Uses Camera Reading
 auto pickupAction(Logic::Arm::ArmControl &arm, Logic::Vision::ObjectDetector &vision, Logic::DeadReckoning::DeadReckoning &deadReckoning, Logic::Dispenser::Dispenser &dispenser) -> DumptruckUltra::FSMState {
     // printf("%s", "Doing pickup state\n");
     const auto target{vision.currentObjectLocation()};
@@ -103,7 +100,6 @@ auto driveToStartAction(Logic::DrivingAlgorithm::DrivingAlgorithm &drivingAlg) -
 
 auto dispenseAction(Logic::Dispenser::Dispenser &dispenser) -> DumptruckUltra::FSMState {
     // printf("%s", "Doing dispense state\n");
-    // TODO: test for dispenser servo value, assume 22 for now
     dispenser.open();
     vTaskDelay(pdMS_TO_TICKS(5000));
     dispenser.close();
