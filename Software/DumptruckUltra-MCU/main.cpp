@@ -45,6 +45,7 @@
 #include "Servo.hpp"
 #include "arm-inverse-kinematics/ArmControl.hpp"
 #include "cy_utils.h"
+#include "dispenser/Dispenser.hpp"
 #include "hw/proc/proc_setup.hpp"
 #include "i2cBusManager.hpp"
 #include "imu.hpp"
@@ -52,6 +53,7 @@
 #include "logic/fsm/fsmStates.hpp"
 #include "pressure_sensor/pressure_sensor.hpp"
 #include "proc_setup.hpp"
+#include "vision/ObjectDetector.hpp"
 #include <memory>
 
 auto main() -> int {
@@ -66,14 +68,14 @@ auto main() -> int {
 
     auto i2cBus{std::make_shared<Hardware::I2C::I2CBusManager>(&i2cPins)};
 
-    auto deadReckoning{std::make_shared<Logic::DeadReckoning::DeadReckoning>()};
+    const auto deadReckoning{std::make_unique<Logic::DeadReckoning::DeadReckoning>()};
 
-    auto imu{std::make_unique<Hardware::IMU::IMU>(
+    const auto imu{std::make_unique<Hardware::IMU::IMU>(
         i2cBus,
-        [deadReckoning](const Hardware::IMU::AccelerometerData &accelData) { deadReckoning->sendAccelerometerMessage(accelData); },
-        [deadReckoning](const Hardware::IMU::GyroscopeData &gyroData) { deadReckoning->sendGyroscopeMessage(gyroData); })};
+        [&deadReckoning{*deadReckoning}](const Hardware::IMU::AccelerometerData &accelData) { deadReckoning.sendAccelerometerMessage(accelData); },
+        [&deadReckoning{*deadReckoning}](const Hardware::IMU::GyroscopeData &gyroData) { deadReckoning.sendGyroscopeMessage(gyroData); })};
 
-    auto distSensor{std::make_shared<Hardware::DistanceSensor::DistanceSensor>(
+    const auto distSensor{std::make_unique<Hardware::DistanceSensor::DistanceSensor>(
         i2cBus,
         0x52 >> 1)};
 
@@ -83,12 +85,12 @@ auto main() -> int {
             Hardware::Motors::MotorDirection::FORWARD}, // TODO: Pick pins
         .rightMotor = Hardware::Motors::Motor{{.forwardPin = Hardware::Processor::M2_FORWARD, .backwardPin = Hardware::Processor::M2_FORWARD}, Hardware::Motors::MotorDirection::REVERSE}};
 
-    auto drivingAlg{std::make_unique<Logic::DrivingAlgorithm::DrivingAlgorithm>(
+    const auto drivingAlg{std::make_unique<Logic::DrivingAlgorithm::DrivingAlgorithm>(
         driveLayout,
-        [distSensor]() -> float { return distSensor->getDistanceMeters(); },
-        [deadReckoning]() -> Logic::DeadReckoning::Pose2D { return deadReckoning->getCurrentPose(); })};
+        [&distSensor{*distSensor}]() -> float { return distSensor.getDistanceMeters(); },
+        [&deadReckoning{*deadReckoning}]() -> Logic::DeadReckoning::Pose2D { return deadReckoning.getCurrentPose(); })};
 
-    auto pressureSensor{std::make_shared<Hardware::PressureSensor::PressureSensor>(Hardware::Processor::PRESSURE_SENSOR_ADC)};
+    const auto pressureSensor{std::make_unique<Hardware::PressureSensor::PressureSensor>(Hardware::Processor::PRESSURE_SENSOR_ADC)};
 
     Logic::Arm::ArmLayout armLayout{
         .shoulder = Hardware::Servos::Servo{Hardware::Processor::SERVO1_PWM},
@@ -96,35 +98,52 @@ auto main() -> int {
         .wrist = Hardware::Servos::Servo{Hardware::Processor::SERVO3_PWM},
         .claw = Hardware::Servos::Servo{Hardware::Processor::SERVO4_PWM}};
 
-    auto arm{std::make_unique<Logic::Arm::ArmControl>(
+    const auto arm{std::make_unique<Logic::Arm::ArmControl>(
         armLayout,
-        [pressureSensor]() -> bool { return pressureSensor->isPressed(); })};
+        [&pressureSensor{*pressureSensor}]() -> bool { return pressureSensor.isPressed(); })};
 
-    auto dispenserServo{std::make_shared<Hardware::Servos::Servo>(Hardware::Processor::SERVO7_PWM)};
+    const auto vision{std::make_unique<Logic::Vision::ObjectDetector>()};
+
+    Hardware::Servos::Servo dispenserServo{Hardware::Processor::SERVO7_PWM};
+    const auto dispenser{std::make_unique<Logic::Dispenser::Dispenser>(dispenserServo)};
 
     // Create FSM and add states
     auto dumptruckFSM = std::make_unique<Logic::FSM::DumptruckUltra>();
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::INIT,
-        []() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::initStateAction(); });
+        []() -> Logic::FSM::DumptruckUltra::FSMState {
+            return Logic::FSM::initStateAction();
+        });
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::DRIVE_TO_SEARCH,
-        [&drivingAlg{*drivingAlg}]() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::driveToSearchAction(); });
+        [&drivingAlg{*drivingAlg}]() {
+            return Logic::FSM::driveToSearchAction(drivingAlg);
+        });
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::LOCAL_SEARCH,
-        []() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::localSearchAction(); });
+        [&motorLayout{drivingAlg->getMotors()}, &vision{*vision}]() {
+            return Logic::FSM::localSearchAction(motorLayout, vision);
+        });
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::APPROACH,
-        []() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::approachAction(); });
+        [&drivingAlg{*drivingAlg}, &vision{*vision}]() {
+            return Logic::FSM::approachAction(drivingAlg, vision);
+        });
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::PICKUP,
-        [distSensor, arm, pressureSensor]() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::pickupAction(); });
+        [&arm{*arm}, &vision{*vision}, &deadReckoning{*deadReckoning}, &dispenser{*dispenser}]() {
+            return Logic::FSM::pickupAction(arm, vision, deadReckoning, dispenser);
+        });
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::DRIVE_TO_START,
-        []() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::driveToStartAction(); });
+        [&drivingAlg{*drivingAlg}]() {
+            return Logic::FSM::driveToStartAction(drivingAlg);
+        });
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::DISPENSE,
-        [dispenserServo]() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::dispenseAction(); });
+        [&dispenser{*dispenser}]() {
+            return Logic::FSM::dispenseAction(dispenser);
+        });
 
     vTaskStartScheduler();
 
