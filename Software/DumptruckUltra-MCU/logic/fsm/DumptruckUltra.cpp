@@ -1,17 +1,19 @@
 #include "DumptruckUltra.hpp"
+
 #include "FreeRTOSConfig.h"
-#include "Motor.hpp"
+#include "RGBLED.hpp"
 #include "fsm/DumptruckUltra.hpp"
-#include "i2cBusManager.hpp"
 #include "imu.hpp"
-#include "proc_setup.hpp"
+#include <utility>
 
 namespace Logic {
 namespace FSM {
 using namespace Hardware;
 using namespace Logic;
 
-DumptruckUltra::DumptruckUltra() : currState{INITIAL_STATE} {
+DumptruckUltra::DumptruckUltra(RGB_LED::RGBLED led) : led{led},
+                                                      currState{INITIAL_STATE},
+                                                      fsmTaskHandle{} {
     // Create FSM task
     xTaskCreate(
         [](void *obj) -> void { static_cast<DumptruckUltra *>(obj)->fsmTask(); },
@@ -23,12 +25,16 @@ DumptruckUltra::DumptruckUltra() : currState{INITIAL_STATE} {
 }
 
 auto DumptruckUltra::fsmTask() -> void {
-    FSMState nextState = stateActionMap[currState]();
-    currState = nextState;
+    led.turnOn();
+    while (true) {
+        led.setColor(stateActionMap.at(currState).color);
+        FSMState nextState = stateActionMap[currState].stateAction();
+        currState = nextState;
+    }
 }
 
-void DumptruckUltra::addToStateTable(FSMState state, std::function<FSMState()> stateAction) {
-    stateActionMap[state] = std::move(stateAction);
+void DumptruckUltra::addToStateTable(FSMState state, StateRepresentation repr) {
+    stateActionMap[state] = std::move(repr);
 }
 } // namespace FSM
 } // namespace Logic

@@ -42,6 +42,7 @@
 #include "DeadReckoning.hpp"
 #include "DistanceSensor.hpp"
 #include "DrivingAlgorithm.hpp"
+#include "RGBLED.hpp"
 #include "Servo.hpp"
 #include "arm-inverse-kinematics/ArmControl.hpp"
 #include "cy_utils.h"
@@ -107,43 +108,56 @@ auto main() -> int {
     Hardware::Servos::Servo dispenserServo{Hardware::Processor::SERVO7_PWM};
     const auto dispenser{std::make_unique<Logic::Dispenser::Dispenser>(dispenserServo)};
 
+    const auto rgbLed{std::make_unique<Hardware::RGB_LED::RGBLED>(
+        Hardware::RGB_LED::RGBLayout{
+            .redPin = Hardware::Processor::USER_RGB_RED,
+            .greenPin = Hardware::Processor::USER_RGB_GREEN,
+            .bluePin = Hardware::Processor::USER_RGB_BLUE})};
+
     // Create FSM and add states
-    auto dumptruckFSM = std::make_unique<Logic::FSM::DumptruckUltra>();
+    auto dumptruckFSM = std::make_unique<Logic::FSM::DumptruckUltra>(*rgbLed);
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::INIT,
-        []() -> Logic::FSM::DumptruckUltra::FSMState {
-            return Logic::FSM::initStateAction();
-        });
+        {.stateAction{[]() -> Logic::FSM::DumptruckUltra::FSMState {
+             return Logic::FSM::initStateAction();
+         }},
+         .color{Hardware::RGB_LED::PredefinedColors::BLUE}});
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::DRIVE_TO_SEARCH,
-        [&drivingAlg{*drivingAlg}]() {
-            return Logic::FSM::driveToSearchAction(drivingAlg);
-        });
+        {.stateAction{[&drivingAlg{*drivingAlg}]() {
+             return Logic::FSM::driveToSearchAction(drivingAlg);
+         }},
+         .color{Hardware::RGB_LED::PredefinedColors::CYAN}});
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::LOCAL_SEARCH,
-        [&motorLayout{drivingAlg->getMotors()}, &vision{*vision}]() {
-            return Logic::FSM::localSearchAction(motorLayout, vision);
-        });
+        {.stateAction{[&motorLayout{drivingAlg->getMotors()}, &vision{*vision}]() {
+             return Logic::FSM::localSearchAction(motorLayout, vision);
+         }},
+         .color{Hardware::RGB_LED::PredefinedColors::GREEN}});
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::APPROACH,
-        [&drivingAlg{*drivingAlg}, &vision{*vision}]() {
-            return Logic::FSM::approachAction(drivingAlg, vision);
-        });
+        {.stateAction{[&drivingAlg{*drivingAlg}, &vision{*vision}]() {
+             return Logic::FSM::approachAction(drivingAlg, vision);
+         }},
+         .color{Hardware::RGB_LED::PredefinedColors::MAGENTA}});
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::PICKUP,
-        [&arm{*arm}, &vision{*vision}, &deadReckoning{*deadReckoning}, &dispenser{*dispenser}]() {
-            return Logic::FSM::pickupAction(arm, vision, deadReckoning, dispenser);
-        });
+        {.stateAction{[&arm{*arm}, &vision{*vision}, &deadReckoning{*deadReckoning}, &dispenser{*dispenser}]() {
+             return Logic::FSM::pickupAction(arm, vision, deadReckoning, dispenser);
+         }},
+         .color{Hardware::RGB_LED::PredefinedColors::RED}});
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::DRIVE_TO_START,
-        [&drivingAlg{*drivingAlg}]() {
-            return Logic::FSM::driveToStartAction(drivingAlg);
-        });
+        {.stateAction{[&drivingAlg{*drivingAlg}]() {
+             return Logic::FSM::driveToStartAction(drivingAlg);
+         }},
+         .color{Hardware::RGB_LED::PredefinedColors::YELLOW}});
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::DISPENSE,
-        [&dispenser{*dispenser}]() {
-            return Logic::FSM::dispenseAction(dispenser);
-        });
+        {.stateAction{[&dispenser{*dispenser}]() {
+             return Logic::FSM::dispenseAction(dispenser);
+         }},
+         .color{Hardware::RGB_LED::PredefinedColors::WHITE}});
 
     vTaskStartScheduler();
 

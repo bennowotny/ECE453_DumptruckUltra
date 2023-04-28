@@ -1,9 +1,5 @@
 #pragma once
-
-#include "DeadReckoning.hpp"
-#include "DrivingAlgorithm.hpp"
-#include "Motor.hpp"
-#include "i2cBusManager.hpp"
+#include "RGBLED.hpp"
 #include "imu.hpp"
 #include <functional>
 #include <map>
@@ -22,13 +18,23 @@ public:
         DISPENSE
     };
 
-    DumptruckUltra();
-    void addToStateTable(FSMState state, std::function<FSMState()> stateAction);
+    explicit DumptruckUltra(Hardware::RGB_LED::RGBLED led);
+
+    struct StateRepresentation {
+        std::function<FSMState()> stateAction;
+        Hardware::RGB_LED::Color color;
+    };
+
+    void addToStateTable(FSMState state, StateRepresentation repr);
 
 private:
     // Each action function should return the next state
     // Could be the same state as current if there is no state change
-    std::map<FSMState, std::function<FSMState()>> stateActionMap;
+
+    std::map<FSMState, StateRepresentation> stateActionMap;
+
+    Hardware::RGB_LED::RGBLED led;
+
     auto fsmTask() -> void;
     FSMState currState;
     TaskHandle_t fsmTaskHandle;
