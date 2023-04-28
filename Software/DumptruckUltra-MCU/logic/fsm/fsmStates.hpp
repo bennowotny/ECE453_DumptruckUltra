@@ -2,12 +2,8 @@
 
 #include "DumptruckUltra.hpp"
 #include "dispenser/Dispenser.hpp"
-#include "hw/distance_sensor/DistanceSensor.hpp"
-#include "hw/pressure_sensor/pressure_sensor.hpp"
-#include "hw/servos/Servo.hpp"
 #include "logic/arm-inverse-kinematics/ArmControl.hpp"
-#include "logic/vision/ObjectDetector.hpp"
-
+#include "vision/ObjectDetector.hpp"
 
 namespace Logic {
 namespace FSM {
