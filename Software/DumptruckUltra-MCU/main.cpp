@@ -42,14 +42,14 @@
 #include "DeadReckoning.hpp"
 #include "DistanceSensor.hpp"
 #include "DrivingAlgorithm.hpp"
-#include "DumptruckUltra.hpp"
 #include "Servo.hpp"
 #include "arm-inverse-kinematics/ArmControl.hpp"
 #include "cy_utils.h"
-#include "fsmStates.hpp"
 #include "hw/proc/proc_setup.hpp"
 #include "i2cBusManager.hpp"
 #include "imu.hpp"
+#include "logic/fsm/DumptruckUltra.hpp"
+#include "logic/fsm/fsmStates.hpp"
 #include "pressure_sensor/pressure_sensor.hpp"
 #include "proc_setup.hpp"
 #include <memory>
@@ -109,7 +109,7 @@ auto main() -> int {
         []() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::initStateAction(); });
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::DRIVE_TO_SEARCH,
-        [drivingAlg]() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::driveToSearchAction(); });
+        [&drivingAlg{*drivingAlg}]() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::driveToSearchAction(); });
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::LOCAL_SEARCH,
         []() -> Logic::FSM::DumptruckUltra::FSMState { return Logic::FSM::localSearchAction(); });

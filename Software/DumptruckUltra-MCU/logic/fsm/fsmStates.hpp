@@ -5,6 +5,7 @@
 #include "hw/pressure_sensor/pressure_sensor.hpp"
 #include "hw/servos/Servo.hpp"
 #include "logic/arm-inverse-kinematics/ArmControl.hpp"
+#include "logic/vision/ObjectDetector.hpp"
 
 namespace Logic {
 namespace FSM {
