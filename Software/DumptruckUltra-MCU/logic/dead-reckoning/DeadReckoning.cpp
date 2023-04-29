@@ -27,5 +27,10 @@ auto DeadReckoning::getCurrentPose() const -> Pose2D {
     return currentPosition;
 }
 
+auto DeadReckoning::resetVelocity() -> void {
+    currentVelocity.dx = 0;
+    currentVelocity.dy = 0;
+}
+
 } // namespace DeadReckoning
 } // namespace Logic

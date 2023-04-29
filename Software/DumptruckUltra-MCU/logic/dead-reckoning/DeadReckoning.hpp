@@ -20,6 +20,8 @@ public:
 
     void sendGyroscopeMessage(const Hardware::IMU::GyroscopeData &msg);
 
+    void resetVelocity();
+
     [[nodiscard]] auto getCurrentPose() const -> Pose2D;
 
 private:

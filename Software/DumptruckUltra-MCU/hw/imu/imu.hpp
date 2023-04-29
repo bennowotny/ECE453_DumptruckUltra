@@ -1,6 +1,7 @@
 #pragma once
 
 #include "FreeRTOS.h"
+#include "cy_scb_i2c.h"
 #include "cy_syslib.h"
 #include "cyhal_gpio.h"
 #include "cyhal_psoc6_01_43_smt.h"
@@ -41,6 +42,7 @@ private:
     const std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus;
     const std::function<void(AccelerometerData &)> sendAccelData;
     const std::function<void(GyroscopeData &)> sendGyroData;
+    // const std::function<void(uint8_t)> printRaw;
     const std::function<void(const char *)> printStr;
     float avg_xl_x_off;
     float avg_xl_y_off;
@@ -48,9 +50,15 @@ private:
     float avg_g_x_off;
     float avg_g_y_off;
     float avg_g_z_off;
+    std::array<float, 3> avgXlX;
+    std::array<float, 3> avgXlY;
+    std::array<float, 3> avgGZ;
+    uint8_t bufInd;
 
     auto imuTask() -> void;
     auto calibrate() -> void;
+    auto addToRingBuffers(float newXlX, float newXlY, float newGZ) -> void;
+    auto getCurrReadings() -> const std::array<float, 3>;
 
     static constexpr UBaseType_t IMU_TASK_PRIORITY{tskIDLE_PRIORITY + 3};
     static constexpr cyhal_gpio_t IMU_INT_PIN{P9_2};
@@ -86,6 +94,7 @@ private:
     // Starts at address of OUTX_L_G. Subsequent registers include rest of
     // gyroscope data and accelerometer data
     static constexpr uint8_t SENSOR_DATA_BEGIN{0x22};
+    static constexpr uint8_t SENSOR_DATA_STATUS{0x1E};
 
     // FIFO data registers
     static constexpr uint8_t FIFO_DATA_OUT_TAG{0x78};
@@ -100,8 +109,20 @@ private:
 
     // static constexpr uint8_t XL_CTRL{0x40}; // Accelerometer ODR and scale
     // static constexpr uint8_t XL_CTRL{0x44};        // Accelerometer ODR and scale
-    static constexpr uint8_t XL_CTRL{0x46}; // Accelerometer ODR, scale, second stage filter enable
+    // static constexpr uint8_t XL_CTRL{0x46}; // Accelerometer ODR, scale, second stage filter enable
+
+    static constexpr uint8_t XL_ODR_104{0x40};
+    static constexpr uint8_t XL_ODR_208{0x50};
+    static constexpr uint8_t XL_SET_LPF2_EN{0x02};
+    static constexpr uint8_t XL_FS_SCALE_2G{0x00};
+    static constexpr uint8_t XL_FS_SCALE_4G{0x10};
+    static constexpr uint8_t XL_FS_SCALE_8G{0x11};
+    static constexpr uint8_t XL_FS_SCALE_16G{0x01};
+
+    static constexpr uint8_t XL_SET_LPF2_ODR_OVER_10{0x20};
     static constexpr uint8_t XL_SET_LPF2_ODR_OVER_45{0x60};
+    static constexpr uint8_t XL_SET_LPF2_ODR_OVER_100{0x80};
+
     static constexpr uint8_t G_CTRL{0x4C}; // Gyroscope ODR and scale
     static constexpr uint8_t XL_DISABLE_I3C{0xE2};
 
@@ -120,11 +141,13 @@ private:
 
     static constexpr float TIMESTAMP_RES{0.025};
     static constexpr float GYRO_SCALE{70.0F / 1000.0F};
-    // static constexpr float ACCEL_SCALE{9.81F * 0.061F / 1000.0F};
-    static constexpr float ACCEL_SCALE{9.81F * 0.488F / 1000.0F};
+    static constexpr float ACCEL_SCALE{9.81F * 0.061F / 1000.0F};
+    // static constexpr float ACCEL_SCALE{9.81F * 0.488F / 1000.0F};
 
     static constexpr uint8_t READ_INTERVAL_MS{10};
     static constexpr uint16_t NUM_CALIBRATION_SAMPLES{500};
+    static constexpr uint8_t NUM_CALIBRATION_PASSES{3};
+    static constexpr uint8_t CIRC_BUF_LEN{5}; // Not used
 };
 } // namespace IMU
 } // namespace Hardware

@@ -8,9 +8,9 @@
 
 void printGyroData(const Hardware::IMU::GyroscopeData &gData) {
     // printf("\033[2J\033[H");
-    fflush(stdout);
     printf("\033[H");
     printf("GyroData:\r\n\tx %f\r\n\ty %f\r\n\tz %f\r\n\ttimestamp %f\r\n", gData.Gx, gData.Gy, gData.Gz, gData.Gts);
+    fflush(stdout);
 }
 
 void printAccelData(const Hardware::IMU::AccelerometerData &aData) {
@@ -21,10 +21,12 @@ void printAccelData(const Hardware::IMU::AccelerometerData &aData) {
     float average = totalAccel / numPoints;
     (void)average;
     printf("AccelData:\r\n\tx %f\r\n\ty %f\r\n\tz %f\r\n\ttimestamp %f\r\n", aData.Ax, aData.Ay, aData.Az, aData.Ats);
+    fflush(stdout);
 }
 
-void printStrFromTask(const char *str) {
-    printf("%s", str);
+void printStrFromTask(uint8_t data) {
+    printf("%x\r\n", data);
+    fflush(stdout);
 }
 
 auto main() -> int {

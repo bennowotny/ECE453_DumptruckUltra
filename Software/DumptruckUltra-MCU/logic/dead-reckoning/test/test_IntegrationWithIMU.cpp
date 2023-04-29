@@ -12,6 +12,10 @@
 #include "task.h"
 #include <memory>
 
+auto printStr(const char *str) {
+    printf("%s", str);
+}
+
 auto main() -> int {
     using Hardware::I2C::I2CBusManager;
     using Hardware::IMU::IMU;
@@ -25,7 +29,8 @@ auto main() -> int {
     auto imu{std::make_unique<IMU>(
         i2cBus,
         [uut](const Hardware::IMU::AccelerometerData &msg) -> void { uut->sendAccelerometerMessage(msg); },
-        [uut](const Hardware::IMU::GyroscopeData &msg) -> void { uut->sendGyroscopeMessage(msg); })};
+        [uut](const Hardware::IMU::GyroscopeData &msg) -> void { uut->sendGyroscopeMessage(msg); },
+        printStr)};
 
     cy_retarget_io_init(P5_1, P5_0, 115200);
 
@@ -34,14 +39,17 @@ auto main() -> int {
     // Create task which runs DeadReckoning
     xTaskCreate(
         [](void *params) -> void {
+            Logic::DeadReckoning::DeadReckoning *uut{static_cast<DeadReckoning *>(params)};
+            uint32_t itNum = 0;
             while (true) {
-                Logic::DeadReckoning::DeadReckoning *uut{static_cast<DeadReckoning *>(params)};
+                if (itNum++ % 20)
+                    uut->resetVelocity();
                 vTaskDelay(pdMS_TO_TICKS(500));
                 Logic::DeadReckoning::Pose2D currPose = uut->getCurrentPose();
-                (void)currPose;
-                // cyhal_gpio_write(P10_3, true);
-                // printf("%0.2f %0.2f %0.2f\r\n", currPose.x, currPose.y, currPose.heading);
-                // cyhal_gpio_write(P10_3, false);
+                // (void)currPose;
+                cyhal_gpio_write(P10_3, true);
+                printf("%0.2f %0.2f %0.2f\r\n", currPose.x, currPose.y, currPose.heading);
+                cyhal_gpio_write(P10_3, false);
             }
         },
         "dead_reckoning",
