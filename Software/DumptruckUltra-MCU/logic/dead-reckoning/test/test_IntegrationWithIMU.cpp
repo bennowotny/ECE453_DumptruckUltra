@@ -1,4 +1,5 @@
 #include "DeadReckoning.hpp"
+#include "DrivingAlgorithm.hpp"
 #include "FreeRTOSConfig.h"
 #include "cy_retarget_io.h"
 #include "cy_utils.h"
@@ -24,12 +25,12 @@ auto main() -> int {
     Hardware::I2C::i2cPin_t i2cPins{.sda = P10_1, .scl = P10_0};
     auto i2cBus{std::make_shared<I2CBusManager>(i2cPins)};
 
-    auto uut{std::make_shared<DeadReckoning>()};
+    auto uut{std::make_unique<DeadReckoning>([]() -> Logic::DrivingAlgorithm::MotorSpeeds { return {0, 0}; })};
 
     auto imu{std::make_unique<IMU>(
         i2cBus,
-        [uut](const Hardware::IMU::AccelerometerData &msg) -> void { uut->sendAccelerometerMessage(msg); },
-        [uut](const Hardware::IMU::GyroscopeData &msg) -> void { uut->sendGyroscopeMessage(msg); },
+        [&uut{*uut}](const Hardware::IMU::AccelerometerData &msg) -> void { uut.sendAccelerometerMessage(msg); },
+        [&uut{*uut}](const Hardware::IMU::GyroscopeData &msg) -> void { uut.sendGyroscopeMessage(msg); },
         printStr)};
 
     cy_retarget_io_init(P5_1, P5_0, 115200);
@@ -40,10 +41,7 @@ auto main() -> int {
     xTaskCreate(
         [](void *params) -> void {
             Logic::DeadReckoning::DeadReckoning *uut{static_cast<DeadReckoning *>(params)};
-            uint32_t itNum = 0;
             while (true) {
-                if (itNum++ % 20)
-                    uut->resetVelocity();
                 vTaskDelay(pdMS_TO_TICKS(500));
                 Logic::DeadReckoning::Pose2D currPose = uut->getCurrentPose();
                 // (void)currPose;

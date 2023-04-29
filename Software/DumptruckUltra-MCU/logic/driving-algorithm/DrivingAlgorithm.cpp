@@ -1,7 +1,6 @@
 #include "DrivingAlgorithm.hpp"
 #include "Motor.hpp"
 #include "cy_utils.h"
-#include "logic/dead-reckoning/DeadReckoning.hpp"
 #include "logic/driving-algorithm/DrivingAlgorithm.hpp"
 #include "portmacro.h"
 #include <cmath>
@@ -114,7 +113,7 @@ void DrivingAlgorithm::drivingTask() {
  *  - pi/2 (turning right)
  *  - pi/2 (turning left)
  */
-auto DrivingAlgorithm::deltaAngleToDrivePowers(float angleDiff) -> DrivingAlgorithm::MotorSpeeds {
+auto DrivingAlgorithm::deltaAngleToDrivePowers(float angleDiff) -> MotorSpeeds {
     float leftSpeed{0};
     float rightSpeed{0};
     constexpr float CLIMB_RATE{4};

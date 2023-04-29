@@ -3,7 +3,7 @@
 
 #include "FreeRTOS.h" // IWYU pragma: keep
 #include "hw/motors/Motor.hpp"
-#include "logic/dead-reckoning/DeadReckoning.hpp"
+#include "logic/dead-reckoning/Positioning.hpp"
 #include "portmacro.h"
 #include "projdefs.h"
 #include "task.h" // IWYU pragma: keep
