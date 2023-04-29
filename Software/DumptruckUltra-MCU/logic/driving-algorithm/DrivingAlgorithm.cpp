@@ -13,8 +13,7 @@ namespace DrivingAlgorithm {
 DrivingAlgorithm::DrivingAlgorithm(DriveMotorLayout driveMotors,
                                    std::function<float()> getFrontDistanceFunction,
                                    std::function<DeadReckoning::Pose2D()> getPoseFunction)
-    : leftMotor{driveMotors.leftMotor},
-      rightMotor{driveMotors.rightMotor},
+    : driveMotors{driveMotors},
       getFrontDistanceFunction{std::move(getFrontDistanceFunction)},
       getPoseFunction{std::move(getPoseFunction)},
       currentTarget{.x = 0, .y = 0, .heading = 0},
@@ -46,16 +45,16 @@ void DrivingAlgorithm::loadNewTarget(const DeadReckoning::Pose2D &position) {
 }
 
 void DrivingAlgorithm::start() {
-    leftMotor.enable();
-    rightMotor.enable();
+    driveMotors.leftMotor.enable();
+    driveMotors.rightMotor.enable();
     currentStatus = DrivingAlgorithmStatus::RUNNING;
     // Manipulate task LAST to avoid scheduling shennanigans
     vTaskResume(drivingTaskHandle);
 }
 
 void DrivingAlgorithm::stop(const DrivingAlgorithmStatus &stopStatus) {
-    leftMotor.disable();
-    rightMotor.disable();
+    driveMotors.leftMotor.disable();
+    driveMotors.rightMotor.disable();
     currentStatus = stopStatus;
     // Manipulate task LAST to avoid scheduling shennanigans
     vTaskSuspend(drivingTaskHandle);
@@ -63,6 +62,10 @@ void DrivingAlgorithm::stop(const DrivingAlgorithmStatus &stopStatus) {
 
 void DrivingAlgorithm::stop() {
     stop(DrivingAlgorithmStatus::STOPPED);
+}
+
+[[nodiscard]] auto DrivingAlgorithm::getMotors() -> DriveMotorLayout & {
+    return driveMotors;
 }
 
 void DrivingAlgorithm::drivingTask() {
@@ -80,13 +83,13 @@ void DrivingAlgorithm::drivingTask() {
             // If something is in the way...
             if (getFrontDistanceFunction() < DISTANCE_THRESHOLD_METERS) {
                 // Turn right
-                leftMotor.setPower(Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS);
-                rightMotor.setPower(-Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS);
+                driveMotors.leftMotor.setPower(Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS);
+                driveMotors.rightMotor.setPower(-Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS);
             } else {
                 // Otherwise, drive at the target
                 const auto motorPowers{deltaAngleToDrivePowers(headingToTarget - currPose.heading)};
-                leftMotor.setPower(motorPowers.leftSpeed);
-                rightMotor.setPower(motorPowers.rightSpeed);
+                driveMotors.leftMotor.setPower(motorPowers.leftSpeed);
+                driveMotors.rightMotor.setPower(motorPowers.rightSpeed);
             }
         } else {
             // We are at our current target, so stop, signal complete, and wait for restart

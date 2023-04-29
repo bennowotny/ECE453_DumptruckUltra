@@ -34,10 +34,10 @@ public:
     void start();
     void stop();
     [[nodiscard]] auto getStatus() const -> DrivingAlgorithmStatus;
+    [[nodiscard]] auto getMotors() -> DriveMotorLayout &;
 
 private:
-    Hardware::Motors::Motor leftMotor;
-    Hardware::Motors::Motor rightMotor;
+    DriveMotorLayout driveMotors;
     const std::function<float()> getFrontDistanceFunction;
     const std::function<DeadReckoning::Pose2D()> getPoseFunction;
     DeadReckoning::Pose2D currentTarget;
