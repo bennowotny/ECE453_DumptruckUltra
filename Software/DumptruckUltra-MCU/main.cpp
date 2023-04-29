@@ -63,7 +63,7 @@ auto main() -> int {
     // Make all objects
     // const auto blinkyLED{Hardware::Processor::FreeRTOSBlinky(Hardware::Processor::USER_LED, 0, "Blinky")};
 
-    Hardware::I2C::I2CBusManager::i2cPin_t i2cPins{
+    Hardware::I2C::i2cPin_t i2cPins{
         .sda = Hardware::Processor::I2C_SDA,
         .scl = Hardware::Processor::I2C_SCL};
 
@@ -130,8 +130,12 @@ auto main() -> int {
          .color{Hardware::RGB_LED::PredefinedColors::CYAN}});
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::LOCAL_SEARCH,
-        {.stateAction{[&motorLayout{drivingAlg->getMotors()}, &vision{*vision}]() {
-             return Logic::FSM::localSearchAction(motorLayout, vision);
+        {.stateAction{[motorControl{
+                           [&drivingAlg{*drivingAlg}](Logic::DrivingAlgorithm::MotorSpeeds speeds) {
+                               drivingAlg.setPower(speeds);
+                           }},
+                       &vision{*vision}]() {
+             return Logic::FSM::localSearchAction(motorControl, vision);
          }},
          .color{Hardware::RGB_LED::PredefinedColors::GREEN}});
     dumptruckFSM->addToStateTable(

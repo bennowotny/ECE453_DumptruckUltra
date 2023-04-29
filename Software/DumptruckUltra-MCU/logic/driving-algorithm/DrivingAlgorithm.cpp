@@ -13,7 +13,8 @@ namespace DrivingAlgorithm {
 DrivingAlgorithm::DrivingAlgorithm(DriveMotorLayout driveMotors,
                                    std::function<float()> getFrontDistanceFunction,
                                    std::function<DeadReckoning::Pose2D()> getPoseFunction)
-    : driveMotors{driveMotors},
+    : leftMotor{driveMotors.leftMotor},
+      rightMotor{driveMotors.rightMotor},
       getFrontDistanceFunction{std::move(getFrontDistanceFunction)},
       getPoseFunction{std::move(getPoseFunction)},
       currentTarget{.x = 0, .y = 0, .heading = 0},
@@ -45,16 +46,15 @@ void DrivingAlgorithm::loadNewTarget(const DeadReckoning::Pose2D &position) {
 }
 
 void DrivingAlgorithm::start() {
-    driveMotors.leftMotor.enable();
-    driveMotors.rightMotor.enable();
+    leftMotor.enable();
+    rightMotor.enable();
     currentStatus = DrivingAlgorithmStatus::RUNNING;
     // Manipulate task LAST to avoid scheduling shennanigans
     vTaskResume(drivingTaskHandle);
 }
 
 void DrivingAlgorithm::stop(const DrivingAlgorithmStatus &stopStatus) {
-    driveMotors.leftMotor.disable();
-    driveMotors.rightMotor.disable();
+    setPower({.leftPower = 0, .rightPower = 0});
     currentStatus = stopStatus;
     // Manipulate task LAST to avoid scheduling shennanigans
     vTaskSuspend(drivingTaskHandle);
@@ -64,8 +64,13 @@ void DrivingAlgorithm::stop() {
     stop(DrivingAlgorithmStatus::STOPPED);
 }
 
-[[nodiscard]] auto DrivingAlgorithm::getMotors() -> DriveMotorLayout & {
-    return driveMotors;
+void DrivingAlgorithm::setPower(MotorSpeeds speeds) {
+    leftMotor.setPower(speeds.leftPower);
+    rightMotor.setPower(speeds.rightPower);
+}
+
+[[nodiscard]] auto DrivingAlgorithm::getPower() const -> MotorSpeeds {
+    return {.leftPower = leftMotor.getPower(), .rightPower = rightMotor.getPower()};
 }
 
 void DrivingAlgorithm::drivingTask() {
@@ -83,13 +88,13 @@ void DrivingAlgorithm::drivingTask() {
             // If something is in the way...
             if (getFrontDistanceFunction() < DISTANCE_THRESHOLD_METERS) {
                 // Turn right
-                driveMotors.leftMotor.setPower(Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS);
-                driveMotors.rightMotor.setPower(-Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS);
+                setPower(
+                    {.leftPower = Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS,
+                     .rightPower = -Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS});
             } else {
                 // Otherwise, drive at the target
                 const auto motorPowers{deltaAngleToDrivePowers(headingToTarget - currPose.heading)};
-                driveMotors.leftMotor.setPower(motorPowers.leftSpeed);
-                driveMotors.rightMotor.setPower(motorPowers.rightSpeed);
+                setPower(motorPowers);
             }
         } else {
             // We are at our current target, so stop, signal complete, and wait for restart
@@ -109,7 +114,7 @@ void DrivingAlgorithm::drivingTask() {
  *  - pi/2 (turning right)
  *  - pi/2 (turning left)
  */
-auto DrivingAlgorithm::deltaAngleToDrivePowers(float angleDiff) -> DrivingAlgorithm::DrivingPower {
+auto DrivingAlgorithm::deltaAngleToDrivePowers(float angleDiff) -> DrivingAlgorithm::MotorSpeeds {
     float leftSpeed{0};
     float rightSpeed{0};
     constexpr float CLIMB_RATE{4};
@@ -120,7 +125,7 @@ auto DrivingAlgorithm::deltaAngleToDrivePowers(float angleDiff) -> DrivingAlgori
         leftSpeed = Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS;
         rightSpeed = Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS * std::max(static_cast<float>(-CLIMB_RATE / M_PI * angleDiff + 1), -1.0F);
     }
-    return {.leftSpeed = leftSpeed, .rightSpeed = rightSpeed};
+    return {.leftPower = leftSpeed, .rightPower = rightSpeed};
 }
 
 auto DrivingAlgorithm::distanceToTarget(const DeadReckoning::Pose2D &currPosition) const -> float {

@@ -43,21 +43,16 @@ auto driveToSearchAction(Logic::DrivingAlgorithm::DrivingAlgorithm &drivingAlg) 
     return DumptruckUltra::FSMState::LOCAL_SEARCH;
 }
 
-auto localSearchAction(DrivingAlgorithm::DriveMotorLayout &driveMotors, Logic::Vision::ObjectDetector &vision) -> DumptruckUltra::FSMState {
+auto localSearchAction(const std::function<void(Logic::DrivingAlgorithm::MotorSpeeds)> &motorControl, Logic::Vision::ObjectDetector &vision) -> DumptruckUltra::FSMState {
     // printf("%s", "Doing localSearch state\n");
 
-    driveMotors.leftMotor.enable();
-    driveMotors.rightMotor.enable();
-
-    driveMotors.leftMotor.setPower(-0.3);
-    driveMotors.rightMotor.setPower(0.3);
+    motorControl({.leftPower = -0.3, .rightPower = 0.3});
 
     while (!vision.detectedObject()) {
         vTaskDelay(pdMS_TO_TICKS(5));
     }
 
-    driveMotors.leftMotor.disable();
-    driveMotors.rightMotor.disable();
+    motorControl({.leftPower = 0, .rightPower = 0});
 
     return DumptruckUltra::FSMState::APPROACH;
 }

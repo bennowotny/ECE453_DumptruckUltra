@@ -90,12 +90,8 @@ DISABLE_COMPONENTS=
 # by default, or otherwise not found by the build system.
 # TEAM03: Change this line to specify which file has the main you want to run
 # DEFAULT: Use main.cpp
-<<<<<<< HEAD
 SOURCES=logic/dead-reckoning/test/test_IntegrationWithIMU.cpp
 # SOURCES=hw/imu/test/test_printData.cpp
-=======
-SOURCES=hw/servos/test/test_Servo.cpp
->>>>>>> 47981b2388fc0227a58fc923a8cfd8854fdc18a3
 
 # Like SOURCES, but for include directories. Value should be paths to
 # directories (without a leading -I).

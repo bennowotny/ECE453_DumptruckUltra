@@ -24,6 +24,11 @@ struct DriveMotorLayout {
     Hardware::Motors::Motor rightMotor;
 };
 
+struct MotorSpeeds {
+    float leftPower;
+    float rightPower;
+};
+
 class DrivingAlgorithm {
 public:
     DrivingAlgorithm(DriveMotorLayout driveMotors,
@@ -34,10 +39,13 @@ public:
     void start();
     void stop();
     [[nodiscard]] auto getStatus() const -> DrivingAlgorithmStatus;
-    [[nodiscard]] auto getMotors() -> DriveMotorLayout &;
+
+    void setPower(MotorSpeeds speeds);
+    [[nodiscard]] auto getPower() const -> MotorSpeeds;
 
 private:
-    DriveMotorLayout driveMotors;
+    Hardware::Motors::Motor leftMotor;
+    Hardware::Motors::Motor rightMotor;
     const std::function<float()> getFrontDistanceFunction;
     const std::function<DeadReckoning::Pose2D()> getPoseFunction;
     DeadReckoning::Pose2D currentTarget;
@@ -47,12 +55,7 @@ private:
 
     [[noreturn]] void drivingTask();
 
-    struct DrivingPower {
-        float leftSpeed;
-        float rightSpeed;
-    };
-
-    [[nodiscard]] auto static deltaAngleToDrivePowers(float angleDiff) -> DrivingPower;
+    [[nodiscard]] auto static deltaAngleToDrivePowers(float angleDiff) -> MotorSpeeds;
     [[nodiscard]] auto distanceToTarget(const DeadReckoning::Pose2D &currPosition) const -> float;
     void stop(const DrivingAlgorithmStatus &stopStatus);
 

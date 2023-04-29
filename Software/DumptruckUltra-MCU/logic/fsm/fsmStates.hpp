@@ -6,13 +6,12 @@
 #include "logic/arm-inverse-kinematics/ArmControl.hpp"
 #include "vision/ObjectDetector.hpp"
 
-
 namespace Logic {
 namespace FSM {
 
 auto initStateAction() -> DumptruckUltra::FSMState;
 auto driveToSearchAction(Logic::DrivingAlgorithm::DrivingAlgorithm &drivingAlg) -> DumptruckUltra::FSMState;
-auto localSearchAction(DrivingAlgorithm::DriveMotorLayout &driveMotors, Logic::Vision::ObjectDetector &vision) -> DumptruckUltra::FSMState;
+auto localSearchAction(const std::function<void(Logic::DrivingAlgorithm::MotorSpeeds)> &motorControl, Logic::Vision::ObjectDetector &vision) -> DumptruckUltra::FSMState;
 auto approachAction(Logic::DrivingAlgorithm::DrivingAlgorithm &drivingAlg, Logic::Vision::ObjectDetector &vision) -> DumptruckUltra::FSMState;
 auto pickupAction(Logic::Arm::ArmControl &arm, Logic::Vision::ObjectDetector &vision, Logic::DeadReckoning::DeadReckoning &deadReckoning, Logic::Dispenser::Dispenser &dispenser) -> DumptruckUltra::FSMState;
 auto driveToStartAction(Logic::DrivingAlgorithm::DrivingAlgorithm &drivingAlg) -> DumptruckUltra::FSMState;
