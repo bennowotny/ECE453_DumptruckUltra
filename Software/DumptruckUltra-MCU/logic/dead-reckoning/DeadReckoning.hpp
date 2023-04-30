@@ -10,7 +10,7 @@ namespace DeadReckoning {
 
 class DeadReckoning {
 public:
-    explicit DeadReckoning(std::function<DrivingAlgorithm::MotorSpeeds()> getMotorSpeeds);
+    DeadReckoning();
 
     void sendAccelerometerMessage(const Hardware::IMU::AccelerometerData &msg);
 
@@ -18,10 +18,12 @@ public:
 
     [[nodiscard]] auto getCurrentPose() const -> Pose2D;
 
+    void setMotorSpeedsHandle(std::function<DrivingAlgorithm::MotorSpeeds()> getMotorSpeeds);
+
 private:
     Pose2D currentPosition;
 
-    const std::function<DrivingAlgorithm::MotorSpeeds()> getMotorSpeeds;
+    std::function<DrivingAlgorithm::MotorSpeeds()> getMotorSpeeds;
 
     struct LinearVelocity2D {
         float dx;
