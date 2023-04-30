@@ -9,9 +9,11 @@ from tflite_support.task import vision
 import utils
 import serial
 import struct
+import math
 
 from distance_sampler import DistanceSampler2
 
+ser = serial.Serial('/dev/ttyAMA0',9600,timeout=None)
 
 def thread_test():
     while(1):
@@ -54,9 +56,12 @@ def run(
   options = vision.ObjectDetectorOptions(base_options=base_options, detection_options=detection_options)
   detector = vision.ObjectDetector.create_from_options(options)
 
-  pixel_size = 398.0      #3.98 um
+  # pixel_size = 398.0      #3.98 um
+  pixel_size = 304.0
+
   focalLength = 3.67     # in mm
-  knownDistance = 50      # in mm
+  # knownDistance = 50      # in mm
+  knownDistance = 100.0
   absoluteWidth = 49.784  # 1.96 in
   absoluteHeight = 49.784 # 1.96 in
   distanceSampler = DistanceSampler2(
@@ -68,7 +73,6 @@ def run(
   
   # Continuously capture images from the camera and run inference
   while cap.isOpened():
-    ser = serial.Serial('/dev/ttyAMA0',9600,timeout=None)
 
     success, image = cap.read()
     if not success:
@@ -89,27 +93,29 @@ def run(
         bounding_box = detection_object.bounding_box
         (x,y,w,h) = bounding_box.origin_x, bounding_box.origin_y, bounding_box.width, bounding_box.height
         object_class = detection_object.categories[0].category_name
-        #print(f'x,y,w,h,object_class: {x,y,w,h,object_class}')
-        # ser.write(b'{object_class},{x},{y},{w},{h}\r\n')
         results_string = b''
-        if object_class in {'remote','cell phone','frisbee'}:
-            pass
-            ser.write(b"x\r\n");
-            ser.write(b"y\r\n");
-            ser.write(b"x,y,w,h,d,object_class:\r\n");
-            #ser.write(max(x,0))     # bbox W can be negative
-            results_string += struct.pack('I',max(x,0))
+        if object_class in {'remote','cell phone','frisbee','cup','chair','vase'}:
+            ser.write(b"x,y,w,h,d,real_x,real_y\r\n");
             results_string += struct.pack('I',max(x,0))
             results_string += struct.pack('I',max(y,0))
             results_string += struct.pack('I',w)
             results_string += struct.pack('I',h)
-            distance = (distanceSampler.getDistance(y))
+
+            # Retrieve estimated relative distance, x, y
+            distance = distanceSampler.getDistance(h)
+            angle = distanceSampler.getAngle(x,y,w,h,width,height)
+            angle_degrees = math.degrees(angle)
+            (real_x_dist,real_y_dist) = distanceSampler.getRealXYFlatPlane(angle,distance)
             results_string += struct.pack('f',distance)
+            results_string += struct.pack('f',real_x_dist)
+            results_string += struct.pack('f',real_y_dist)
             ser.write(results_string)
-            ser.write(object_class.encode('utf-8'))
+            # ser.write(object_class.encode('utf-8'))
             ser.write(b'\r\n')
-            # line = ser.readline().decode('utf-8').rstrip()
-    ser.close()
+
+            print(f'x,y,w,h,object_class: {x,y,w,h,object_class}')
+            print(f'distance & angle: {distance, angle_degrees}')
+            print(f'Estimated real x and y distance: {real_x_dist, real_y_dist}')
 
     if visualize_image:
 
@@ -136,6 +142,7 @@ def run(
     if cv2.waitKey(1)==27:
         break
 
+  ser.close()
   cap.release()
   cv2.destroyAllWindows()
 
@@ -157,7 +164,6 @@ def main():
 if __name__ == '__main__':
     import threading
     #x = threading.Thread(target=thread_test)
-    detect_thread = threading.Thread(target=main)
     #x.start()
+    detect_thread = threading.Thread(target=main)
     detect_thread.start()
-    #main()
