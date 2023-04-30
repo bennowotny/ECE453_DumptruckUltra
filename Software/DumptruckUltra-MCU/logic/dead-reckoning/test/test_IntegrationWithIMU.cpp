@@ -25,12 +25,12 @@ auto main() -> int {
     Hardware::I2C::i2cPin_t i2cPins{.sda = P10_1, .scl = P10_0};
     auto i2cBus{std::make_shared<I2CBusManager>(i2cPins)};
 
-    auto uut{std::make_unique<DeadReckoning>([]() -> Logic::DrivingAlgorithm::MotorSpeeds { return {0, 0}; })};
+    auto uut{std::make_unique<DeadReckoning>([]() -> Logic::DrivingAlgorithm::MotorSpeeds { return {0.1, 0}; })};
 
     auto imu{std::make_unique<IMU>(
         i2cBus,
-        [&uut{*uut}](const Hardware::IMU::AccelerometerData &msg) -> void { uut.sendAccelerometerMessage(msg); },
-        [&uut{*uut}](const Hardware::IMU::GyroscopeData &msg) -> void { uut.sendGyroscopeMessage(msg); },
+        [uu2{uut.get()}](const Hardware::IMU::AccelerometerData &msg) -> void { uu2->sendAccelerometerMessage(msg); },
+        [uut2{uut.get()}](const Hardware::IMU::GyroscopeData &msg) -> void { uut2->sendGyroscopeMessage(msg); },
         printStr)};
 
     cy_retarget_io_init(P5_1, P5_0, 115200);
@@ -45,9 +45,9 @@ auto main() -> int {
                 vTaskDelay(pdMS_TO_TICKS(500));
                 Logic::DeadReckoning::Pose2D currPose = uut->getCurrentPose();
                 // (void)currPose;
-                cyhal_gpio_write(P10_3, true);
+                // cyhal_gpio_write(P10_3, true);
                 printf("%0.2f %0.2f %0.2f\r\n", currPose.x, currPose.y, currPose.heading);
-                cyhal_gpio_write(P10_3, false);
+                // cyhal_gpio_write(P10_3, false);
             }
         },
         "dead_reckoning",
