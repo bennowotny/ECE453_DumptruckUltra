@@ -7,6 +7,8 @@
 
 #include "Servo.hpp"
 #include "cyhal_pwm.h"
+#include "cyhal_system.h"
+#include <cmath>
 
 namespace Hardware {
 namespace Servos {
@@ -34,6 +36,18 @@ void Servo::setPosition(float position) {
 
     auto result{cyhal_pwm_set_duty_cycle(&pwmHandle, positionScaledToOutput, SERVO_PWM_FREQUENCY_HZ)};
     CY_ASSERT(CY_RSLT_SUCCESS == result);
+}
+
+void Servo::sweep(float start, float end, SweepConfiguration sweepParams) {
+
+    auto currentPosition{start};
+    const auto step{(end - start) / static_cast<float>(sweepParams.stepCount)};
+    while (std::abs(end - currentPosition) > step) {
+        setPosition(currentPosition);
+        cyhal_system_delay_ms(sweepParams.stepDuration_ms);
+        currentPosition += step;
+    }
+    setPosition(end);
 }
 
 } // namespace Servos
