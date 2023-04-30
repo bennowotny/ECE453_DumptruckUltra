@@ -18,7 +18,7 @@ DumptruckUltra::DumptruckUltra(RGB_LED::RGBLED led) : led{led},
     xTaskCreate(
         [](void *obj) -> void { static_cast<DumptruckUltra *>(obj)->fsmTask(); },
         "DumpTruckUltraFSM",
-        configMINIMAL_STACK_SIZE,
+        configMINIMAL_STACK_SIZE * 4,
         this,
         tskIDLE_PRIORITY + 1,
         &fsmTaskHandle);

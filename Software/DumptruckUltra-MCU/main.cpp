@@ -61,8 +61,18 @@ auto main() -> int {
     Hardware::Processor::setupProcessor();
 
     // Make all objects
-    // TODO Fix so it's not an error
-    // const auto blinkyLED{Hardware::Processor::FreeRTOSBlinky(Hardware::Processor::USER_LED, 0, "Blinky")};
+
+    /*
+     * RGB LED
+     */
+    const auto rgbLed{std::make_unique<Hardware::RGB_LED::RGBLED>(
+        Hardware::RGB_LED::RGBLayout{
+            .redPin = Hardware::Processor::USER_RGB_RED,
+            .greenPin = Hardware::Processor::USER_RGB_GREEN,
+            .bluePin = Hardware::Processor::USER_RGB_BLUE})};
+
+    const auto blinkyLED{Hardware::Processor::FreeRTOSBlinky(Hardware::Processor::USER_LED, 0, "Blinky")};
+    (void)blinkyLED; // Unused, doing it's own thing
 
     /*
      * I2C BUS
@@ -71,7 +81,7 @@ auto main() -> int {
         .sda = Hardware::Processor::I2C_SDA,
         .scl = Hardware::Processor::I2C_SCL};
 
-    auto i2cBus{std::make_shared<Hardware::I2C::I2CBusManager>(&i2cPins)};
+    auto i2cBus{std::make_shared<Hardware::I2C::I2CBusManager>(i2cPins)};
 
     /*
      * DISTANCE SENSOR
@@ -92,12 +102,12 @@ auto main() -> int {
         .leftMotor = Hardware::Motors::Motor{
             {.forwardPin = Hardware::Processor::M1_FORWARD, .backwardPin = Hardware::Processor::M1_BACKWARD},
             Hardware::Motors::MotorDirection::FORWARD}, // TODO: Pick pins
-        .rightMotor = Hardware::Motors::Motor{{.forwardPin = Hardware::Processor::M2_FORWARD, .backwardPin = Hardware::Processor::M2_FORWARD}, Hardware::Motors::MotorDirection::REVERSE}};
+        .rightMotor = Hardware::Motors::Motor{{.forwardPin = Hardware::Processor::M2_FORWARD, .backwardPin = Hardware::Processor::M2_BACKWARD}, Hardware::Motors::MotorDirection::REVERSE}};
 
     const auto drivingAlg{std::make_unique<Logic::DrivingAlgorithm::DrivingAlgorithm>(
         driveLayout,
-        [&distSensor{*distSensor}]() -> float { return distSensor.getDistanceMeters(); },
-        [&deadReckoning{*deadReckoning}]() -> Logic::DeadReckoning::Pose2D { return deadReckoning.getCurrentPose(); })};
+        [distSensor{distSensor.get()}]() -> float { return distSensor->getDistanceMeters(); },
+        [deadReckoning{deadReckoning.get()}]() -> Logic::DeadReckoning::Pose2D { return deadReckoning->getCurrentPose(); })};
 
     deadReckoning->setMotorSpeedsHandle(
         [drivingAlg{drivingAlg.get()}]() { return drivingAlg->getPower(); });
@@ -107,8 +117,8 @@ auto main() -> int {
      */
     const auto imu{std::make_unique<Hardware::IMU::IMU>(
         i2cBus,
-        [&deadReckoning{*deadReckoning}](const Hardware::IMU::AccelerometerData &accelData) { deadReckoning.sendAccelerometerMessage(accelData); },
-        [&deadReckoning{*deadReckoning}](const Hardware::IMU::GyroscopeData &gyroData) { deadReckoning.sendGyroscopeMessage(gyroData); },
+        [deadReckoning{deadReckoning.get()}](const Hardware::IMU::AccelerometerData &accelData) { deadReckoning->sendAccelerometerMessage(accelData); },
+        [deadReckoning{deadReckoning.get()}](const Hardware::IMU::GyroscopeData &gyroData) { deadReckoning->sendGyroscopeMessage(gyroData); },
         nullptr)}; // FIXME This parameter should not exist
 
     /*
@@ -127,7 +137,7 @@ auto main() -> int {
 
     const auto arm{std::make_unique<Logic::Arm::ArmControl>(
         armLayout,
-        [&pressureSensor{*pressureSensor}]() -> bool { return pressureSensor.isPressed(); })};
+        [pressureSensor{pressureSensor.get()}]() -> bool { return pressureSensor->isPressed(); })};
 
     /*
      * VISION SYSTEM
@@ -137,17 +147,8 @@ auto main() -> int {
     /*
      * DISPENSER
      */
-    Hardware::Servos::Servo dispenserServo{Hardware::Processor::SERVO7_PWM};
+    Hardware::Servos::Servo dispenserServo{Hardware::Processor::SERVO5_PWM};
     const auto dispenser{std::make_unique<Logic::Dispenser::Dispenser>(dispenserServo)};
-
-    /*
-     * RGB LED
-     */
-    const auto rgbLed{std::make_unique<Hardware::RGB_LED::RGBLED>(
-        Hardware::RGB_LED::RGBLayout{
-            .redPin = Hardware::Processor::USER_RGB_RED,
-            .greenPin = Hardware::Processor::USER_RGB_GREEN,
-            .bluePin = Hardware::Processor::USER_RGB_BLUE})};
 
     // Create FSM and add states
     auto dumptruckFSM = std::make_unique<Logic::FSM::DumptruckUltra>(*rgbLed);
@@ -169,8 +170,8 @@ auto main() -> int {
                            [drivingAlg{drivingAlg.get()}](Logic::DrivingAlgorithm::MotorSpeeds speeds) {
                                drivingAlg->setPower(speeds);
                            }},
-                       &vision{*vision}]() {
-             return Logic::FSM::localSearchAction(motorControl, vision);
+                       vision{vision.get()}]() {
+             return Logic::FSM::localSearchAction(motorControl, *vision);
          }},
          .color{Hardware::RGB_LED::PredefinedColors::GREEN}});
     dumptruckFSM->addToStateTable(
