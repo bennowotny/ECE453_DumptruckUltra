@@ -61,25 +61,38 @@ auto main() -> int {
     Hardware::Processor::setupProcessor();
 
     // Make all objects
+    // TODO Fix so it's not an error
     // const auto blinkyLED{Hardware::Processor::FreeRTOSBlinky(Hardware::Processor::USER_LED, 0, "Blinky")};
 
+    /*
+     * I2C BUS
+     */
     Hardware::I2C::i2cPin_t i2cPins{
         .sda = Hardware::Processor::I2C_SDA,
         .scl = Hardware::Processor::I2C_SCL};
 
     auto i2cBus{std::make_shared<Hardware::I2C::I2CBusManager>(&i2cPins)};
 
+    /*
+     * DISTANCE SENSOR
+     */
     const auto distSensor{std::make_unique<Hardware::DistanceSensor::DistanceSensor>(
         i2cBus,
         0x52 >> 1)};
 
+    /*
+     * DEAD RECKONING
+     */
+    const auto deadReckoning{std::make_unique<Logic::DeadReckoning::DeadReckoning>()};
+
+    /*
+     * DRIVING ALGORITHM
+     */
     Logic::DrivingAlgorithm::DriveMotorLayout driveLayout{
         .leftMotor = Hardware::Motors::Motor{
             {.forwardPin = Hardware::Processor::M1_FORWARD, .backwardPin = Hardware::Processor::M1_BACKWARD},
             Hardware::Motors::MotorDirection::FORWARD}, // TODO: Pick pins
         .rightMotor = Hardware::Motors::Motor{{.forwardPin = Hardware::Processor::M2_FORWARD, .backwardPin = Hardware::Processor::M2_FORWARD}, Hardware::Motors::MotorDirection::REVERSE}};
-
-    const auto deadReckoning{std::make_unique<Logic::DeadReckoning::DeadReckoning>()};
 
     const auto drivingAlg{std::make_unique<Logic::DrivingAlgorithm::DrivingAlgorithm>(
         driveLayout,
@@ -89,14 +102,23 @@ auto main() -> int {
     deadReckoning->setMotorSpeedsHandle(
         [drivingAlg{drivingAlg.get()}]() { return drivingAlg->getPower(); });
 
+    /*
+     * IMU
+     */
     const auto imu{std::make_unique<Hardware::IMU::IMU>(
         i2cBus,
         [&deadReckoning{*deadReckoning}](const Hardware::IMU::AccelerometerData &accelData) { deadReckoning.sendAccelerometerMessage(accelData); },
         [&deadReckoning{*deadReckoning}](const Hardware::IMU::GyroscopeData &gyroData) { deadReckoning.sendGyroscopeMessage(gyroData); },
         nullptr)}; // FIXME This parameter should not exist
 
+    /*
+     * PRESSURE SENSOR
+     */
     const auto pressureSensor{std::make_unique<Hardware::PressureSensor::PressureSensor>(Hardware::Processor::PRESSURE_SENSOR_ADC)};
 
+    /*
+     * ARM CONTROL
+     */
     Logic::Arm::ArmLayout armLayout{
         .shoulder = Hardware::Servos::Servo{Hardware::Processor::SERVO1_PWM},
         .elbow = Hardware::Servos::Servo{Hardware::Processor::SERVO2_PWM},
@@ -107,11 +129,20 @@ auto main() -> int {
         armLayout,
         [&pressureSensor{*pressureSensor}]() -> bool { return pressureSensor.isPressed(); })};
 
+    /*
+     * VISION SYSTEM
+     */
     const auto vision{std::make_unique<Logic::Vision::ObjectDetector>()};
 
+    /*
+     * DISPENSER
+     */
     Hardware::Servos::Servo dispenserServo{Hardware::Processor::SERVO7_PWM};
     const auto dispenser{std::make_unique<Logic::Dispenser::Dispenser>(dispenserServo)};
 
+    /*
+     * RGB LED
+     */
     const auto rgbLed{std::make_unique<Hardware::RGB_LED::RGBLED>(
         Hardware::RGB_LED::RGBLayout{
             .redPin = Hardware::Processor::USER_RGB_RED,
