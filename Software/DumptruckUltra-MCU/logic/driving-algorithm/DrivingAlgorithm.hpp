@@ -64,7 +64,7 @@ private:
     static constexpr uint32_t DRIVING_ALGORITHM_PRIORITY{tskIDLE_PRIORITY + 1};
     static constexpr TickType_t DRIVING_ALGORITHM_TASK_PERIOD_TICKS{pdMS_TO_TICKS(2)};
 
-    static constexpr float DISTANCE_THRESHOLD_METERS{0.5};
+    static constexpr float DISTANCE_THRESHOLD_METERS{0.2};
     static constexpr float TARGET_PROXIMITY_THRESHOLD_METERS{0.1};
     static constexpr float TARGET_HEADING_THRESHOLD_RADIANS{0.1};
 };

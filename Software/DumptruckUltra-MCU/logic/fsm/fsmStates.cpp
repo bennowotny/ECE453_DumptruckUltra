@@ -48,7 +48,7 @@ auto localSearchAction(const std::function<void(Logic::DrivingAlgorithm::MotorSp
     // printf("%s", "Doing localSearch state\n");
     vTaskDelay(pdMS_TO_TICKS(1000));
 
-    motorControl({.leftPower = -0.3, .rightPower = 0.3});
+    motorControl({.leftPower = -0.15, .rightPower = 0.15});
 
     while (!vision.detectedObject()) {
         vTaskDelay(pdMS_TO_TICKS(5));
