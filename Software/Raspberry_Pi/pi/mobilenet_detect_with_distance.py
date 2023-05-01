@@ -96,27 +96,24 @@ def run(
         results_string = b''
         if object_class in {'remote','cell phone','frisbee','cup','chair','vase'}:
             # ser.write(b"x,y,w,h,d,real_x,real_y\r\n");
-            # results_string += struct.pack('I',max(x,0))
-            # results_string += struct.pack('I',max(y,0))
-            # results_string += struct.pack('I',w)
-            # results_string += struct.pack('I',h)
-            results_string += struct.pack('f',float(max(x,0)))
-            results_string += struct.pack('f',float(max(y,0)))
-            results_string += struct.pack('f',float(w))
-            results_string += struct.pack('f',float(h))
+
+            #results_string += struct.pack('f',float(max(x,0)))
+            #results_string += struct.pack('f',float(max(y,0)))
+            #results_string += struct.pack('f',float(w))
+            #results_string += struct.pack('f',float(h))
 
             # Retrieve estimated relative distance, x, y
             distance = distanceSampler.getDistance(h)
             angle = distanceSampler.getAngle(x,y,w,h,width,height)
             angle_degrees = math.degrees(angle)
             (real_x_dist,real_y_dist) = distanceSampler.getRealXYFlatPlane(angle,distance)
-            results_string += struct.pack('f',distance)
             results_string += struct.pack('f',real_x_dist)
             results_string += struct.pack('f',real_y_dist)
+            # results_string += struct.pack('f',distance)
             ser.write(results_string)
-            # ser.write(object_class.encode('utf-8'))
             ser.write(b'\r\n')
 
+            # console print for debugging
             print(f'x,y,w,h,object_class: {x,y,w,h,object_class}')
             print(f'distance & angle: {distance, angle_degrees}')
             print(f'Estimated real x and y distance: {real_x_dist, real_y_dist}')
