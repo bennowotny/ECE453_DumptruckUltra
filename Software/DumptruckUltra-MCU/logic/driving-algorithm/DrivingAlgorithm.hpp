@@ -60,7 +60,7 @@ private:
     void stop(const DrivingAlgorithmStatus &stopStatus);
 
     static constexpr auto DRIVING_ALGORITHM_TASK_NAME{"Driving Algorithm"};
-    static constexpr uint16_t DRIVING_ALGORITHM_STACK_SIZE{configMINIMAL_STACK_SIZE};
+    static constexpr uint16_t DRIVING_ALGORITHM_STACK_SIZE{configMINIMAL_STACK_SIZE * 2};
     static constexpr uint32_t DRIVING_ALGORITHM_PRIORITY{tskIDLE_PRIORITY + 1};
     static constexpr TickType_t DRIVING_ALGORITHM_TASK_PERIOD_TICKS{pdMS_TO_TICKS(2)};
 

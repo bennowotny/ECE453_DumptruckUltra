@@ -8,7 +8,7 @@ using Hardware::Servos::Servo;
 ArmControl::ArmControl(const ArmLayout &armLayout, std::function<bool()> isClawOpen) {
 }
 
-void collect(double distanceForward_m) {
+void ArmControl::collect(double distanceForward_m) {
 }
 
 } // namespace Arm

@@ -11,7 +11,7 @@ auto main() -> int {
     using Hardware::DistanceSensor::DistanceSensor;
     using Hardware::I2C::I2CBusManager;
 
-    const Hardware::I2C::I2CBusManager::i2cPin_t pins{.sda = P9_1, .scl = P9_0};
+    const Hardware::I2C::i2cPin_t pins{.sda = P9_1, .scl = P9_0};
     auto busManager{std::make_shared<I2CBusManager>(pins)};
     DistanceSensor uut{busManager, 0x52 >> 1};
 

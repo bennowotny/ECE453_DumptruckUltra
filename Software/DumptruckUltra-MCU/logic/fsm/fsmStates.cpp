@@ -20,16 +20,14 @@ namespace FSM {
 auto initStateAction() -> DumptruckUltra::FSMState {
     // printf("%s", "Doing init state\n");
     vTaskDelay(pdMS_TO_TICKS(500));
+    srand(xTaskGetTickCount());
     return DumptruckUltra::FSMState::DRIVE_TO_SEARCH;
 }
 
 auto driveToSearchAction(Logic::DrivingAlgorithm::DrivingAlgorithm &drivingAlg) -> DumptruckUltra::FSMState {
     // printf("%s", "Doing driveToSearch state\n");
-    std::random_device randomSource{};
-    std::default_random_engine randomEngine{randomSource()};
-    std::uniform_real_distribution<float> distribution{0, 10};
-    const float randX{distribution(randomEngine)};
-    const float randY{distribution(randomEngine)};
+    const float randX{10 * static_cast<float>(rand()) / RAND_MAX};
+    const float randY{10 * static_cast<float>(rand()) / RAND_MAX};
 
     // printf("%d", drivingAlg->getStatus());
     drivingAlg.loadNewTarget({.x = randX, .y = randY, .heading = 0});

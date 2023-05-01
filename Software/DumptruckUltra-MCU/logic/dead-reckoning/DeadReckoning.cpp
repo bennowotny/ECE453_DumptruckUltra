@@ -7,9 +7,9 @@
 namespace Logic {
 namespace DeadReckoning {
 
-DeadReckoning::DeadReckoning(std::function<DrivingAlgorithm::MotorSpeeds()> getMotorSpeeds)
+DeadReckoning::DeadReckoning()
     : currentPosition{.x = 0, .y = 0, .heading = 0},
-      getMotorSpeeds{std::move(getMotorSpeeds)},
+      getMotorSpeeds{[]() { return DrivingAlgorithm::MotorSpeeds{.leftPower = 0, .rightPower = 0}; }},
       currentVelocity{.dx = 0, .dy = 0} {}
 
 void DeadReckoning::sendAccelerometerMessage(const Hardware::IMU::AccelerometerData &msg) {
@@ -40,6 +40,10 @@ void DeadReckoning::sendGyroscopeMessage(const Hardware::IMU::GyroscopeData &msg
 
 auto DeadReckoning::getCurrentPose() const -> Pose2D {
     return currentPosition;
+}
+
+void DeadReckoning::setMotorSpeedsHandle(std::function<DrivingAlgorithm::MotorSpeeds()> getMotorSpeeds) {
+    this->getMotorSpeeds = std::move(getMotorSpeeds);
 }
 
 } // namespace DeadReckoning
