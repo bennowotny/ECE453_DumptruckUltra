@@ -9,7 +9,7 @@
 namespace Logic {
 namespace FSM {
 
-auto initStateAction() -> DumptruckUltra::FSMState;
+auto initStateAction(const std::function<void()> &setup) -> DumptruckUltra::FSMState;
 auto driveToSearchAction(Logic::DrivingAlgorithm::DrivingAlgorithm &drivingAlg) -> DumptruckUltra::FSMState;
 auto localSearchAction(const std::function<void(Logic::DrivingAlgorithm::MotorSpeeds)> &motorControl, Logic::Vision::ObjectDetector &vision) -> DumptruckUltra::FSMState;
 auto approachAction(Logic::DrivingAlgorithm::DrivingAlgorithm &drivingAlg, Logic::Vision::ObjectDetector &vision) -> DumptruckUltra::FSMState;

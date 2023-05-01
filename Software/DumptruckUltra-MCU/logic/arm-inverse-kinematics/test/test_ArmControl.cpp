@@ -1,5 +1,3 @@
-
-
 #include "Servo.hpp"
 #include "arm-inverse-kinematics/ArmControl.hpp"
 #include "proc_setup.hpp"
@@ -11,7 +9,7 @@ auto main() -> int {
     using Logic::Arm::ArmControl;
     using Logic::Arm::ArmLayout;
 
-    const ArmLayout arm{
+    ArmLayout arm{
         .shoulder{Servo{Hardware::Processor::SERVO1_PWM}},
         .elbow{Servo{Hardware::Processor::SERVO2_PWM}},
         .wrist{Servo{Hardware::Processor::SERVO3_PWM}},

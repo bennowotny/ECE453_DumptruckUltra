@@ -101,8 +101,8 @@ auto main() -> int {
     Logic::DrivingAlgorithm::DriveMotorLayout driveLayout{
         .leftMotor = Hardware::Motors::Motor{
             {.forwardPin = Hardware::Processor::M1_FORWARD, .backwardPin = Hardware::Processor::M1_BACKWARD},
-            Hardware::Motors::MotorDirection::FORWARD}, // TODO: Pick pins
-        .rightMotor = Hardware::Motors::Motor{{.forwardPin = Hardware::Processor::M2_FORWARD, .backwardPin = Hardware::Processor::M2_BACKWARD}, Hardware::Motors::MotorDirection::REVERSE}};
+            Hardware::Motors::MotorDirection::REVERSE}, // TODO: Pick pins
+        .rightMotor = Hardware::Motors::Motor{{.forwardPin = Hardware::Processor::M2_FORWARD, .backwardPin = Hardware::Processor::M2_BACKWARD}, Hardware::Motors::MotorDirection::FORWARD}};
 
     const auto drivingAlg{std::make_unique<Logic::DrivingAlgorithm::DrivingAlgorithm>(
         driveLayout,
@@ -154,8 +154,8 @@ auto main() -> int {
     auto dumptruckFSM = std::make_unique<Logic::FSM::DumptruckUltra>(*rgbLed);
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::INIT,
-        {.stateAction{[]() -> Logic::FSM::DumptruckUltra::FSMState {
-             return Logic::FSM::initStateAction();
+        {.stateAction{[distSensor{distSensor.get()}]() -> Logic::FSM::DumptruckUltra::FSMState {
+             return Logic::FSM::initStateAction([distSensor]() { distSensor->init(); });
          }},
          .color{Hardware::RGB_LED::PredefinedColors::BLUE}});
     dumptruckFSM->addToStateTable(

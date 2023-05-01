@@ -19,13 +19,25 @@ class DistanceSampler2:
         else:
             return 0
 
-    def getAngle(self, bbox_height, bbox_width):
-        w2 = bbox_height * (self.absoluteWidth/self.absoluteHeight)
-        if self.absoluteWidth!=0 and w2>bbox_height:
-            self.angle = (1-(bbox_width/w2))*90
-        else:
-            self.angle = 0
-        return self.angle
+
+    def getAngle(self, x_coord, y_coord, bbox_width, bbox_height,width,height):
+        # angle = 2*math.atan(bbox_height/(2*self.focalLength))
+        horizontal_angle = math.atan2(x_coord+bbox_width/2-width/2, self.focalLength)
+        # vertical_angle = math.atan2(y_coord+bbox_height/2-height/2, self.focalLength)
+        # horizontal_angle = math.degrees(horizontal_angle)
+        # vertical_angle = math.degrees(vertical_angle)
+        # print(f'Horizontal and vertical angles {horizontal_angle,vertical_angle}')
+        return horizontal_angle
+
+    def getRealXYFlatPlane(self, horizontal_angle, distance):
+        real_x_dist_flat = math.sin(horizontal_angle)*distance
+        real_y_dist_flat = math.cos(horizontal_angle)*distance
+        return (real_x_dist_flat, real_y_dist_flat)
+
+    def getRealXY(self, angle, distance, y_coord, img_height):
+        real_x_dist = math.tan(angle)*distance
+        real_y_dist = (y_coord-(img_height/2))*(distance/self.focalLength)
+        return (real_x_dist,real_y_dist)
 
     def getFocalLength(self):
         return self.focalLength

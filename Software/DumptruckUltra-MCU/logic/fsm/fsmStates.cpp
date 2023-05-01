@@ -17,9 +17,11 @@
 namespace Logic {
 namespace FSM {
 
-auto initStateAction() -> DumptruckUltra::FSMState {
+auto initStateAction(const std::function<void()> &setup) -> DumptruckUltra::FSMState {
     // printf("%s", "Doing init state\n");
-    vTaskDelay(pdMS_TO_TICKS(500));
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    setup();
+    vTaskDelay(pdMS_TO_TICKS(10'000));
     srand(xTaskGetTickCount());
     return DumptruckUltra::FSMState::DRIVE_TO_SEARCH;
 }
@@ -28,6 +30,7 @@ auto driveToSearchAction(Logic::DrivingAlgorithm::DrivingAlgorithm &drivingAlg) 
     // printf("%s", "Doing driveToSearch state\n");
     const float randX{10 * static_cast<float>(rand()) / RAND_MAX};
     const float randY{10 * static_cast<float>(rand()) / RAND_MAX};
+    vTaskDelay(pdMS_TO_TICKS(1000));
 
     // printf("%d", drivingAlg->getStatus());
     drivingAlg.loadNewTarget({.x = randX, .y = randY, .heading = 0});
@@ -43,8 +46,9 @@ auto driveToSearchAction(Logic::DrivingAlgorithm::DrivingAlgorithm &drivingAlg) 
 
 auto localSearchAction(const std::function<void(Logic::DrivingAlgorithm::MotorSpeeds)> &motorControl, Logic::Vision::ObjectDetector &vision) -> DumptruckUltra::FSMState {
     // printf("%s", "Doing localSearch state\n");
+    vTaskDelay(pdMS_TO_TICKS(1000));
 
-    motorControl({.leftPower = -0.3, .rightPower = 0.3});
+    motorControl({.leftPower = -0.15, .rightPower = 0.15});
 
     while (!vision.detectedObject()) {
         vTaskDelay(pdMS_TO_TICKS(5));
@@ -57,6 +61,7 @@ auto localSearchAction(const std::function<void(Logic::DrivingAlgorithm::MotorSp
 
 auto approachAction(Logic::DrivingAlgorithm::DrivingAlgorithm &drivingAlg, Logic::Vision::ObjectDetector &vision) -> DumptruckUltra::FSMState {
     // printf("%s", "Doing approachAction state\n");
+    vTaskDelay(pdMS_TO_TICKS(1000));
 
     const auto target{vision.currentObjectLocation()};
 
@@ -71,6 +76,7 @@ auto approachAction(Logic::DrivingAlgorithm::DrivingAlgorithm &drivingAlg, Logic
 
 auto pickupAction(Logic::Arm::ArmControl &arm, Logic::Vision::ObjectDetector &vision, Logic::DeadReckoning::DeadReckoning &deadReckoning, Logic::Dispenser::Dispenser &dispenser) -> DumptruckUltra::FSMState {
     // printf("%s", "Doing pickup state\n");
+    vTaskDelay(pdMS_TO_TICKS(1000));
     const auto target{vision.currentObjectLocation()};
     const auto currentPosition{deadReckoning.getCurrentPose()};
     const auto distance{std::sqrt(std::pow(target.x - currentPosition.x, 2) + std::pow(target.y - currentPosition.y, 2))};
@@ -82,6 +88,7 @@ auto pickupAction(Logic::Arm::ArmControl &arm, Logic::Vision::ObjectDetector &vi
 }
 
 auto driveToStartAction(Logic::DrivingAlgorithm::DrivingAlgorithm &drivingAlg) -> DumptruckUltra::FSMState {
+    vTaskDelay(pdMS_TO_TICKS(1000));
     drivingAlg.loadNewTarget({.x = 0, .y = 0, .heading = 0});
     // printf("%d", drivingAlg->getStatus());
     drivingAlg.start();
@@ -93,6 +100,7 @@ auto driveToStartAction(Logic::DrivingAlgorithm::DrivingAlgorithm &drivingAlg) -
 
 auto dispenseAction(Logic::Dispenser::Dispenser &dispenser) -> DumptruckUltra::FSMState {
     // printf("%s", "Doing dispense state\n");
+    vTaskDelay(pdMS_TO_TICKS(1000));
     dispenser.open();
     vTaskDelay(pdMS_TO_TICKS(5000));
     dispenser.close();
