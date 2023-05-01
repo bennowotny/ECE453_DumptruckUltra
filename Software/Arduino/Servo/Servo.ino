@@ -5,9 +5,9 @@ Servo Servo_1;
 Servo Servo_2;
 Servo Servo_3;
 
-const float L1 = 94.0;          // 9.4 cm (from ground)
-const float L2 = 97.0;          // 9.7 cm
-const float L3 = 54.0;          // 5.4 cm
+const double L1 = 87.0;
+const double L2 = 50.0;
+const double L3 = 82.0;
 const int openM3 = 80;          // Servo angle for open claw
 const int closeM3 = 180;        // Servo angle for closed claw
 const int Servo_delay = 20;     // Delay between servo movements
@@ -21,9 +21,18 @@ void setup() {
   Servo_3.attach(7);
 }
 
-
-void inverseKinematics(double x,double y,double z,double L1,double L2,double L3,double &theta1,double &theta2,double &theta3){ 
-    /*
+void inverse_kinematics(
+    double x,
+    double y,
+    double z,
+    double L1,
+    double L2,
+    double L3,
+    double &theta1,
+    double &theta2,
+    double &theta3
+){ 
+    /********************************************
         x: desired x position
         y: desired y position
         z: desired z position
@@ -33,53 +42,29 @@ void inverseKinematics(double x,double y,double z,double L1,double L2,double L3,
         theta1: angle between base and first link [shoulder]
         theta2: angle between first and second links [elbow]
         theta3: angle between second link and end-effector [wrist]
-    */
+    *********************************************/
     // IK for shoulder calculated using inverse tangent in the (x,y) plane
     theta1 = atan2(y, x);
 
-    // IK for wrist orientation calculated using cosine rule where the lengths
-    // are L2, L3, and rxy (the distance between origin and the wrist) and where the angle between
-    // L2 and L3 is theta3 and is opposite to L1.
-    double rxy = sqrt(pow(x,2) + pow(y,2));
-    theta3 = acos((pow(rxy,2) + pow((z-L1),2) - pow(L2,2) - pow(L3,2))/(2*L2*L3));
+    double rxy = sqrt(pow(x,2) + pow(y,2) + pow(z,2));
+    theta3 = acos((pow(rxy,2) - pow(L2,2) - pow(L3,2))/(2*L2*L3));
     theta3 = (z-L1)>0 ? theta3:-theta3;
 
-    // IK for elbow orientation calculated by first computing the forward kinematics of the wrist
-    // First term in theta2 is the angle between the x-axis and the projection of the wrist position onto the x-y plane
-    // Second term in theta2 is the angle between the projection of the wrist position onto the x-y plane and the second link
     double x_wrist = cos(theta1) * ((L2 * cos(theta2)) + (L3 * cos(theta2 + theta3)));
     double y_wrist = sin(theta1) * ((L2 * cos(theta2)) + (L3 * cos(theta2 + theta3)));
-    double z_wrist = L1 + (L2 * sin(theta2)) + (L3 * sin(theta2 + theta3));
     theta2 = atan2(y_wrist, x_wrist) - atan2(L3 * sin(theta3), L2 + (L3 * cos(theta3)));
+
+    // Return in degrees and between 0 and 180
+    theta1 = theta1 * 180 / M_PI;
+    theta2 = theta2 * 180 / M_PI;
+    theta3 = theta3 * 180 / M_PI;
+    if(theta1 < 0) theta1 += 180;
+    if(theta2 < 0) theta2 += 180;
+    if(theta3 < 0) theta3 += 180;
+    if(theta1 > 180) theta1 -= 180;
+    if(theta2 > 180) theta2 -= 180;
+    if(theta3 > 180) theta3 -= 180;
 }
-
-void inverseKinematicsV2(double x, double y, double z, double L1, double L2, double L3, double &theta1, double &theta2, double &theta3){
-    double d = sqrt(x*x + y*y + z*z);
-    double cosTheta1 = (d*d + L1*L1 - L2*L2) / (2 * d * L1);
-    theta1 = atan2(sqrt(1 - cosTheta1*cosTheta1), cosTheta1);
-    double cosTheta2 = (L1*L1 + L2*L2 - d*d) / (2 * L1 * L2);
-    theta2 = atan2(sqrt(1 - cosTheta2*cosTheta2), cosTheta2);
-    theta3 = atan2(y, x) - (theta1 + theta2);
-
-    // Radians to degrees
-    theta1 = theta1 * 180.0 / M_PI;
-    theta2 = theta2 * 180.0 / M_PI;
-    theta3 = theta3 * 180.0 / M_PI;
-
-    // Ensure that the joint angles are between 0 and 180 degrees
-    if (theta1 < 0) 
-        theta1 += 360.0;
-    if (theta2 < 0)
-        theta2 += 360.0;
-    if (theta3 < 0)
-        theta3 += 360.0;
-    if (theta1 > 180.0)
-        theta1 -= 180.0;
-    if (theta2 > 180.0)
-        theta2 -= 180.0;
-    if (theta3 > 180.0)
-        theta3 -= 180.0;
-} 
 
 
 
@@ -179,22 +164,46 @@ void loop()
   gradualMovement(180, 90, Servo_3);    // open claw
 
   // DEFINE x,y,z location of the object
-  float x = 50.0;
+  /*
+  float x = 55.0;
   float y = 0.0;
-  float z = 0.0;
+  float z = -15;
 
   // Inverse kinematics  
+  double theta1 = 90.0;   // 90-theta1
+  double theta2 = 150;    // 180-theta2
+  double theta3 = 130;    // 100+theta3
+
+  float x = 50;
+  float y = 50;
+  float z = -15;
+  */
+
+  // Inverse kinematics  
+  //double theta1 = 90;                 // theta1
+  //double theta2 = 180-(16.68778);     // 180-theta2
+  //double theta3 = 180-(37.574513);    // 180-theta3
+  double x = 50;
+  double y = 50;
+  double z = -15;
   double theta1 = 0.0;
   double theta2 = 0.0;
   double theta3 = 0.0;
-  inverseKinematicsV2(x, y, z, L1, L2, L3, theta1, theta2, theta3);
+  inverse_kinematics(x, y, z, L1, L2, L3, theta1, theta2, theta3);
+  theta1 = 180-(theta1);
+  theta2 = theta2>90 ? theta2 : 180-(theta2);
+  theta3 = theta3>90 ? theta3 : 180-(theta3);
+  //double theta1 = 180-(45.000000);
+  //double theta2 = 127.040029;
+  //double theta3 = 180-(60.811599);
 
   // Move arm accordingly
   moveArmForward(theta1, theta2, theta3);
   delay(2000);
 
+
   // Dump object into dumptruck
-  dumpArmMotion();
+  //dumpArmMotion();
   delay(1000);
 
   while(1);
