@@ -3,7 +3,7 @@
 
 #include "FreeRTOS.h" // IWYU pragma: keep
 #include "hw/motors/Motor.hpp"
-#include "logic/dead-reckoning/DeadReckoning.hpp"
+#include "logic/dead-reckoning/Positioning.hpp"
 #include "portmacro.h"
 #include "projdefs.h"
 #include "task.h" // IWYU pragma: keep
@@ -24,6 +24,11 @@ struct DriveMotorLayout {
     Hardware::Motors::Motor rightMotor;
 };
 
+struct MotorSpeeds {
+    float leftPower;
+    float rightPower;
+};
+
 class DrivingAlgorithm {
 public:
     DrivingAlgorithm(DriveMotorLayout driveMotors,
@@ -34,6 +39,9 @@ public:
     void start();
     void stop();
     [[nodiscard]] auto getStatus() const -> DrivingAlgorithmStatus;
+
+    void setPower(MotorSpeeds speeds);
+    [[nodiscard]] auto getPower() const -> MotorSpeeds;
 
 private:
     Hardware::Motors::Motor leftMotor;
@@ -47,17 +55,12 @@ private:
 
     [[noreturn]] void drivingTask();
 
-    struct DrivingPower {
-        float leftSpeed;
-        float rightSpeed;
-    };
-
-    [[nodiscard]] auto static deltaAngleToDrivePowers(float angleDiff) -> DrivingPower;
+    [[nodiscard]] auto static deltaAngleToDrivePowers(float angleDiff) -> MotorSpeeds;
     [[nodiscard]] auto distanceToTarget(const DeadReckoning::Pose2D &currPosition) const -> float;
     void stop(const DrivingAlgorithmStatus &stopStatus);
 
     static constexpr auto DRIVING_ALGORITHM_TASK_NAME{"Driving Algorithm"};
-    static constexpr uint16_t DRIVING_ALGORITHM_STACK_SIZE{configMINIMAL_STACK_SIZE};
+    static constexpr uint16_t DRIVING_ALGORITHM_STACK_SIZE{configMINIMAL_STACK_SIZE * 2};
     static constexpr uint32_t DRIVING_ALGORITHM_PRIORITY{tskIDLE_PRIORITY + 1};
     static constexpr TickType_t DRIVING_ALGORITHM_TASK_PERIOD_TICKS{pdMS_TO_TICKS(2)};
 
