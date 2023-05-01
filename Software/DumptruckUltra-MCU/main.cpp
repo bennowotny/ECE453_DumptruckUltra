@@ -154,8 +154,8 @@ auto main() -> int {
     auto dumptruckFSM = std::make_unique<Logic::FSM::DumptruckUltra>(*rgbLed);
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::INIT,
-        {.stateAction{[]() -> Logic::FSM::DumptruckUltra::FSMState {
-             return Logic::FSM::initStateAction();
+        {.stateAction{[distSensor{distSensor.get()}]() -> Logic::FSM::DumptruckUltra::FSMState {
+             return Logic::FSM::initStateAction([distSensor]() { distSensor->init(); });
          }},
          .color{Hardware::RGB_LED::PredefinedColors::BLUE}});
     dumptruckFSM->addToStateTable(

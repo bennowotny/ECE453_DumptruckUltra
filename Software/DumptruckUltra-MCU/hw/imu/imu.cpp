@@ -39,8 +39,20 @@ IMU::IMU(std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus,
       bufInd{0} {
     // TODO: take address as parameter
 
+    // Create FreeRTOS task
+    xTaskCreate(
+        [](void *params) -> void { static_cast<IMU *>(params)->imuTask(); },
+        "imuTask",
+        4 * configMINIMAL_STACK_SIZE,
+        this,
+        IMU_TASK_PRIORITY,
+        &imuTaskHandle);
+}
+
+auto IMU::imuTask() -> void {
+
     // Wait for IMU to boot up
-    cyhal_system_delay_ms(15);
+    vTaskDelay(pdMS_TO_TICKS(15));
 
     // Query WHO_AM_I
     std::array<uint8_t, 1> dataToRec{};
@@ -71,20 +83,6 @@ IMU::IMU(std::shared_ptr<Hardware::I2C::I2CBusManager> i2cBus,
     // Configure BYPASS FIFO (clear data)
     this->i2cBus->i2cWrite1ByteReg<1>(IMU_ADDR, FIFO_CTRL4, {0x00});
 
-    // FIXME: DEBUG timing setup
-    cyhal_gpio_init(P12_6, CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, false);
-
-    // Create FreeRTOS task
-    xTaskCreate(
-        [](void *params) -> void { static_cast<IMU *>(params)->imuTask(); },
-        "imuTask",
-        4 * configMINIMAL_STACK_SIZE,
-        this,
-        IMU_TASK_PRIORITY,
-        &imuTaskHandle);
-}
-
-auto IMU::imuTask() -> void {
     // std::array<uint8_t, 15> rawSensorData{}; // All raw sensor data
     std::array<uint8_t, 12> rawSensorData{}; // All raw sensor data
     std::array<uint8_t, 1> status{};
@@ -245,7 +243,7 @@ auto IMU::calibrate() -> void {
 
     vTaskDelay(pdMS_TO_TICKS(100));
 
-    printStr("Calibration complete\r\n");
+    // printStr("Calibration complete\r\n");
 }
 } // namespace IMU
 } // namespace Hardware

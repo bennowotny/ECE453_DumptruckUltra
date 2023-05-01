@@ -6,7 +6,7 @@ namespace Logic {
 namespace Vision {
 
 auto ObjectDetector::detectedObject() const -> bool {
-    return true;
+    return false;
 }
 
 auto ObjectDetector::currentObjectLocation() const -> DeadReckoning::Pose2D {
