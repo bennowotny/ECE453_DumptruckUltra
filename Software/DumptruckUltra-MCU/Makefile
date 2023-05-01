@@ -90,7 +90,7 @@ DISABLE_COMPONENTS=
 # by default, or otherwise not found by the build system.
 # TEAM03: Change this line to specify which file has the main you want to run
 # DEFAULT: Use main.cpp
-SOURCES=logic/fsm/test/test_fsm.cpp
+SOURCES=main.cpp
 
 # Like SOURCES, but for include directories. Value should be paths to
 # directories (without a leading -I).

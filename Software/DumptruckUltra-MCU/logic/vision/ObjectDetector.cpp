@@ -27,7 +27,7 @@ namespace Vision {
             pose.x = pi_packet[0];
             pose.y = pi_packet[1];
         }
-        return {};
+        return pose;
     }
 
     ///////////////////////////////////////////

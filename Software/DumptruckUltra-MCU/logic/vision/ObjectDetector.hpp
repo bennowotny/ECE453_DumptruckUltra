@@ -13,6 +13,7 @@ namespace Vision {
 
 class ObjectDetector {
 public:
+    ObjectDetector();
     [[nodiscard]] auto detectedObject() const -> bool;
     [[nodiscard]] auto currentObjectLocation() const -> DeadReckoning::Pose2D; // WORLD FRAME
 
