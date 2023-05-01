@@ -6,7 +6,6 @@
 #include <functional>
 #include <cmath>
 
-
 namespace Logic {
 namespace Arm {
 

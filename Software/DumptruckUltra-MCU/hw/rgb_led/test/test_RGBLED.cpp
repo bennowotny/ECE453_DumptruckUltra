@@ -13,7 +13,7 @@ auto main() -> int {
          .bluePin = Hardware::Processor::USER_RGB_BLUE}};
 
     // FOR TESTER: Change the color here (predefined or otherwise) to change the color for the test.
-    uut.setColor(Hardware::RGB_LED::PredefinedColors::RED);
+    uut.setColor(Hardware::RGB_LED::PredefinedColors::WHITE);
     bool isOn{false};
 
     while (true) {
@@ -22,6 +22,7 @@ auto main() -> int {
         } else {
             uut.turnOn();
         }
+        isOn = !isOn;
         cyhal_system_delay_ms(500);
     }
 }

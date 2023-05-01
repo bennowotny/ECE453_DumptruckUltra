@@ -1,16 +1,12 @@
 #ifndef _LOGIC_DEAD_RECKONING_DEADRECKONING_HPP
 #define _LOGIC_DEAD_RECKONING_DEADRECKONING_HPP
 
+#include "DrivingAlgorithm.hpp"
+#include "Positioning.hpp"
 #include "hw/imu/imu.hpp"
 
 namespace Logic {
 namespace DeadReckoning {
-
-struct Pose2D {
-    float x;
-    float y;
-    float heading;
-};
 
 class DeadReckoning {
 public:
@@ -22,8 +18,12 @@ public:
 
     [[nodiscard]] auto getCurrentPose() const -> Pose2D;
 
+    void setMotorSpeedsHandle(std::function<DrivingAlgorithm::MotorSpeeds()> getMotorSpeeds);
+
 private:
     Pose2D currentPosition;
+
+    std::function<DrivingAlgorithm::MotorSpeeds()> getMotorSpeeds;
 
     struct LinearVelocity2D {
         float dx;

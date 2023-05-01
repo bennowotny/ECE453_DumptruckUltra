@@ -1,5 +1,6 @@
 #include "Servo.hpp"
 #include "arm-inverse-kinematics/ArmControl.hpp"
+#include "proc_setup.hpp"
 
 auto main() -> int {
     Hardware::Processor::setupProcessor();

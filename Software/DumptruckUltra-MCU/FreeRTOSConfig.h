@@ -76,7 +76,7 @@ extern uint32_t SystemCoreClock;
 /* Memory allocation related definitions. */
 #define configSUPPORT_STATIC_ALLOCATION 1
 #define configSUPPORT_DYNAMIC_ALLOCATION 1
-#define configTOTAL_HEAP_SIZE 10240
+#define configTOTAL_HEAP_SIZE 131072
 #define configAPPLICATION_ALLOCATED_HEAP 0
 
 /* Hook function related definitions. */
@@ -191,7 +191,7 @@ standard names - or at least those used in the unmodified vector table. */
 #define HEAP_ALLOCATION_TYPE5 (5) /* heap_5.c*/
 #define NO_HEAP_ALLOCATION (0)
 
-#define configHEAP_ALLOCATION_SCHEME (HEAP_ALLOCATION_TYPE3)
+#define configHEAP_ALLOCATION_SCHEME (HEAP_ALLOCATION_TYPE4)
 
 /* Check if the ModusToolbox Device Configurator Power personality parameter
  * "System Idle Power Mode" is set to either "CPU Sleep" or "System Deep Sleep".
