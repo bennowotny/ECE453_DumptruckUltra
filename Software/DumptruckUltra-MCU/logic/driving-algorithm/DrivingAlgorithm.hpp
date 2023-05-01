@@ -7,6 +7,7 @@
 #include "portmacro.h"
 #include "projdefs.h"
 #include "task.h" // IWYU pragma: keep
+#include <cmath>
 #include <functional>
 
 namespace Logic {
@@ -56,6 +57,7 @@ private:
     [[noreturn]] void drivingTask();
 
     [[nodiscard]] auto static deltaAngleToDrivePowers(float angleDiff) -> MotorSpeeds;
+    [[nodiscard]] auto static angleDiff(float heading1, float heading2) -> float;
     [[nodiscard]] auto distanceToTarget(const DeadReckoning::Pose2D &currPosition) const -> float;
     void stop(const DrivingAlgorithmStatus &stopStatus);
 

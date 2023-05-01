@@ -36,6 +36,7 @@ void DeadReckoning::sendGyroscopeMessage(const Hardware::IMU::GyroscopeData &msg
     // Gyroscope gives angular velocity readings, so it must be integrated once
     // Expect z-axis to be vertical, so all planar rotation happens about this axis
     currentPosition.heading += (msg.Gz * msg.Gts);
+    currentPosition.heading = std::fmod(currentPosition.heading, 360.F);
 }
 
 auto DeadReckoning::getCurrentPose() const -> Pose2D {

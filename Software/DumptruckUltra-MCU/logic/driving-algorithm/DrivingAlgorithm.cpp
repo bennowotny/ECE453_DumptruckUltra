@@ -77,9 +77,10 @@ void DrivingAlgorithm::drivingTask() {
     // No setup
 
     while (true) {
-        const auto currPose{getPoseFunction()};
+        auto currPose{getPoseFunction()};
+
         // If we are not at the target...
-        if (distanceToTarget(currPose) > TARGET_PROXIMITY_THRESHOLD_METERS || (currentTarget.heading - currPose.heading) > TARGET_HEADING_THRESHOLD_RADIANS) {
+        if (distanceToTarget(currPose) > TARGET_PROXIMITY_THRESHOLD_METERS || angleDiff(currPose.heading, currentTarget.heading) > TARGET_HEADING_THRESHOLD_RADIANS) {
             // Find target heading (if we are already close to the target, turn to match the goal heading)
             const float headingToTarget{(distanceToTarget(currPose) > TARGET_PROXIMITY_THRESHOLD_METERS)
                                             ? std::atan2(currentTarget.y - currPose.y, currentTarget.x - currPose.x)
@@ -116,21 +117,28 @@ void DrivingAlgorithm::drivingTask() {
 auto DrivingAlgorithm::deltaAngleToDrivePowers(float angleDiff) -> MotorSpeeds {
     float leftSpeed{0};
     float rightSpeed{0};
-    constexpr float CLIMB_RATE{4};
+    constexpr float CLIMB_RATE{2 / 180.0};
     if (angleDiff < 0) {
-        leftSpeed = Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS * std::max(static_cast<float>(CLIMB_RATE / M_PI * angleDiff + 1), -1.0F);
+        leftSpeed = Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS * std::max(static_cast<float>(CLIMB_RATE * angleDiff + 1), -1.0F);
         rightSpeed = Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS;
     } else {
         leftSpeed = Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS;
-        rightSpeed = Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS * std::max(static_cast<float>(-CLIMB_RATE / M_PI * angleDiff + 1), -1.0F);
+        rightSpeed = Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS * std::max(static_cast<float>(-CLIMB_RATE * angleDiff + 1), -1.0F);
     }
-    return {.leftPower = leftSpeed, .rightPower = rightSpeed};
+    return {.leftPower = rightSpeed, .rightPower = leftSpeed};
 }
 
 auto DrivingAlgorithm::distanceToTarget(const DeadReckoning::Pose2D &currPosition) const -> float {
     // Assume Euclidean (planar) distance
     constexpr float SQUARE_POWER{2};
     return std::sqrt(std::pow(currPosition.x - currentTarget.x, SQUARE_POWER) + std::pow(currPosition.y - currentTarget.y, SQUARE_POWER));
+}
+
+auto DrivingAlgorithm::angleDiff(float heading1, float heading2) -> float {
+    const auto diff1{std::fmod(heading1 - heading2, 360.F)};
+    const auto diff2{std::fmod(heading2 - heading1, 360.F)};
+
+    return std::abs(diff1) > std::abs(diff2) ? diff2 : diff1;
 }
 
 } // namespace DrivingAlgorithm
