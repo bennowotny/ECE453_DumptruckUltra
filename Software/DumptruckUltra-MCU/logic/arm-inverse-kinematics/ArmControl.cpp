@@ -142,6 +142,5 @@ namespace Arm {
         if(theta3 > 180) theta3 -= 180;
     }
 
-
 } // namespace Arm
 } // namespace Logic

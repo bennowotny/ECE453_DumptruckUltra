@@ -83,5 +83,4 @@ namespace Vision {
     }
 
 } // namespace Vision
-
 } // namespace Logic
