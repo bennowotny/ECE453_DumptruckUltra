@@ -40,7 +40,7 @@ private:
 
     // Servo positions are floats on [0,100]
     static constexpr float SERVO_POSITION_LOWER_BOUND{0};
-    static constexpr float SERVO_POSITION_UPPER_BOUND{100};
+    static constexpr float SERVO_POSITION_UPPER_BOUND{180};
     static constexpr uint32_t SWEEP_STEP_DURATION_MS{5};
     static constexpr uint32_t SWEEP_STEP_COUNT{100};
 };
