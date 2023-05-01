@@ -8,7 +8,7 @@ auto main() -> int {
 
     // Test Setup
     using Hardware::Servos::Servo;
-    Servo testServo{Hardware::Processor::SERVO7_PWM};
+    Servo testServo{Hardware::Processor::SERVO1_PWM};
     testServo.enable();
 
     float position{0.0};

@@ -14,7 +14,7 @@ int main() {
     using Hardware::I2C::I2CBusManager;
 
     // Setup I2C
-    I2CBusManager::i2cPin_t i2cPins = {.sda = P9_1, .scl = P9_0};
+    Hardware::I2C::i2cPin_t i2cPins = {.sda = P10_1, .scl = P10_0};
     I2CBusManager i2cBus(i2cPins);
 
     i2cBus.i2cWrite1ByteReg<1>(IO_EXP_ADDR, IO_EXP_CONFREG, {0x00});

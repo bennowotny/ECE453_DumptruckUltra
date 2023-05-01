@@ -26,18 +26,6 @@ std::shared_ptr<I2C::I2CBusManager> DistanceSensor::busManager{}; // NOLINT(cppc
 DistanceSensor::DistanceSensor(std::shared_ptr<I2C::I2CBusManager> busManager, uint16_t deviceAddress)
     : deviceAddress{deviceAddress} {
     DistanceSensor::busManager = std::move(busManager);
-
-    uint8_t sensorState{0};
-    while (sensorState == 0) {
-        VL53L1X_BootState(this->deviceAddress, &sensorState);
-        cyhal_system_delay_ms(1); // Wait for boot
-    }
-
-    VL53L1X_SensorInit(this->deviceAddress);
-    VL53L1X_SetDistanceMode(this->deviceAddress, DISTANCE_SENSOR_LONG_RANGE_MODE);
-    VL53L1X_SetTimingBudgetInMs(this->deviceAddress, DISTANCE_TIMING_BUDGET_MS);
-    VL53L1X_SetInterMeasurementInMs(this->deviceAddress, DISTANCE_INTER_MEASUREMENT_PERIOD_MS);
-    VL53L1X_StartRanging(this->deviceAddress);
 }
 
 /**
@@ -67,6 +55,20 @@ auto DistanceSensor::getDistanceMeters() const -> float {
 
 auto DistanceSensor::getI2CBusManager() -> I2C::I2CBusManager & {
     return *DistanceSensor::busManager;
+}
+
+void DistanceSensor::init() {
+    uint8_t sensorState{0};
+    while (sensorState == 0) {
+        VL53L1X_BootState(this->deviceAddress, &sensorState);
+        cyhal_system_delay_ms(1); // Wait for boot
+    }
+
+    VL53L1X_SensorInit(this->deviceAddress);
+    VL53L1X_SetDistanceMode(this->deviceAddress, DISTANCE_SENSOR_LONG_RANGE_MODE);
+    VL53L1X_SetTimingBudgetInMs(this->deviceAddress, DISTANCE_TIMING_BUDGET_MS);
+    VL53L1X_SetInterMeasurementInMs(this->deviceAddress, DISTANCE_INTER_MEASUREMENT_PERIOD_MS);
+    VL53L1X_StartRanging(this->deviceAddress);
 }
 
 } // namespace DistanceSensor

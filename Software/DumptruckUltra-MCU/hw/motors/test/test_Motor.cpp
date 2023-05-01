@@ -9,7 +9,7 @@ auto main() -> int {
     using Hardware::Motors::MotorDirection;
     using Hardware::Motors::MotorPinDefinition;
 
-    Motor uut{{.forwardPin = P9_3, .backwardPin = P7_1}, MotorDirection::REVERSE};
+    Motor uut{{.forwardPin = Hardware::Processor::M1_FORWARD, .backwardPin = Hardware::Processor::M1_BACKWARD}, MotorDirection::REVERSE};
     uut.enable();
 
     float speed{0.0};

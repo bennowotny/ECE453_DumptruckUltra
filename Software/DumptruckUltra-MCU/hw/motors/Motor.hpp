@@ -22,12 +22,14 @@ public:
     void enable();
     void disable();
     void setPower(float power);
+    [[nodiscard]] auto getPower() const -> float;
 
     static constexpr float MOTOR_MAX_SPEED_ABS{100};
 
 private:
     cyhal_pwm_t forwardPWMHandle;
     cyhal_pwm_t backwardPWMHandle;
+    float currentPower;
     const MotorDirection positiveDirection;
 
     // A guess.

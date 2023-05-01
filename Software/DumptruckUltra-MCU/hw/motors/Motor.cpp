@@ -7,6 +7,7 @@ namespace Motors {
 Motor::Motor(MotorPinDefinition motorPins, MotorDirection positiveDirection)
     : forwardPWMHandle{},
       backwardPWMHandle{},
+      currentPower{0},
       positiveDirection{positiveDirection} {
     const auto resultForward{cyhal_pwm_init(&forwardPWMHandle, motorPins.forwardPin, nullptr)};
     CY_ASSERT(resultForward == CY_RSLT_SUCCESS);
@@ -42,6 +43,12 @@ void Motor::setPower(float power) {
         cyhal_pwm_set_duty_cycle(&forwardPWMHandle, 0, MOTOR_PWM_FREQUENCY_HZ);
         cyhal_pwm_set_duty_cycle(&backwardPWMHandle, -power, MOTOR_PWM_FREQUENCY_HZ);
     }
+
+    currentPower = power;
+}
+
+auto Motor::getPower() const -> float {
+    return currentPower;
 }
 
 } // namespace Motors
