@@ -61,38 +61,74 @@ auto main() -> int {
     Hardware::Processor::setupProcessor();
 
     // Make all objects
-    // const auto blinkyLED{Hardware::Processor::FreeRTOSBlinky(Hardware::Processor::USER_LED, 0, "Blinky")};
 
-    Hardware::I2C::I2CBusManager::i2cPin_t i2cPins{
+    /*
+     * RGB LED
+     */
+    const auto rgbLed{std::make_unique<Hardware::RGB_LED::RGBLED>(
+        Hardware::RGB_LED::RGBLayout{
+            .redPin = Hardware::Processor::USER_RGB_RED,
+            .greenPin = Hardware::Processor::USER_RGB_GREEN,
+            .bluePin = Hardware::Processor::USER_RGB_BLUE})};
+
+    const auto blinkyLED{Hardware::Processor::FreeRTOSBlinky(Hardware::Processor::USER_LED, 0, "Blinky")};
+    (void)blinkyLED; // Unused, doing it's own thing
+
+    /*
+     * I2C BUS
+     */
+    Hardware::I2C::i2cPin_t i2cPins{
         .sda = Hardware::Processor::I2C_SDA,
         .scl = Hardware::Processor::I2C_SCL};
 
-    auto i2cBus{std::make_shared<Hardware::I2C::I2CBusManager>(&i2cPins)};
+    auto i2cBus{std::make_shared<Hardware::I2C::I2CBusManager>(i2cPins)};
 
-    const auto deadReckoning{std::make_unique<Logic::DeadReckoning::DeadReckoning>()};
-
-    const auto imu{std::make_unique<Hardware::IMU::IMU>(
-        i2cBus,
-        [&deadReckoning{*deadReckoning}](const Hardware::IMU::AccelerometerData &accelData) { deadReckoning.sendAccelerometerMessage(accelData); },
-        [&deadReckoning{*deadReckoning}](const Hardware::IMU::GyroscopeData &gyroData) { deadReckoning.sendGyroscopeMessage(gyroData); })};
-
+    /*
+     * DISTANCE SENSOR
+     */
     const auto distSensor{std::make_unique<Hardware::DistanceSensor::DistanceSensor>(
         i2cBus,
         0x52 >> 1)};
 
+    /*
+     * DEAD RECKONING
+     */
+    const auto deadReckoning{std::make_unique<Logic::DeadReckoning::DeadReckoning>()};
+
+    /*
+     * DRIVING ALGORITHM
+     */
     Logic::DrivingAlgorithm::DriveMotorLayout driveLayout{
         .leftMotor = Hardware::Motors::Motor{
             {.forwardPin = Hardware::Processor::M1_FORWARD, .backwardPin = Hardware::Processor::M1_BACKWARD},
             Hardware::Motors::MotorDirection::FORWARD}, // TODO: Pick pins
-        .rightMotor = Hardware::Motors::Motor{{.forwardPin = Hardware::Processor::M2_FORWARD, .backwardPin = Hardware::Processor::M2_FORWARD}, Hardware::Motors::MotorDirection::REVERSE}};
+        .rightMotor = Hardware::Motors::Motor{{.forwardPin = Hardware::Processor::M2_FORWARD, .backwardPin = Hardware::Processor::M2_BACKWARD}, Hardware::Motors::MotorDirection::REVERSE}};
 
     const auto drivingAlg{std::make_unique<Logic::DrivingAlgorithm::DrivingAlgorithm>(
         driveLayout,
-        [&distSensor{*distSensor}]() -> float { return distSensor.getDistanceMeters(); },
-        [&deadReckoning{*deadReckoning}]() -> Logic::DeadReckoning::Pose2D { return deadReckoning.getCurrentPose(); })};
+        [distSensor{distSensor.get()}]() -> float { return distSensor->getDistanceMeters(); },
+        [deadReckoning{deadReckoning.get()}]() -> Logic::DeadReckoning::Pose2D { return deadReckoning->getCurrentPose(); })};
 
+    deadReckoning->setMotorSpeedsHandle(
+        [drivingAlg{drivingAlg.get()}]() { return drivingAlg->getPower(); });
+
+    /*
+     * IMU
+     */
+    const auto imu{std::make_unique<Hardware::IMU::IMU>(
+        i2cBus,
+        [deadReckoning{deadReckoning.get()}](const Hardware::IMU::AccelerometerData &accelData) { deadReckoning->sendAccelerometerMessage(accelData); },
+        [deadReckoning{deadReckoning.get()}](const Hardware::IMU::GyroscopeData &gyroData) { deadReckoning->sendGyroscopeMessage(gyroData); },
+        nullptr)}; // FIXME This parameter should not exist
+
+    /*
+     * PRESSURE SENSOR
+     */
     const auto pressureSensor{std::make_unique<Hardware::PressureSensor::PressureSensor>(Hardware::Processor::PRESSURE_SENSOR_ADC)};
 
+    /*
+     * ARM CONTROL
+     */
     Logic::Arm::ArmLayout armLayout{
         .shoulder = Hardware::Servos::Servo{Hardware::Processor::SERVO1_PWM},
         .elbow = Hardware::Servos::Servo{Hardware::Processor::SERVO2_PWM},
@@ -101,61 +137,65 @@ auto main() -> int {
 
     const auto arm{std::make_unique<Logic::Arm::ArmControl>(
         armLayout,
-        [&pressureSensor{*pressureSensor}]() -> bool { return pressureSensor.isPressed(); })};
+        [pressureSensor{pressureSensor.get()}]() -> bool { return pressureSensor->isPressed(); })};
 
+    /*
+     * VISION SYSTEM
+     */
     const auto vision{std::make_unique<Logic::Vision::ObjectDetector>()};
 
-    Hardware::Servos::Servo dispenserServo{Hardware::Processor::SERVO7_PWM};
+    /*
+     * DISPENSER
+     */
+    Hardware::Servos::Servo dispenserServo{Hardware::Processor::SERVO5_PWM};
     const auto dispenser{std::make_unique<Logic::Dispenser::Dispenser>(dispenserServo)};
-
-    const auto rgbLed{std::make_unique<Hardware::RGB_LED::RGBLED>(
-        Hardware::RGB_LED::RGBLayout{
-            .redPin = Hardware::Processor::USER_RGB_RED,
-            .greenPin = Hardware::Processor::USER_RGB_GREEN,
-            .bluePin = Hardware::Processor::USER_RGB_BLUE})};
 
     // Create FSM and add states
     auto dumptruckFSM = std::make_unique<Logic::FSM::DumptruckUltra>(*rgbLed);
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::INIT,
-        {.stateAction{[]() -> Logic::FSM::DumptruckUltra::FSMState {
-             return Logic::FSM::initStateAction();
+        {.stateAction{[distSensor{distSensor.get()}]() -> Logic::FSM::DumptruckUltra::FSMState {
+             return Logic::FSM::initStateAction([distSensor]() { distSensor->init(); });
          }},
          .color{Hardware::RGB_LED::PredefinedColors::BLUE}});
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::DRIVE_TO_SEARCH,
-        {.stateAction{[&drivingAlg{*drivingAlg}]() {
-             return Logic::FSM::driveToSearchAction(drivingAlg);
+        {.stateAction{[drivingAlg{drivingAlg.get()}]() {
+             return Logic::FSM::driveToSearchAction(*drivingAlg);
          }},
          .color{Hardware::RGB_LED::PredefinedColors::CYAN}});
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::LOCAL_SEARCH,
-        {.stateAction{[&motorLayout{drivingAlg->getMotors()}, &vision{*vision}]() {
-             return Logic::FSM::localSearchAction(motorLayout, vision);
+        {.stateAction{[motorControl{
+                           [drivingAlg{drivingAlg.get()}](Logic::DrivingAlgorithm::MotorSpeeds speeds) {
+                               drivingAlg->setPower(speeds);
+                           }},
+                       vision{vision.get()}]() {
+             return Logic::FSM::localSearchAction(motorControl, *vision);
          }},
          .color{Hardware::RGB_LED::PredefinedColors::GREEN}});
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::APPROACH,
-        {.stateAction{[&drivingAlg{*drivingAlg}, &vision{*vision}]() {
-             return Logic::FSM::approachAction(drivingAlg, vision);
+        {.stateAction{[drivingAlg{drivingAlg.get()}, vision{vision.get()}]() {
+             return Logic::FSM::approachAction(*drivingAlg, *vision);
          }},
          .color{Hardware::RGB_LED::PredefinedColors::MAGENTA}});
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::PICKUP,
-        {.stateAction{[&arm{*arm}, &vision{*vision}, &deadReckoning{*deadReckoning}, &dispenser{*dispenser}]() {
-             return Logic::FSM::pickupAction(arm, vision, deadReckoning, dispenser);
+        {.stateAction{[arm{arm.get()}, vision{vision.get()}, deadReckoning{deadReckoning.get()}, dispenser{dispenser.get()}]() {
+             return Logic::FSM::pickupAction(*arm, *vision, *deadReckoning, *dispenser);
          }},
          .color{Hardware::RGB_LED::PredefinedColors::RED}});
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::DRIVE_TO_START,
-        {.stateAction{[&drivingAlg{*drivingAlg}]() {
-             return Logic::FSM::driveToStartAction(drivingAlg);
+        {.stateAction{[drivingAlg{drivingAlg.get()}]() {
+             return Logic::FSM::driveToStartAction(*drivingAlg);
          }},
          .color{Hardware::RGB_LED::PredefinedColors::YELLOW}});
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::DISPENSE,
-        {.stateAction{[&dispenser{*dispenser}]() {
-             return Logic::FSM::dispenseAction(dispenser);
+        {.stateAction{[dispenser{dispenser.get()}]() {
+             return Logic::FSM::dispenseAction(*dispenser);
          }},
          .color{Hardware::RGB_LED::PredefinedColors::WHITE}});
 

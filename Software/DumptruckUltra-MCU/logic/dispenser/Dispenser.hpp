@@ -19,8 +19,8 @@ private:
     Hardware::Servos::Servo dispenserServo;
     uint32_t objectCount;
 
-    static constexpr float OPEN_POSITION{90};
-    static constexpr float CLOSE_POSITION{0};
+    static constexpr float OPEN_POSITION{60};
+    static constexpr float CLOSE_POSITION{20};
     static constexpr uint32_t MAX_OBJECTS{2};
 };
 } // namespace Dispenser

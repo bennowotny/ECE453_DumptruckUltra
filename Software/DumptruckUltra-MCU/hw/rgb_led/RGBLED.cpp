@@ -11,13 +11,13 @@ RGBLED::RGBLED(const RGBLayout &layout)
       greenPWMHandle{},
       bluePWMHandle{} {
 
-    const auto redResult{cyhal_pwm_init(&redPWMHandle, layout.redPin, nullptr)};
+    const auto redResult{cyhal_pwm_init_adv(&redPWMHandle, layout.redPin, NC, CYHAL_PWM_RIGHT_ALIGN, true, 0U, true, nullptr)};
     CY_ASSERT(CY_RSLT_SUCCESS == redResult);
 
-    const auto greenResult{cyhal_pwm_init(&greenPWMHandle, layout.greenPin, nullptr)};
+    const auto greenResult{cyhal_pwm_init_adv(&greenPWMHandle, layout.greenPin, NC, CYHAL_PWM_RIGHT_ALIGN, true, 0U, true, nullptr)};
     CY_ASSERT(CY_RSLT_SUCCESS == greenResult);
 
-    const auto blueResult{cyhal_pwm_init(&bluePWMHandle, layout.bluePin, nullptr)};
+    const auto blueResult{cyhal_pwm_init_adv(&bluePWMHandle, layout.bluePin, NC, CYHAL_PWM_RIGHT_ALIGN, true, 0U, true, nullptr)};
     CY_ASSERT(CY_RSLT_SUCCESS == blueResult);
 }
 
