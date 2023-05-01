@@ -12,6 +12,9 @@ namespace I2C {
 I2CBusManager::I2CBusManager(const i2cPin_t &i2cPins) {
     cy_rslt_t rslt = i2cInit(i2cPins);
     CY_ASSERT(rslt == CY_RSLT_SUCCESS);
+
+    // Create mutex
+    mutex = xSemaphoreCreateMutex();
 }
 
 /** Initialize the I2C bus to the specified module site

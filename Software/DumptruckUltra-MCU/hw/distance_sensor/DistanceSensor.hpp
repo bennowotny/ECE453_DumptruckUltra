@@ -11,6 +11,7 @@ class DistanceSensor {
 public:
     explicit DistanceSensor(std::shared_ptr<I2C::I2CBusManager> busManager, uint16_t deviceAddress);
     auto getDistanceMeters() const -> float;
+    void init();
     // auto getDistanceMetersPoll() const -> float;
 
     static auto getI2CBusManager() -> I2C::I2CBusManager &; // Required for API usage
