@@ -9,23 +9,31 @@
 #include "cy_pdl.h"
 #include "cyhal.h"
 #include "cybsp.h"
-#include "cy_retarget_io.h"
+#include "cyhal_uart.h"
+#include "proc/proc_setup.hpp"
 
-// Definitions
-#define UART_TX P5_1
-#define UART_RX P5_0
-#define DEBUG_MESSAGE_MAX_LEN   (100u)
-#define INT_PRIORITY_CONSOLE	3
-#define BUFFER_SIZE 80
+// UART Configs
+#define BAUD_RATE 115200
+#define UART_DELAY 10u
+#define INT_PRIORITY 3
+#define DATA_BITS 8
+#define STOP_BITS 1
 
-// Global Variables
-extern volatile uint8_t buffer[];		// storage for input characters
-extern volatile int counter;
-extern volatile uint16_t Rx_cnt;
-extern volatile bool ALERT_STR;// keeps track of next buffer (re)placement slot
+// DEFINE: UART PINS
+#define UART_TX_PIN Hardware::Processor::MCU_TX_PI_RX
+#define UART_RX_PIN Hardware::Processor::MCU_RX_PI_TX
 
-/* Public Function API */
-void console_init(void);
+// Buffer Configs
+const size_t RX_BUF_SIZE = 28;              // 7 floats * 4 bytes/float
+const size_t PACKET_SIZE = 7;               // 7 floats
+
+// Global UART Variables
+extern volatile bool DETECT_OBJECT;
+extern volatile float pi_packet[PACKET_SIZE];
+//volatile uint16_t rx_count = 0;	        // use if we want to read in multiple packets
+
+// Public functions
+void uart_init_event_irq(void);
 
 
 #endif /* CONSOLE_H_ */

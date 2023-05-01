@@ -2,130 +2,62 @@
  * uart.c
  *
  */
- 
-#include "uart.hpp"
+ #include "uart.hpp"
 
-// UART Macros
-#define  BAUD_RATE 115200
-#define  UART_DELAY 10u
-#define INT_PRIORITY 3
-#define DATA_BITS 8
-#define STOP_BITS 1
-#define TX_BUF_SIZE 4
-#define RX_BUF_SIZE 4
+volatile bool DETECT_OBJECT = false;
+volatile float pi_packet[PACKET_SIZE];
+uint8_t rx_buf[RX_BUF_SIZE];
+cyhal_uart_t uart_obj;
 
-// Global UART Variables
-volatile bool ALERT_STR = false;		        
-volatile uint16_t rx_count = 0;					
-volatile uint8_t tx_buf[TX_BUF_SIZE]={'1','2','3','4'};
-volatile uint8_t rx_buf[RX_BUF_SIZE];
+//////////////////////////////////////////////////////////
+// UART-PI Callback Handler
+//////////////////////////////////////////////////////////
+void uart_pi_handler(void *callback_arg, cyhal_uart_event_t event){
+    (void)callback_arg;
+    if((event & CYHAL_UART_IRQ_RX_DONE)==CYHAL_UART_IRQ_RX_DONE){
+        // read in all bytes into rx_buf
+        cy_rslt_t rslt;
+        size_t NUM_BYTES = RX_BUF_SIZE;
+        rslt = cyhal_uart_read(&uart_obj, rx_buf, &NUM_BYTES);
+        CY_ASSERT(CY_RSLT_SUCCESS == rslt);
+
+        // convert from bytes to floats 
+        for(unsigned int i=0;i<PACKET_SIZE;++i){
+            pi_packet[i] = *((float*)(rx_buf + i*sizeof(float)));
+        }
+
+        // Alert when packet is received
+        DETECT_OBJECT = true;
+    }
+}
+
 
 
 ///////////////////////////////////////////
 // Initialization of UART and Interrupts
 ////////////////////////////////////////////
-static void uart_init_event_irq(void){
-    cyhal_uart_t uart_obj;
+void uart_init_event_irq(void){
     const cyhal_uart_cfg_t uart_config = {
         .data_bits = DATA_BITS,
         .stop_bits = STOP_BITS,
         .parity = CYHAL_UART_PARITY_NONE,
-        .rx_buffer = NULL, 
-    }
-
+        .rx_buffer = rx_buf,
+        .rx_buffer_size = RX_BUF_SIZE,
+    };
     // Initialize UART
     cy_rslt_t rslt;
-    rslt = cyhal_uart_init(&uart_obj, CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX, NULL, &uart_config);
+
+    rslt = cyhal_uart_init(&uart_obj, UART_TX_PIN, UART_RX_PIN, CYHAL_NC_PIN_VALUE, CYHAL_NC_PIN_VALUE, NULL, &uart_config);
+    CY_ASSERT(CY_RSLT_SUCCESS == rslt);
+
+    // Set Baud Rate    
+    uint32_t actual_baud;
+    rslt = cyhal_uart_set_baud(&uart_obj, BAUD_RATE, &actual_baud);
     CY_ASSERT(CY_RSLT_SUCCESS == rslt);
 
     // UART Callback handler registration
-    cyhal_uart_register_callback(&uart_obj, uart_event_handler, NULL);
+    cyhal_uart_register_callback(&uart_obj, uart_pi_handler, NULL);
 
     // Enable required UART events
-    cyhal_uart_enable_event(
-        &uart_obj,
-        (cyhal_uart_event_t)(CYHAL_UART_IRQ_TX_DONE | CYHAL_UART_IRQ_TX_ERROR | CYHAL_UART_IRQ_RX_DONE),
-        INT_PRIORITY,
-        true
-    );
-
-    // Read
-    uint8_t rx_data;
-    rslt = cyhal_uart_getc(&uart_obj, &rx_data, UART_DELAY);
-    CY_ASSERT(CY_RSLT_SUCCESS == rslt);
+    cyhal_uart_enable_event(&uart_obj, (cyhal_uart_event_t)(CYHAL_UART_IRQ_RX_DONE), INT_PRIORITY, true);
 }
-
-
-////////////////////////////////////////////
-// UART Callback Function
-////////////////////////////////////////////
-void uart_event_handler(void *handler_arg, cyhal_uart_event_t event){
-    (void) handler_arg;
-    if((event & CYHAL_UART_IRQ_TX_ERROR) == CYHAL_UART_IRQ_TX_ERROR){
-        printf("TX Error");
-        //TODO: Handle TX ERROR
-    }else if((event & CYHAL_UART_IRQ_TX_DONE) == CYHAL_UART_IRQ_TX_DONE){
-        // All Tx data hass been transmitted
-    }else if((event & CYHAL_UART_IRQ_RX_DONE) == CYHAL_UART_IRQ_RX_DONE){
-        // All Rx data has been received
-
-    }
-}
-
-
-//////////////////////////////////////////////////////////
-// Console Event Handler to receive characters from console
-//////////////////////////////////////////////////////////
-void console_event_handler(void *handler_arg, cyhal_uart_event_t event)
-{
-    (void) handler_arg;
-	uint8_t c;
-	cy_rslt_t rslt = cyhal_uart_getc(&cy_retarget_io_uart_obj, &c, 0); // changed (uint8_t*)&c to &c
-	rx_buf[rx_count] = c;
-	rx_count++;
-	rslt = cyhal_uart_putc(&cy_retarget_io_uart_obj,(uint32_t)c);
-	if(rslt == CY_RSLT_SUCCESS){
-		if((c=='\n') || (c=='\r')){
-			ALERT_STR = true;
-		}
-	}
-}
-
-
-//////////////////////////////////////////////////////////
-// Console Init IRQ enables and reegisters all interrupt sources
-//////////////////////////////////////////////////////////
-static void console_init_irq(void)
-{
-    // Enable Console Rx Interrupts
-	/* The UART callback handler registration */
-	cyhal_uart_register_callback(&cy_retarget_io_uart_obj, console_event_handler, NULL);
-
-	/* Enable required UART events */
-	cyhal_uart_enable_event(
-		&cy_retarget_io_uart_obj,
-		(cyhal_uart_event_t)(CYHAL_UART_IRQ_RX_NOT_EMPTY),
-		INT_PRIORITY_CONSOLE,
-		true
-	);
-}
-
-
-//////////////////////////////////////////////////////////
-// Setup for console retarget IO
-// Initial Baud Rate: 115200, 8N1
-//////////////////////////////////////////////////////////
-static void console_init_retarget(void)
-{
-	cy_retarget_io_init(UART_TX, UART_RX, CY_RETARGET_IO_BAUDRATE);
-}
-
-//////////////////////////////////////////////////////////
-// Console Init to enable the SCB used for console interface
-//////////////////////////////////////////////////////////
-void console_init(void)
-{
-	console_init_retarget();
-	console_init_irq();
-}
-

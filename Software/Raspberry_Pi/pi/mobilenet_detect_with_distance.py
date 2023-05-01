@@ -95,11 +95,15 @@ def run(
         object_class = detection_object.categories[0].category_name
         results_string = b''
         if object_class in {'remote','cell phone','frisbee','cup','chair','vase'}:
-            ser.write(b"x,y,w,h,d,real_x,real_y\r\n");
-            results_string += struct.pack('I',max(x,0))
-            results_string += struct.pack('I',max(y,0))
-            results_string += struct.pack('I',w)
-            results_string += struct.pack('I',h)
+            # ser.write(b"x,y,w,h,d,real_x,real_y\r\n");
+            # results_string += struct.pack('I',max(x,0))
+            # results_string += struct.pack('I',max(y,0))
+            # results_string += struct.pack('I',w)
+            # results_string += struct.pack('I',h)
+            results_string += struct.pack('f',float(max(x,0)))
+            results_string += struct.pack('f',float(max(y,0)))
+            results_string += struct.pack('f',float(w))
+            results_string += struct.pack('f',float(h))
 
             # Retrieve estimated relative distance, x, y
             distance = distanceSampler.getDistance(h)
