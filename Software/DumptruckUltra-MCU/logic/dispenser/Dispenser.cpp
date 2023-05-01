@@ -1,3 +1,4 @@
+#include "Dispenser.hpp"
 #include "cyhal_system.h"
 
 namespace Logic {
