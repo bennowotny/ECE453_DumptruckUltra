@@ -92,7 +92,7 @@ DISABLE_COMPONENTS=
 # DEFAULT: Use main.cpp
 # SOURCES=logic/dead-reckoning/test/test_IntegrationWithIMU.cpp
 # SOURCES=hw/imu/test/test_printData.cpp
-SOURCES=hw/motors/test/test_Motor.cpp
+SOURCES=logic/dead-reckoning/test/test_IntegrationWithIMU.cpp
 
 # Like SOURCES, but for include directories. Value should be paths to
 # directories (without a leading -I).

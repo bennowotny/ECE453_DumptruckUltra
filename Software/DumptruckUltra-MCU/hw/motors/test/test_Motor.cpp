@@ -18,6 +18,8 @@ auto main() -> int {
     uut2.enable();
     uut2.setPower(0.25);
 
-    while (true)
-        ;
+    while (true) {
+        uut.setPower(0.5);
+        uut2.setPower(0.25);
+    }
 }

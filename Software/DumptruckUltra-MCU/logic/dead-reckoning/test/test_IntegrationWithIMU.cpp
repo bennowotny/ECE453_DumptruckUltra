@@ -9,6 +9,7 @@
 #include "cyhal_system.h"
 #include "i2cBusManager.hpp"
 #include "imu.hpp"
+#include "proc_setup.hpp"
 #include "projdefs.h"
 #include "task.h"
 #include <memory>
@@ -22,10 +23,11 @@ auto main() -> int {
     using Hardware::IMU::IMU;
     using Logic::DeadReckoning::DeadReckoning;
 
-    Hardware::I2C::i2cPin_t i2cPins{.sda = P10_1, .scl = P10_0};
+    Hardware::I2C::i2cPin_t i2cPins{.sda = Hardware::Processor::I2C_SDA, .scl = Hardware::Processor::I2C_SCL};
     auto i2cBus{std::make_shared<I2CBusManager>(i2cPins)};
 
-    auto uut{std::make_unique<DeadReckoning>([]() -> Logic::DrivingAlgorithm::MotorSpeeds { return {0.1, 0}; })};
+    auto uut{std::make_unique<DeadReckoning>()};
+    uut->setMotorSpeedsHandle([]() -> Logic::DrivingAlgorithm::MotorSpeeds { return {0.1, 0}; });
 
     auto imu{std::make_unique<IMU>(
         i2cBus,
@@ -33,7 +35,7 @@ auto main() -> int {
         [uut2{uut.get()}](const Hardware::IMU::GyroscopeData &msg) -> void { uut2->sendGyroscopeMessage(msg); },
         printStr)};
 
-    cy_retarget_io_init(P5_1, P5_0, 115200);
+    cy_retarget_io_init(Hardware::Processor::MCU_TX_FTDI_RX, Hardware::Processor::MCU_RX_FTDI_TX, 115200);
 
     cyhal_gpio_init(P10_3, CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, false);
 
