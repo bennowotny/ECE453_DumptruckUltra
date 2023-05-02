@@ -41,12 +41,30 @@ void Servo::setPosition(float position) {
 void Servo::sweep(float start, float end, SweepConfiguration sweepParams) {
 
     auto currentPosition{start};
-    const auto step{(end - start) / static_cast<float>(sweepParams.stepCount)};
+    //const auto step{(end - start) / static_cast<float>(sweepParams.stepCount)};
+    const auto step{1};
+
+    if(end>start){
+        while(currentPosition<end){
+            setPosition(currentPosition);
+            cyhal_system_delay_ms(sweepParams.stepDuration_ms);
+            currentPosition += step;
+        }
+    }else{
+        while(currentPosition>end){
+            setPosition(currentPosition);
+            cyhal_system_delay_ms(sweepParams.stepDuration_ms);
+            currentPosition -= step;
+        }
+    }
+
+    /*
     while (std::abs(end - currentPosition) > step) {
         setPosition(currentPosition);
         cyhal_system_delay_ms(sweepParams.stepDuration_ms);
         currentPosition += step;
     }
+    */
     setPosition(end);
 }
 

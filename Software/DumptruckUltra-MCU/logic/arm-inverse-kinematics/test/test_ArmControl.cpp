@@ -20,5 +20,7 @@ auto main() -> int {
 
     while (true) {
         // TODO: Write test
+        float distanceForward_m = 0.05;
+        uut.collect(distanceForward_m);
     }
 }
