@@ -1,6 +1,7 @@
 #include "ObjectDetector.hpp"
 #include "DeadReckoning.hpp"
 #include "vision/ObjectDetector.hpp"
+#include "cyhal_system.h"
 
 namespace Logic {
 namespace Vision {
@@ -14,26 +15,26 @@ namespace Vision {
     // Return true if object is detected
     ////////////////////////////////////////////
     auto ObjectDetector::detectedObject() -> bool {
+        //cy_rslt_t rslt = cyhal_uart_read_async(&uart_obj, (void*)rx_buf, RX_BUF_SIZE);
         size_t NUM_BYTES = RX_BUF_SIZE;
-        cy_rslt_t rslt = cyhal_uart_read(&uart_obj, (void*)rx_buf, &NUM_BYTES);
-        CY_ASSERT(CY_RSLT_SUCCESS == rslt);
+        cy_rslt_t rslt = cyhal_uart_read(&uart_obj, rx_buf, &NUM_BYTES);
+        cyhal_system_delay_ms(100);
 
-        // convert from bytes to floats 
+        CY_ASSERT(CY_RSLT_SUCCESS == rslt);
         for(unsigned int i=0;i<PACKET_SIZE;++i)
             pi_packet[i] = *((float*)(rx_buf + i*sizeof(float)));
-
         float x = pi_packet[0];
         float y = pi_packet[1];
-        float d = sqrt(x*x + y*y);
-        if(d>50 && d<1500) DETECT_OBJECT = true;
-        else DETECT_OBJECT = false;
-
-        // clear buffer 
-        //for(unsigned int i=0;i<RX_BUF_SIZE;++i)
-        //    rx_buf[i] = 0;
-
+        float distance = sqrt(x*x + y*y);
+        if(distance>0){
+            DETECT_OBJECT = true;
+            // clear buffer
+        }else{
+            DETECT_OBJECT = false;
+        }
         return DETECT_OBJECT;
     }
+
 
 
     ///////////////////////////////////////////
@@ -71,15 +72,14 @@ namespace Vision {
         CY_ASSERT(CY_RSLT_SUCCESS == rslt);
 
         // UART Callback handler registration
-        //cyhal_uart_register_callback(&uart_obj, [](void *callback_arg, cyhal_uart_event_t event)->void { ((ObjectDetector*)callback_arg) -> uart_pi_handler(event);}, this);
+        //cyhal_uart_register_callback(&uart_obj, [](void *callback_arg, cyhal_uart_event_t event)->void { ((ObjectDetector*)callback_arg) -> uart_pi_handler(); }, this);
 
         // Enable required UART events
-        //cyhal_uart_enable_event(&uart_obj, (cyhal_uart_event_t)(CYHAL_UART_IRQ_RX_NOT_EMPTY), INT_PRIORITY, true);
+        //cyhal_uart_enable_event(&uart_obj, (cyhal_uart_event_t)(CYHAL_UART_IRQ_RX_DONE), INT_PRIORITY, true);
 
         // Begin asynchronous read
         //rslt = cyhal_uart_read_async(&uart_obj, (void*)rx_buf, RX_BUF_SIZE);
         //CY_ASSERT(CY_RSLT_SUCCESS == rslt);
-
     }
 
 
@@ -87,8 +87,14 @@ namespace Vision {
     //////////////////////////////////////////////////////////
     // UART-PI Callback Handler
     //////////////////////////////////////////////////////////
-    auto ObjectDetector::uart_pi_handler(cyhal_uart_event_t event)->void{
+    auto ObjectDetector::uart_pi_handler()->void{
         DETECT_OBJECT = true;
+        // convert from bytes to floats 
+        for(unsigned int i=0;i<PACKET_SIZE;++i){
+            pi_packet[i] = *((float*)(rx_buf + i*sizeof(float)));
+        }
+
+        /*
         if((event & CYHAL_UART_IRQ_RX_FULL)==CYHAL_UART_IRQ_RX_FULL){
             // read in all bytes into rx_buf
             cy_rslt_t rslt;
@@ -103,7 +109,7 @@ namespace Vision {
 
             // Alert when packet is received
             DETECT_OBJECT = true;
-        }
+        }*/
     }
 
 } // namespace Vision

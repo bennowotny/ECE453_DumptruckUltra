@@ -20,7 +20,7 @@ public:
 
 private:
     auto uart_init_event_irq() -> void;
-    auto uart_pi_handler(cyhal_uart_event_t event) -> void;
+    auto uart_pi_handler() -> void;
 
     // private config variables
     static constexpr uint32_t BAUD_RATE{115200};
@@ -34,7 +34,7 @@ private:
     static constexpr cyhal_gpio_t UART_RX_PIN{Hardware::Processor::MCU_RX_PI_TX};
 
     // private variables
-    bool DETECT_OBJECT{false};
+    bool DETECT_OBJECT = false;             // flag for object detection
     float pi_packet[PACKET_SIZE];           // stores floats from converted rx_buf
     uint8_t rx_buf[RX_BUF_SIZE];            // stores bytes from uart
     cyhal_uart_t uart_obj;                  // uart object

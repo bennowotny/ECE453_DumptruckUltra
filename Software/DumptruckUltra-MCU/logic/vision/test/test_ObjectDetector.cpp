@@ -20,20 +20,16 @@ int main(void){
     ArmControl uut{
         arm, []() -> bool { return true; }};
 
+    __enable_irq();
 
     cyhal_system_delay_ms(15000);       // wait 15 seconds for Pi to start
     while (true) {
         if (vision.detectedObject()) {
-            //auto pose = vision.currentObjectLocation();
-            //float x = (float)pose.x;
-            //float y = (float)pose.y;
-
-            //float distanceForward_m = (float)pose.x*1000;
-            float distanceForward_m = 0.05;
-            uut.collect(distanceForward_m);
-
-            //printf("x: %f, y: %f\n", pose.x, pose.y);
+            auto pose = vision.currentObjectLocation();
+            float x = (float)pose.x/1000.0;
+            float y = (float)pose.y/1000.0;
+            uut.collect(y,x);
         }
-        //cyhal_system_delay_ms(100);
+        cyhal_system_delay_ms(100);
     }
 }
