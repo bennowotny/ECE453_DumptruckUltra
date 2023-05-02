@@ -56,7 +56,7 @@ namespace Vision {
         cyhal_uart_register_callback(&uart_obj, [](void *callback_arg, cyhal_uart_event_t event)->void { ((ObjectDetector*)callback_arg) -> uart_pi_handler(event);}, this);
 
         // Enable required UART events
-        cyhal_uart_enable_event(&uart_obj, (cyhal_uart_event_t)(CYHAL_UART_IRQ_RX_DONE), INT_PRIORITY, true);
+        cyhal_uart_enable_event(&uart_obj, (cyhal_uart_event_t)(CYHAL_UART_IRQ_RX_FULL), INT_PRIORITY, true);
     }
 
 
@@ -65,7 +65,7 @@ namespace Vision {
     // UART-PI Callback Handler
     //////////////////////////////////////////////////////////
     auto ObjectDetector::uart_pi_handler(cyhal_uart_event_t event)->void{
-        if((event & CYHAL_UART_IRQ_RX_DONE)==CYHAL_UART_IRQ_RX_DONE){
+        if((event & CYHAL_UART_IRQ_RX_FULL)==CYHAL_UART_IRQ_RX_FULL){
             // read in all bytes into rx_buf
             cy_rslt_t rslt;
             size_t NUM_BYTES = RX_BUF_SIZE;
