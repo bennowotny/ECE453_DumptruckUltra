@@ -9,26 +9,17 @@ auto main() -> int {
     using Hardware::Motors::MotorDirection;
     using Hardware::Motors::MotorPinDefinition;
 
-    Motor uut{{.forwardPin = Hardware::Processor::M1_FORWARD, .backwardPin = Hardware::Processor::M1_BACKWARD}, MotorDirection::REVERSE};
+    Motor uut{{.forwardPin = Hardware::Processor::M1_FORWARD, .backwardPin = Hardware::Processor::M1_BACKWARD}, MotorDirection::FORWARD};
+
+    uut.setPower(0.5);
     uut.enable();
 
-    float speed{0.0};
-    bool goingUp{true};
-    constexpr float STEP{100.0 / 20.0 / 100.0};
+    Motor uut2{{.forwardPin = Hardware::Processor::M2_FORWARD, .backwardPin = Hardware::Processor::M2_BACKWARD}, MotorDirection::FORWARD};
+    uut2.enable();
+    uut2.setPower(0.25);
 
-    // Climb the available duty cycles
-    // FOR TESTER: Check that we use the full duty cycle and switch pins between forwards and backwards operation
-    // If the direction is backwards, then expect the motors to start driving backwards
     while (true) {
-        uut.setPower(speed);
-        cyhal_system_delay_ms(10);
-        if (goingUp && speed < 99)
-            speed += STEP;
-        else if (!goingUp && speed > -99)
-            speed -= STEP;
-        else {
-            cyhal_system_delay_ms(5000);
-            goingUp = !goingUp;
-        }
+        uut.setPower(0.5);
+        uut2.setPower(0.25);
     }
 }
