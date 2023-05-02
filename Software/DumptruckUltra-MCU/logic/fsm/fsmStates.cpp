@@ -33,7 +33,7 @@ auto driveToSearchAction(Logic::DrivingAlgorithm::DrivingAlgorithm &drivingAlg) 
     vTaskDelay(pdMS_TO_TICKS(1000));
 
     // printf("%d", drivingAlg->getStatus());
-    drivingAlg.loadNewTarget({.x = 2, .y = 1, .heading = 0});
+    drivingAlg.loadNewTarget({.x = 1, .y = 0, .heading = 0});
     // printf("%d", drivingAlg->getStatus());
     drivingAlg.start();
     while (drivingAlg.getStatus() != DrivingAlgorithm::DrivingAlgorithmStatus::COMPLETE) {

@@ -68,7 +68,7 @@ private:
 
     static constexpr float DISTANCE_THRESHOLD_METERS{0.2};
     static constexpr float TARGET_PROXIMITY_THRESHOLD_METERS{0.1};
-    static constexpr float TARGET_HEADING_THRESHOLD_RADIANS{0.1};
+    static constexpr float TARGET_HEADING_THRESHOLD_DEGREES{10};
 };
 } // namespace DrivingAlgorithm
 } // namespace Logic

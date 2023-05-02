@@ -64,6 +64,12 @@ void DrivingAlgorithm::stop() {
 }
 
 void DrivingAlgorithm::setPower(MotorSpeeds speeds) {
+    if (currentStatus == DrivingAlgorithmStatus::STOPPED) {
+        leftMotor.enable();
+        rightMotor.enable();
+        currentStatus = DrivingAlgorithmStatus::RUNNING;
+    }
+
     leftMotor.setPower(speeds.leftPower);
     rightMotor.setPower(speeds.rightPower);
 }
@@ -80,20 +86,20 @@ void DrivingAlgorithm::drivingTask() {
         auto currPose{getPoseFunction()};
 
         // If we are not at the target...
-        if (distanceToTarget(currPose) > TARGET_PROXIMITY_THRESHOLD_METERS || angleDiff(currPose.heading, currentTarget.heading) > TARGET_HEADING_THRESHOLD_RADIANS) {
+        if (distanceToTarget(currPose) > TARGET_PROXIMITY_THRESHOLD_METERS || angleDiff(currPose.heading, currentTarget.heading) > TARGET_HEADING_THRESHOLD_DEGREES) {
             // Find target heading (if we are already close to the target, turn to match the goal heading)
             const float headingToTarget{(distanceToTarget(currPose) > TARGET_PROXIMITY_THRESHOLD_METERS)
-                                            ? std::atan2(currentTarget.y - currPose.y, currentTarget.x - currPose.x)
+                                            ? static_cast<float>(std::atan2(currentTarget.y - currPose.y, currentTarget.x - currPose.x) * 180.F / M_PI)
                                             : currentTarget.heading};
             // If something is in the way...
             if (getFrontDistanceFunction() < DISTANCE_THRESHOLD_METERS) {
                 // Turn right
                 setPower(
-                    {.leftPower = Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS,
-                     .rightPower = -Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS});
+                    {.leftPower = 0.3,
+                     .rightPower = -0.3});
             } else {
                 // Otherwise, drive at the target
-                const auto motorPowers{deltaAngleToDrivePowers(headingToTarget - currPose.heading)};
+                const auto motorPowers{deltaAngleToDrivePowers(angleDiff(currPose.heading, headingToTarget))};
                 setPower(motorPowers);
             }
         } else {
@@ -117,7 +123,8 @@ void DrivingAlgorithm::drivingTask() {
 auto DrivingAlgorithm::deltaAngleToDrivePowers(float angleDiff) -> MotorSpeeds {
     float leftSpeed{0};
     float rightSpeed{0};
-    constexpr float CLIMB_RATE{2 / 180.0};
+    angleDiff = angleDiff > 180.F ? angleDiff - 360.F : angleDiff;
+    constexpr float CLIMB_RATE{2 / 20.0};
     if (angleDiff < 0) {
         leftSpeed = Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS * std::max(static_cast<float>(CLIMB_RATE * angleDiff + 1), -1.0F);
         rightSpeed = Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS;
@@ -125,7 +132,7 @@ auto DrivingAlgorithm::deltaAngleToDrivePowers(float angleDiff) -> MotorSpeeds {
         leftSpeed = Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS;
         rightSpeed = Hardware::Motors::Motor::MOTOR_MAX_SPEED_ABS * std::max(static_cast<float>(-CLIMB_RATE * angleDiff + 1), -1.0F);
     }
-    return {.leftPower = rightSpeed, .rightPower = leftSpeed};
+    return {.leftPower = leftSpeed, .rightPower = rightSpeed};
 }
 
 auto DrivingAlgorithm::distanceToTarget(const DeadReckoning::Pose2D &currPosition) const -> float {
