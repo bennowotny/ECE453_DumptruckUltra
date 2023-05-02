@@ -33,7 +33,7 @@ namespace Arm {
         float theta3 = 0;
 
         // start from reset
-        resetPosition(90, 30, 100, 180);
+        resetPosition(90, 30, 100, closeClaw);
 
         // Returns angles in degrees and reorient
         inverse_kinematics(xForward_mm, yForward_mm, zForward_mm, theta1, theta2, theta3);

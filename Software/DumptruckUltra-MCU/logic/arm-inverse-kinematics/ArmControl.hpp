@@ -41,14 +41,15 @@ class ArmControl {
             // Arm lengths
             static constexpr float L1 = 87.0;          // Length of shoulder
             static constexpr float L2 = 50.0;          // Length of elbow
-            static constexpr float L3 = 82.0;          // Length of wrist
+            //static constexpr float L3 = 82.0;          // Length of wrist
+            static constexpr float L3 = 87.0;
 
             // Default angle configurations
             static constexpr float resetS1 = 90.0;          // Shoulder reset position
             static constexpr float resetS2 = 30.0;          // Elbow reset position
             static constexpr float resetS3 = 100.0;         // Wrist reset position
             static constexpr float openClaw = 70.0;         // Claw reset position [open]
-            static constexpr float closeClaw = 160.0;       // Claw reset position [close]
+            static constexpr float closeClaw = 140.0;       // Claw reset position [close]
 
 };
 } // namespace Arm

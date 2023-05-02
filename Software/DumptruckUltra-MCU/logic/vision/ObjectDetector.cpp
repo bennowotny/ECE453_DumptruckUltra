@@ -13,7 +13,25 @@ namespace Vision {
     ///////////////////////////////////////////
     // Return true if object is detected
     ////////////////////////////////////////////
-    auto ObjectDetector::detectedObject() const -> bool {
+    auto ObjectDetector::detectedObject() -> bool {
+        size_t NUM_BYTES = RX_BUF_SIZE;
+        cy_rslt_t rslt = cyhal_uart_read(&uart_obj, (void*)rx_buf, &NUM_BYTES);
+        CY_ASSERT(CY_RSLT_SUCCESS == rslt);
+
+        // convert from bytes to floats 
+        for(unsigned int i=0;i<PACKET_SIZE;++i)
+            pi_packet[i] = *((float*)(rx_buf + i*sizeof(float)));
+
+        float x = pi_packet[0];
+        float y = pi_packet[1];
+        float d = sqrt(x*x + y*y);
+        if(d>50 && d<1500) DETECT_OBJECT = true;
+        else DETECT_OBJECT = false;
+
+        // clear buffer 
+        //for(unsigned int i=0;i<RX_BUF_SIZE;++i)
+        //    rx_buf[i] = 0;
+
         return DETECT_OBJECT;
     }
 
@@ -44,7 +62,7 @@ namespace Vision {
         };
 
         // Initialize UART
-        cy_rslt_t rslt = cyhal_uart_init(&uart_obj, UART_TX_PIN, UART_RX_PIN, CYHAL_NC_PIN_VALUE, CYHAL_NC_PIN_VALUE, NULL, &uart_config);
+        cy_rslt_t rslt = cyhal_uart_init(&uart_obj, UART_TX_PIN, UART_RX_PIN, NC, NC, NULL, &uart_config);
         CY_ASSERT(CY_RSLT_SUCCESS == rslt);
 
         // Set Baud Rate    
@@ -53,10 +71,15 @@ namespace Vision {
         CY_ASSERT(CY_RSLT_SUCCESS == rslt);
 
         // UART Callback handler registration
-        cyhal_uart_register_callback(&uart_obj, [](void *callback_arg, cyhal_uart_event_t event)->void { ((ObjectDetector*)callback_arg) -> uart_pi_handler(event);}, this);
+        //cyhal_uart_register_callback(&uart_obj, [](void *callback_arg, cyhal_uart_event_t event)->void { ((ObjectDetector*)callback_arg) -> uart_pi_handler(event);}, this);
 
         // Enable required UART events
-        cyhal_uart_enable_event(&uart_obj, (cyhal_uart_event_t)(CYHAL_UART_IRQ_RX_FULL), INT_PRIORITY, true);
+        //cyhal_uart_enable_event(&uart_obj, (cyhal_uart_event_t)(CYHAL_UART_IRQ_RX_NOT_EMPTY), INT_PRIORITY, true);
+
+        // Begin asynchronous read
+        //rslt = cyhal_uart_read_async(&uart_obj, (void*)rx_buf, RX_BUF_SIZE);
+        //CY_ASSERT(CY_RSLT_SUCCESS == rslt);
+
     }
 
 
@@ -65,6 +88,7 @@ namespace Vision {
     // UART-PI Callback Handler
     //////////////////////////////////////////////////////////
     auto ObjectDetector::uart_pi_handler(cyhal_uart_event_t event)->void{
+        DETECT_OBJECT = true;
         if((event & CYHAL_UART_IRQ_RX_FULL)==CYHAL_UART_IRQ_RX_FULL){
             // read in all bytes into rx_buf
             cy_rslt_t rslt;

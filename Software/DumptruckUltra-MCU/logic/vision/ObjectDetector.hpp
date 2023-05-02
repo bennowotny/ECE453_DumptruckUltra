@@ -14,7 +14,7 @@ namespace Vision {
 class ObjectDetector {
 public:
     ObjectDetector();
-    [[nodiscard]] auto detectedObject() const -> bool;
+    [[nodiscard]] auto detectedObject() -> bool;
     [[nodiscard]] auto currentObjectLocation() const -> DeadReckoning::Pose2D; // WORLD FRAME
 
 
@@ -28,7 +28,7 @@ private:
     static constexpr uint32_t INT_PRIORITY{3};
     static constexpr uint32_t DATA_BITS{8};
     static constexpr uint32_t STOP_BITS{1};
-    static constexpr size_t RX_BUF_SIZE{8};  // 2 floats * 4 bytes/float
+    static constexpr uint32_t RX_BUF_SIZE{8};  // 2 floats * 4 bytes/float
     static constexpr uint32_t PACKET_SIZE{2};   // 2 floats (x distance & y distance)
     static constexpr cyhal_gpio_t UART_TX_PIN{Hardware::Processor::MCU_TX_PI_RX};
     static constexpr cyhal_gpio_t UART_RX_PIN{Hardware::Processor::MCU_RX_PI_TX};
