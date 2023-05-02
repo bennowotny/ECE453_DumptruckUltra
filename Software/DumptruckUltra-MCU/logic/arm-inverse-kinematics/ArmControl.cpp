@@ -32,8 +32,11 @@ namespace Arm {
         // start from reset
         resetPosition(90, 30, 100, 180);
 
-        // Returns angles in degrees
+        // Returns angles in degrees and reorient
         inverse_kinematics(xForward_mm, yForward_mm, zForward_mm, theta1, theta2, theta3);
+        theta1 = 180-(theta1);
+        theta2 = theta2>90 ? theta2 : 180-(theta2);
+        theta3 = theta3>90 ? theta3 : 180-(theta3);
         
         // Moves arm to pick up object and then to reset
         moveArmForward(theta1, theta2, theta3);
