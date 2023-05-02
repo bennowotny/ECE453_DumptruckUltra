@@ -111,7 +111,7 @@ def run(
             results_string += struct.pack('f',real_y_dist)
             # results_string += struct.pack('f',distance)
             ser.write(results_string)
-            ser.write(b'\r\n')
+            #ser.write(b'\r\n')
 
             # console print for debugging
             print(f'x,y,w,h,object_class: {x,y,w,h,object_class}')
