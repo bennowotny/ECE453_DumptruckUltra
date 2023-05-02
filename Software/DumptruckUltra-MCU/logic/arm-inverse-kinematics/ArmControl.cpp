@@ -19,10 +19,10 @@ namespace Arm {
         sweepParams.stepCount = {1};
     }
 
-    void ArmControl::collect(float distanceForward_m) {
+    void ArmControl::collect(float distanceForward_m, float distanceHorizontal_m) {
 
         // Only consider single distance for now 
-        float xForward_m = 0.0;
+        float xForward_m = distanceHorizontal_m;
         float yForward_m = distanceForward_m;
         float xForward_mm = xForward_m * 1000.0;
         float yForward_mm = yForward_m * 1000.0;

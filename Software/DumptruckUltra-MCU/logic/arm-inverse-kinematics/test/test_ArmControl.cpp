@@ -21,6 +21,13 @@ auto main() -> int {
     while (true) {
         // TODO: Write test
         float distanceForward_m = 0.05;
-        uut.collect(distanceForward_m);
+        float distanceHorizontal_m = 0.0;  
+        uut.collect(distanceForward_m, distanceHorizontal_m);
+        distanceForward_m = 0.05;
+        distanceHorizontal_m = 0.05;
+        uut.collect(distanceForward_m, distanceHorizontal_m);
+        distanceForward_m = 0.05;
+        distanceHorizontal_m = -0.05;
+        uut.collect(distanceForward_m, distanceHorizontal_m);
     }
 }

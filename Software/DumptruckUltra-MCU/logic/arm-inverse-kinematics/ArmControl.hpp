@@ -23,7 +23,7 @@ class ArmControl {
     public:
         ArmControl(ArmLayout &armLayout, std::function<bool()> isClawOpen);
 
-        void collect(float distanceForward_m);
+        void collect(float distanceForward_m, float distanceHorizontal_m);
 
     private:
             // Pass in ArmLayout and extract into individual Servo objects

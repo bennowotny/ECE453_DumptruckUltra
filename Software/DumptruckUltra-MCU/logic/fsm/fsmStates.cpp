@@ -81,7 +81,7 @@ auto pickupAction(Logic::Arm::ArmControl &arm, Logic::Vision::ObjectDetector &vi
     const auto currentPosition{deadReckoning.getCurrentPose()};
     const auto distance{std::sqrt(std::pow(target.x - currentPosition.x, 2) + std::pow(target.y - currentPosition.y, 2))};
 
-    arm.collect(distance);
+    arm.collect(distance, 0.0);
 
     dispenser.placeObject();
     return dispenser.full() ? DumptruckUltra::FSMState::DRIVE_TO_START : DumptruckUltra::FSMState::DRIVE_TO_SEARCH;
