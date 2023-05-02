@@ -131,15 +131,15 @@ auto IMU::imuTask() -> void {
         GyroscopeData gd = {
             .Gx = static_cast<float>(gData[0]) * GYRO_SCALE - avg_g_x_off,
             .Gy = static_cast<float>(gData[1]) * GYRO_SCALE - avg_g_y_off,
-            .Gz = avgData[2],
+            .Gz = -avgData[2],
             .Gts = static_cast<float>(READ_INTERVAL_MS) / 1000.0F};
 
         sendGyroData(gd);
 
         // Create accelerometer data struct and send
         AccelerometerData ad = {
-            .Ax = avgData[0],
-            .Ay = avgData[1],
+            .Ax = -avgData[0],
+            .Ay = -avgData[1],
             .Az = static_cast<float>(xlData[2]) * ACCEL_SCALE - avg_xl_z_off,
             .Ats = static_cast<float>(READ_INTERVAL_MS) / 1000.0F};
 
