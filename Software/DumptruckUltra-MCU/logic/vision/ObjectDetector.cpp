@@ -16,6 +16,8 @@ namespace Vision {
     ////////////////////////////////////////////
     auto ObjectDetector::detectedObject() -> bool {
         //cy_rslt_t rslt = cyhal_uart_read_async(&uart_obj, (void*)rx_buf, RX_BUF_SIZE);
+
+        /*
         size_t NUM_BYTES = RX_BUF_SIZE;
         cy_rslt_t rslt = cyhal_uart_read(&uart_obj, rx_buf, &NUM_BYTES);
         cyhal_system_delay_ms(100);
@@ -26,12 +28,13 @@ namespace Vision {
         float x = pi_packet[0];
         float y = pi_packet[1];
         float distance = sqrt(x*x + y*y);
-        if(distance>0){
+        if(distance>50 && distance<1000){
             DETECT_OBJECT = true;
             // clear buffer
         }else{
             DETECT_OBJECT = false;
         }
+        */
         return DETECT_OBJECT;
     }
 
@@ -72,14 +75,14 @@ namespace Vision {
         CY_ASSERT(CY_RSLT_SUCCESS == rslt);
 
         // UART Callback handler registration
-        //cyhal_uart_register_callback(&uart_obj, [](void *callback_arg, cyhal_uart_event_t event)->void { ((ObjectDetector*)callback_arg) -> uart_pi_handler(); }, this);
+        cyhal_uart_register_callback(&uart_obj, [](void *callback_arg, cyhal_uart_event_t event)->void { ((ObjectDetector*)callback_arg) -> uart_pi_handler(); }, this);
 
         // Enable required UART events
-        //cyhal_uart_enable_event(&uart_obj, (cyhal_uart_event_t)(CYHAL_UART_IRQ_RX_DONE), INT_PRIORITY, true);
+        cyhal_uart_enable_event(&uart_obj, (cyhal_uart_event_t)(CYHAL_UART_IRQ_RX_DONE), INT_PRIORITY, true);
 
         // Begin asynchronous read
-        //rslt = cyhal_uart_read_async(&uart_obj, (void*)rx_buf, RX_BUF_SIZE);
-        //CY_ASSERT(CY_RSLT_SUCCESS == rslt);
+        rslt = cyhal_uart_read_async(&uart_obj, (void*)rx_buf, RX_BUF_SIZE);
+        CY_ASSERT(CY_RSLT_SUCCESS == rslt);
     }
 
 
