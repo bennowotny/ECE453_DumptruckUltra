@@ -31,5 +31,11 @@ bool PressureSensor::isPressed() {
     return read() > 200;
 }
 
+void PressureSensor::free() {
+    /* Release ADC and channel objects when no longer needed */
+    cyhal_adc_channel_free(&adc_chan_0_obj);
+    cyhal_adc_free(&adcHandle);
+}
+
 } // namespace PressureSensor
 } // namespace Hardware

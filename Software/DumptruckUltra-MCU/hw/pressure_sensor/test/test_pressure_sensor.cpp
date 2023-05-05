@@ -14,5 +14,11 @@ int main() {
 
     // Setup ADC
     PressureSensor adc(P10_0);
-    printf("ADC Reading: %d\r\n", adc.read());
+    // printf("ADC Reading: %ld\r\n", adc.read());
+
+    while (true) {
+        printf("ADC Reading: %ld\r\n", adc.read());
+        adc.free();
+        cyhal_system_delay_ms(500);
+    }
 }

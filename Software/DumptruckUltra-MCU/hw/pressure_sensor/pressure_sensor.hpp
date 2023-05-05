@@ -13,6 +13,7 @@ public:
     explicit PressureSensor(cyhal_gpio_t pin);
     auto read() -> int32_t;
     auto isPressed() -> bool;
+    auto free() -> void;
 
 private:
     cyhal_adc_t adcHandle;
