@@ -91,7 +91,7 @@ DISABLE_COMPONENTS=
 # TEAM03: Change this line to specify which file has the main you want to run
 # DEFAULT: Use main.cpp
 # SOURCES=logic/dead-reckoning/test/test_IntegrationWithIMU.cpp
-# SOURCES=hw/imu/test/test_printData.cpp
+# SOURCES=hw/uart/test/test_uart.cpp
 SOURCES=main.cpp
 
 # Like SOURCES, but for include directories. Value should be paths to

@@ -1,13 +1,15 @@
 #include "Servo.hpp"
 #include "arm-inverse-kinematics/ArmControl.hpp"
+#include "cyhal_system.h"
+#include "logic/vision/ObjectDetector.hpp"
 #include "proc_setup.hpp"
 
-auto main() -> int {
+int main(void) {
     Hardware::Processor::setupProcessor();
-
     using Hardware::Servos::Servo;
     using Logic::Arm::ArmControl;
     using Logic::Arm::ArmLayout;
+    Logic::Vision::ObjectDetector vision;
 
     ArmLayout arm{
         .shoulder{Servo{Hardware::Processor::SERVO1_PWM}},
@@ -18,16 +20,18 @@ auto main() -> int {
     ArmControl uut{
         arm, []() -> bool { return true; }};
 
+    __enable_irq();
+
+    cyhal_system_delay_ms(15000); // wait 15 seconds for Pi to start
     while (true) {
-        // TODO: Write test
-        float distanceForward_m = 0.05;
-        float distanceHorizontal_m = 0.0;  
-        uut.collect(distanceForward_m, distanceHorizontal_m);
-        distanceForward_m = 0.05;
-        distanceHorizontal_m = 0.05;
-        uut.collect(distanceForward_m, distanceHorizontal_m);
-        distanceForward_m = 0.05;
-        distanceHorizontal_m = -0.05;
-        uut.collect(distanceForward_m, distanceHorizontal_m);
+        if (vision.detectedObject()) {
+            auto pose = vision.currentObjectLocation();
+            // float x = (float)pose.x / 1000.0;
+            // float y = (float)pose.y / 1000.0;
+
+            uut.collect(pose.y, pose.x);
+            vision.resetUARTBuffer();
+        }
+        cyhal_system_delay_ms(100);
     }
 }

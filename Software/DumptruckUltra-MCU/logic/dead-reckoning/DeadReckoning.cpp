@@ -25,8 +25,8 @@ void DeadReckoning::sendAccelerometerMessage(const Hardware::IMU::AccelerometerD
                            .dy = 0};
         return;
     }
-    currentVelocity.dx += (msg.Ax * msg.Ats);
-    currentVelocity.dy += (msg.Ay * msg.Ats);
+    currentVelocity.dx += (msg.Ax * msg.Ats) * std::cos(M_PI / 180.F * currentPosition.heading) + (msg.Ay * msg.Ats) * std::sin(M_PI / 180.F * currentPosition.heading);
+    currentVelocity.dy += (msg.Ax * msg.Ats) * std::cos(M_PI / 180.F * currentPosition.heading) - (msg.Ay * msg.Ats) * std::sin(M_PI / 180.F * currentPosition.heading);
 
     currentPosition.x += (currentVelocity.dx * msg.Ats);
     currentPosition.y += (currentVelocity.dy * msg.Ats);
@@ -36,6 +36,7 @@ void DeadReckoning::sendGyroscopeMessage(const Hardware::IMU::GyroscopeData &msg
     // Gyroscope gives angular velocity readings, so it must be integrated once
     // Expect z-axis to be vertical, so all planar rotation happens about this axis
     currentPosition.heading += (msg.Gz * msg.Gts);
+    currentPosition.heading = std::fmod(currentPosition.heading, 360.F);
 }
 
 auto DeadReckoning::getCurrentPose() const -> Pose2D {

@@ -33,6 +33,9 @@ void Motor::disable() {
 }
 
 void Motor::setPower(float power) {
+
+    currentPower = power;
+
     if (positiveDirection == MotorDirection::REVERSE)
         power = -power;
 
@@ -43,8 +46,6 @@ void Motor::setPower(float power) {
         cyhal_pwm_set_duty_cycle(&forwardPWMHandle, 0, MOTOR_PWM_FREQUENCY_HZ);
         cyhal_pwm_set_duty_cycle(&backwardPWMHandle, -power, MOTOR_PWM_FREQUENCY_HZ);
     }
-
-    currentPower = power;
 }
 
 auto Motor::getPower() const -> float {

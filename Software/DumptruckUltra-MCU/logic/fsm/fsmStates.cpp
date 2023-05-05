@@ -21,15 +21,15 @@ auto initStateAction(const std::function<void()> &setup) -> DumptruckUltra::FSMS
     // printf("%s", "Doing init state\n");
     vTaskDelay(pdMS_TO_TICKS(1000));
     setup();
-    vTaskDelay(pdMS_TO_TICKS(10'000));
+    vTaskDelay(pdMS_TO_TICKS(20'000));
     srand(xTaskGetTickCount());
     return DumptruckUltra::FSMState::DRIVE_TO_SEARCH;
 }
 
 auto driveToSearchAction(Logic::DrivingAlgorithm::DrivingAlgorithm &drivingAlg) -> DumptruckUltra::FSMState {
-    // printf("%s", "Doing driveToSearch state\n");
-    const float randX{10 * static_cast<float>(rand()) / RAND_MAX};
-    const float randY{10 * static_cast<float>(rand()) / RAND_MAX};
+    // // printf("%s", "Doing driveToSearch state\n");
+    const float randX{2 * static_cast<float>(rand()) / RAND_MAX};
+    const float randY{2 * static_cast<float>(rand()) / RAND_MAX};
     vTaskDelay(pdMS_TO_TICKS(1000));
 
     // printf("%d", drivingAlg->getStatus());
@@ -48,7 +48,7 @@ auto localSearchAction(const std::function<void(Logic::DrivingAlgorithm::MotorSp
     // printf("%s", "Doing localSearch state\n");
     vTaskDelay(pdMS_TO_TICKS(1000));
 
-    motorControl({.leftPower = -0.15, .rightPower = 0.15});
+    motorControl({.leftPower = -0.5, .rightPower = 0.5});
 
     while (!vision.detectedObject()) {
         vTaskDelay(pdMS_TO_TICKS(5));
@@ -81,7 +81,7 @@ auto pickupAction(Logic::Arm::ArmControl &arm, Logic::Vision::ObjectDetector &vi
     const auto currentPosition{deadReckoning.getCurrentPose()};
     const auto distance{std::sqrt(std::pow(target.x - currentPosition.x, 2) + std::pow(target.y - currentPosition.y, 2))};
 
-    arm.collect(distance);
+    arm.collect(distance, 0.0);
 
     dispenser.placeObject();
     return dispenser.full() ? DumptruckUltra::FSMState::DRIVE_TO_START : DumptruckUltra::FSMState::DRIVE_TO_SEARCH;
