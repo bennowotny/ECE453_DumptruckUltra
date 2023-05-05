@@ -13,7 +13,7 @@ import math
 
 from distance_sampler import DistanceSampler2
 
-ser = serial.Serial('/dev/ttyAMA0',9600,timeout=None)
+ser = serial.Serial('/dev/ttyAMA0',115200,timeout=None)
 
 def thread_test():
     while(1):
@@ -115,7 +115,7 @@ def run(
 
             # console print for debugging
             print(f'x,y,w,h,object_class: {x,y,w,h,object_class}')
-            print(f'distance & angle: {distance, angle_degrees}')
+            print(f'Estimated Distance & Center Angle: {distance, angle_degrees}')
             print(f'Estimated real x and y distance: {real_x_dist, real_y_dist}')
 
     if visualize_image:
