@@ -28,12 +28,12 @@ auto initStateAction(const std::function<void()> &setup) -> DumptruckUltra::FSMS
 
 auto driveToSearchAction(Logic::DrivingAlgorithm::DrivingAlgorithm &drivingAlg) -> DumptruckUltra::FSMState {
     // // printf("%s", "Doing driveToSearch state\n");
-    // const float randX{2 * static_cast<float>(rand()) / RAND_MAX};
-    // const float randY{2 * static_cast<float>(rand()) / RAND_MAX};
+    const float randX{2 * static_cast<float>(rand()) / RAND_MAX};
+    const float randY{2 * static_cast<float>(rand()) / RAND_MAX};
     vTaskDelay(pdMS_TO_TICKS(1000));
 
     // printf("%d", drivingAlg->getStatus());
-    drivingAlg.loadNewTarget({.x = 0, .y = 1, .heading = 0});
+    drivingAlg.loadNewTarget({.x = randX, .y = randY, .heading = 0});
     // printf("%d", drivingAlg->getStatus());
     drivingAlg.start();
     while (drivingAlg.getStatus() != DrivingAlgorithm::DrivingAlgorithmStatus::COMPLETE) {

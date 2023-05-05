@@ -243,7 +243,7 @@ auto IMU::calibrate() -> void {
 
     vTaskDelay(pdMS_TO_TICKS(100));
 
-    printStr("Calibration complete\r\n");
+    // printStr("Calibration complete\r\n");
 }
 } // namespace IMU
 } // namespace Hardware

@@ -86,7 +86,7 @@ void DrivingAlgorithm::drivingTask() {
         auto currPose{getPoseFunction()};
 
         // If we are not at the target...
-        if (distanceToTarget(currPose) > TARGET_PROXIMITY_THRESHOLD_METERS) { //|| std::abs(angleDiff(currPose.heading, currentTarget.heading)) > TARGET_HEADING_THRESHOLD_DEGREES) {
+        if (distanceToTarget(currPose) > TARGET_PROXIMITY_THRESHOLD_METERS || std::abs(angleDiff(currPose.heading, currentTarget.heading)) > TARGET_HEADING_THRESHOLD_DEGREES) {
             // Find target heading (if we are already close to the target, turn to match the goal heading)
             const float headingToTarget{(distanceToTarget(currPose) > TARGET_PROXIMITY_THRESHOLD_METERS)
                                             ? std::fmod(static_cast<float>(std::atan2(currentTarget.y - currPose.y, currentTarget.x - currPose.x) * 180.F / M_PI - 90.F + 360.F), 360.F)

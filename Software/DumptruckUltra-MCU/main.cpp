@@ -86,9 +86,9 @@ auto main() -> int {
     /*
      * DISTANCE SENSOR
      */
-    // const auto distSensor{std::make_unique<Hardware::DistanceSensor::DistanceSensor>(
-    //     i2cBus,
-    //     0x52 >> 1)};
+    const auto distSensor{std::make_unique<Hardware::DistanceSensor::DistanceSensor>(
+        i2cBus,
+        0x52 >> 1)};
 
     /*
      * DEAD RECKONING
@@ -106,8 +106,7 @@ auto main() -> int {
 
     const auto drivingAlg{std::make_unique<Logic::DrivingAlgorithm::DrivingAlgorithm>(
         driveLayout,
-        // [distSensor{distSensor.get()}]() -> float { return distSensor->getDistanceMeters(); },
-        []() -> float { return 1; },
+        [distSensor{distSensor.get()}]() -> float { return distSensor->getDistanceMeters(); },
         [deadReckoning{deadReckoning.get()}]() -> Logic::DeadReckoning::Pose2D { return deadReckoning->getCurrentPose(); })};
 
     deadReckoning->setMotorSpeedsHandle(
@@ -155,10 +154,9 @@ auto main() -> int {
     auto dumptruckFSM = std::make_unique<Logic::FSM::DumptruckUltra>(*rgbLed);
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::INIT,
-        // {.stateAction{[distSensor{distSensor.get()}]() -> Logic::FSM::DumptruckUltra::FSMState {
-        //      return Logic::FSM::initStateAction([distSensor]() { distSensor->init(); });
-        //  }},
-        {.stateAction = []() { return Logic::FSM::initStateAction([]() {}); },
+        {.stateAction{[distSensor{distSensor.get()}]() -> Logic::FSM::DumptruckUltra::FSMState {
+             return Logic::FSM::initStateAction([distSensor]() { distSensor->init(); });
+         }},
          .color{Hardware::RGB_LED::PredefinedColors::BLUE}});
     dumptruckFSM->addToStateTable(
         Logic::FSM::DumptruckUltra::FSMState::DRIVE_TO_SEARCH,

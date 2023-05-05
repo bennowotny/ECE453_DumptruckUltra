@@ -18,7 +18,6 @@ int main() {
 
     while (true) {
         printf("ADC Reading: %ld\r\n", adc.read());
-        adc.free();
         cyhal_system_delay_ms(500);
     }
 }
